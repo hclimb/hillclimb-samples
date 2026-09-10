@@ -44,8 +44,27 @@ hillclimb-samples/
       artifacts/logs/                      checkpoints and public-test output
 ```
 
-The HotpotQA task ships its corpus and model weights as plain files; no Git LFS
-step is needed.
+## Cloning
+
+Model weights, the HotpotQA corpus, compiled kernels, wheels, and trial
+checkpoints are stored with Git LFS (about 3.8 GB). Install Git LFS before
+cloning, or the clone contains small pointer files in their place and the task
+images will not build:
+
+```bash
+git lfs install
+```
+
+```bash
+git clone https://github.com/hclimb/hillclimb-samples.git
+```
+
+If the repository was cloned before Git LFS was installed, fetch the objects
+afterwards:
+
+```bash
+git lfs pull
+```
 
 ## The completed job
 
