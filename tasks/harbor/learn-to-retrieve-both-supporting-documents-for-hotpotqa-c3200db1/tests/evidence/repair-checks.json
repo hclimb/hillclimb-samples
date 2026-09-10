@@ -1,0 +1,19 @@
+{
+  "scope": "Attempt-1 deterministic repair; no change to task identity or released task",
+  "schema_v3": "passed jsonschema validation against task/build-plan.schema.json",
+  "repository_required_paths": "passed against real source-repository plus starter-overlay",
+  "public_packaging": "22 public-safe files, one declared evaluator.public_tests_dir; no duplicate overlay subtree",
+  "public_helper_parity": "byte-identical to protected helpers",
+  "asset_audit": "passed all counts, hashes, row IDs, selected IDs, positive/context joins and question-panel exclusions",
+  "paragraph_overlaps": {"train/public": 24389, "train/private": 24117, "public/private": 9300},
+  "cpu_self_tests": {"passed": 16, "skipped": 0, "evidence": "repair-self-test.log"},
+  "public_cpu_file_view": "Help and pretrained-encoder weight validity pass. Candidate-only, smoke and paired commands fail on missing CUDA as infrastructure errors without scores. See repair-public-view.json for relocated macOS file-view scope and host temp-directory adaptation.",
+  "syntax": "Python AST parsing and shell bash -n passed",
+  "optimization_build_plan_loader": "unavailable: ModuleNotFoundError for taskforge; host Taskforge files are sandbox-inaccessible",
+  "standard_compile": "not rerun; original starter-digest and entrypoint validation repairs require compiler confirmation",
+  "compiled_linux_public_commands": "not rerun in this inexpensive repair; prior GPU evidence is historical, not proof of current packaging",
+  "additional_model_calls": 0,
+  "additional_gpu_sandboxes": 0,
+  "private_quality_tuning": false,
+  "release_ready": false
+}

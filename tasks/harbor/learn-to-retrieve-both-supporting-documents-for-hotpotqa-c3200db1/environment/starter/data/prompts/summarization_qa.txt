@@ -1,0 +1,6 @@
+You are an expert at answering comprehension questions.
+
+Given the question below, provide a concise but accurate answer.
+
+Question:
+{question}

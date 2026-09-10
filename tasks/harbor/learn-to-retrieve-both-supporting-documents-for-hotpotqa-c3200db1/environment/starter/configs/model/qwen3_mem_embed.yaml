@@ -1,0 +1,54 @@
+name: qwen3_mem_embed
+trainable_params: [".*mem_.*", ".*embed_model.*"]
+
+main_model:
+  model_id: Qwen/Qwen3-4B
+  load_weights: true
+
+memory:
+  mem_layers: [14]
+  mem_size: 16384
+  mem_num_heads: 4
+  mem_k_dim: 1024
+  mem_v_dim: 1024
+  mem_top_k: 128
+  # Approximate memory top-k (jax.lax.approx_max_k) instead of exact top_k. At M≈65k the exact
+  # top-k is ~40% of the train step; approx cuts the step ~1.6-1.7x at ~98% recall@64. Default on
+  # here per wiki/experiments/2026-07-15-approx-topk-training.md. POLICY (2026-07-20): approx is
+  # ALWAYS preferred, train AND eval — do not flip evals to exact by default (speed wins; see
+  # wiki/architecture/retrieval-modes.md). MEM_APPROX_TOPK / MEM_APPROX_RECALL env vars override
+  # for one-off runs.
+  mem_approx_topk: true
+  mem_approx_recall: 0.99
+  # Retrieval weighting over the top-k slots (grounding@corpus experiments):
+  #   softmax (default, corpus-size sensitive) | relu | sigmoid (corpus-size invariant)
+  mem_score_activation: softmax
+  mem_softmax_temp: 1.0        # divides logits before the activation (lower = sharper)
+  mem_phantom_log_n: 0.0       # softmax only: +exp(this) background mass in the denominator
+                               # (emulate competing vs ~exp(this) extra distractors; 0 = off)
+  mem_use_product_keys: false
+  mem_placement: "after_attention" # "after_attention", "after_mlp"
+  mem_use_gating: false
+  mem_lookup_chunk_size: null
+  two_pass_topk: false
+  # two-pass value read: chunk-scan the K key/value gathers (remat) so [B,N,T,K,·] never
+  # materializes -> pass-2 O([B,N,T,·]), enabling much larger training batch. 0 = off (dense
+  # gather). 16 is a good default (flat throughput, streams past B=256). Needs two_pass_topk=true.
+  mem_value_read_kchunk: 0
+  mem_collect_full_scores: true
+  # Grounding Stage 1: zero-init mem_o_proj so the memory branch starts as identity
+  # and its write grows only as it earns CE reduction. Default off (control keeps old init).
+  mem_o_proj_zero_init: false
+
+embed_model:
+  model_id: Qwen/Qwen3-Embedding-0.6B
+  load_weights: true
+  lora:
+    enabled: false
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]
+    rank: 256
+    alpha: 256
+  mask_type: 'bidirectional'
+  embed_conv: true
+  embed_conv_kernel_size: 1
+  embed_conv_stride: 1

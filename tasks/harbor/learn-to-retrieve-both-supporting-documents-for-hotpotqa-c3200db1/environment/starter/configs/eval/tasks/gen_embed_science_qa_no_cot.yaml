@@ -1,0 +1,9 @@
+defaults:
+  - gen_embed_science_qa
+  - override /dataset/sources@dataset: science_qa_no_cot
+  - _self_
+
+eval:
+  temperature: 0.0
+dataset:
+  force_thinking: false 

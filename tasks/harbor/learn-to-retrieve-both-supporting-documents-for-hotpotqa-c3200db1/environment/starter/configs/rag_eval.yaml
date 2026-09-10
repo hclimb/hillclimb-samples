@@ -1,0 +1,40 @@
+defaults:
+  - /eval_set@evals: pretraining
+  - model: qwen3_mem_embed
+  - override hydra/job_logging: disabled
+  - _self_
+
+checkpoint_dir: null
+seed: 42
+tp_devices: 1
+use_wandb: true
+
+aux_losses:
+  doc_access_acc:
+    enabled: true
+
+rag:
+  embedding_model: Qwen/Qwen3-Embedding-0.6B
+  hf_ckpt_dir: ~/weights/huggingface
+  tp_devices: 1
+  max_doc_length: 512
+  max_query_length: 128
+  encode_batch_size: 2048
+  query_task: ""
+  doc_split: train
+  doc_column: text
+  doc_hf_config: null
+  max_docs: 5000000
+  query_split: train
+  query_hf_config: null
+  num_queries: 1000
+  top_k: 5
+  gen_model: Qwen/Qwen3-8B
+  gen_tensor_parallel_size: 8
+  gen_max_model_len: 8192
+  gen_top_k_docs: 5
+  gen_temperature: 0.0
+  gen_concurrency: 64
+  judge_model: Qwen/Qwen3-8B
+  judge_tensor_parallel_size: 8
+  judge_concurrency: 32

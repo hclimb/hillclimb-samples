@@ -1,0 +1,26 @@
+test_invalid_results (test_contract.MetricTests.test_invalid_results) ... ok
+test_normalization_and_rank (test_contract.MetricTests.test_normalization_and_rank) ... ok
+test_partial_and_absent (test_contract.MetricTests.test_partial_and_absent) ... ok
+test_query_association_and_slices (test_contract.MetricTests.test_query_association_and_slices) ... ok
+test_reward (test_contract.MetricTests.test_reward) ... ok
+test_failure_excerpt_and_timeout (test_contract.ProcessTests.test_failure_excerpt_and_timeout) ... ok
+test_isolated_import (test_contract.ProcessTests.test_isolated_import) ... ok
+test_paired_validity_gate (test_contract.ProcessTests.test_paired_validity_gate) ... ok
+test_snapshot_retains_sources_not_generated_state (test_contract.ProcessTests.test_snapshot_retains_sources_not_generated_state) ... ok
+test_environment_failure_precedes_candidate_execution (test_reporting.ReportingTests.test_environment_failure_precedes_candidate_execution) ... ok
+test_launcher_isolation_and_argument_forwarding (test_reporting.ReportingTests.test_launcher_isolation_and_argument_forwarding) ... ok
+test_public_command_from_public_only_file_view (test_reporting.ReportingTests.test_public_command_from_public_only_file_view) ... ok
+test_snapshot_io_error_propagates (test_reporting.ReportingTests.test_snapshot_io_error_propagates) ... ok
+test_trusted_failure_is_not_submission_invalidity (test_reporting.ReportingTests.test_trusted_failure_is_not_submission_invalidity) ... ok
+test_unisolated_entrypoint_fails_before_running_workload (test_reporting.ReportingTests.test_unisolated_entrypoint_fails_before_running_workload) ... ok
+test_verifier_diagnostics_without_zero_reward (test_reporting.ReportingTests.test_verifier_diagnostics_without_zero_reward) ... ok
+test_verifier_numeric_contract (test_reporting.ReportingTests.test_verifier_numeric_contract) ... ok
+test_adapter_is_idempotent_and_rejects_unknown_launchers (test_startup.CompiledStartupTests.test_adapter_is_idempotent_and_rejects_unknown_launchers) ... ok
+test_generated_launcher_reaches_numeric_writer_without_candidate_imports (test_startup.CompiledStartupTests.test_generated_launcher_reaches_numeric_writer_without_candidate_imports) ... ok
+test_exact_encoder_state (test_weights.WeightTests.test_exact_encoder_state) ... ok
+test_invalid_tensor_child_status (test_weights.WeightTests.test_invalid_tensor_child_status) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 7.149s
+
+OK

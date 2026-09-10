@@ -1,0 +1,31 @@
+name: qwen3_distill
+trainable_params: [".*mem_.*", ".*embed_model.*"]
+
+teacher_model:
+  model_id: Qwen/Qwen3-1.7B
+  load_weights: true
+  mask_type: causal
+
+# Student config mirrors qwen3_mem_embed
+main_model:
+  model_id: Qwen/Qwen3-1.7B
+  load_weights: true
+
+memory:
+  mem_layers: [14]
+  mem_size: 16384
+  mem_num_heads: 4
+  mem_k_dim: 1024
+  mem_v_dim: 1024
+  mem_top_k: 8
+  mem_use_product_keys: false
+  mem_placement: "after_attention"
+  mem_use_gating: false
+
+embed_model:
+  model_id: Qwen/Qwen3-Embedding-0.6B
+  load_weights: true
+  mask_type: 'bidirectional'
+  embed_conv: true
+  embed_conv_kernel_size: 1
+  embed_conv_stride: 1

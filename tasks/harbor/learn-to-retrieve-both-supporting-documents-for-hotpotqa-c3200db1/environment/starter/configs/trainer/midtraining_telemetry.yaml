@@ -1,0 +1,31 @@
+# `midtraining` + the weight-0 read-channel telemetry block.
+#
+# Same relationship to `midtraining` as staged_telemetry.yaml has to `staged`, and
+# standard_ground.yaml to `standard`: the recipe is unchanged, only diagnostics are added.
+# Every entry below is stop_gradient'd at weight 0 (registry.py), so it logs every
+# log_interval steps and contributes exactly 0 to the gradient — a NaN in a diagnostic
+# cannot poison the step. See wiki/training/auxiliary-losses.md.
+#
+# Worth having on a MuSiQue run specifically: the whole hypothesis is about multi-hop
+# RETRIEVAL, and mem_pos_weight_mass / mem_hit_rate / mem_top1_weight / mem_topk_entropy are
+# the only in-loop view of whether the read channel is actually finding the gold paragraphs.
+# Note these are in-batch-bank numbers (B*M = 320 chunks), NOT corpus-bank numbers — they are
+# not comparable to the same metric names from a gen_large_mem corpus eval.
+defaults:
+  - midtraining
+  - _self_
+
+aux_losses:
+  mem_write_norm: {enabled: true, weight: 0.0}
+  mem_write_ratio: {enabled: true, weight: 0.0}
+  mem_topk_entropy: {enabled: true, weight: 0.0}
+  mem_effective_slots: {enabled: true, weight: 0.0}
+  mem_top1_weight: {enabled: true, weight: 0.0}
+  mem_o_proj_norm: {enabled: true, weight: 0.0}
+  mem_boundary_straddle: {enabled: true, weight: 0.0}
+  mem_pos_weight_mass: {enabled: true, weight: 0.0}
+  mem_hit_rate: {enabled: true, weight: 0.0}
+  mem_head_query_cos: {enabled: true, weight: 0.0}
+  mem_cross_layer_cos: {enabled: true, weight: 0.0}
+  mem_kv_cos: {enabled: true, weight: 0.0}
+  mem_value_anisotropy: {enabled: true, weight: 0.0}

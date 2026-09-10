@@ -1,0 +1,9 @@
+hf_name: "vm2825/nemotron-cc-v2-Parsed-DQA1-answered-1.7B-combined-hard-negatives-scored-modified"
+field_map: {"question": "query", "neg_doc": "neg_docs"}
+think_field: null
+teacher_prompt_path: null
+student_prompt_path: null
+prompt_path: null
+doc_separator: "<doc_seperator>"
+neg_score_threshold: 0.95
+min_neg_docs: 2

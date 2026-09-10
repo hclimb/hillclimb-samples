@@ -1,0 +1,40 @@
+# Standalone MuSiQue SFT config — for ablating MuSiQue on its own.
+# To fold MuSiQue into the main mix instead, add
+#   - /dataset/sources@sources.musique_sft: musique_sft
+# to configs/dataset/qa_hard_neg_think_sft4b.yaml, but note that min_doc_length
+# is dataset-level, not per-source: relaxing it to 0 there also relaxes it for
+# the vm2825/* hard-neg sources, which currently rely on the 64-token floor.
+defaults:
+  - /dataset/sources@sources.musique_sft: musique_sft
+  - _self_
+
+name: "qa"
+# MUST match the budget the CoT was generated at. musique-sft is generated with
+# think+answer <= 950 tokens, which needs seq_len 1024 (chat-template prefix ~33 tok +
+# <think> wrapper ~8). Setting seq_len 512 here does NOT shorten the data — it makes
+# _StreamingQAFilter (data/qa.py:105-122) silently DROP every row over the limit, which is
+# ~35% of the set and disproportionately the 3/4-hop questions. To train at 512, filter the
+# parquets on think length first; do not just lower this number.
+seq_len: 1024
+doc_chunk_seq_len: 256
+# With seq_len 1024 and a 20-slot bank this is the memory-heaviest config in the repo;
+# drop to 8 if it OOMs on a v6e-8.
+batch_size: 16
+# 20 paragraphs/question at ~152 tokens each → 1 chunk per paragraph. pack_docs
+# packs positives first (data/utils.py:29-36), so the 2-4 gold paragraphs always
+# survive; a smaller M only costs distractors. 20 keeps the full annotated set at
+# the cost of a 20/16 larger memory bank per batch.
+num_chunks_per_doc: 20
+# 16% of MuSiQue gold paragraphs are under 64 tokens, and _StreamingQAFilter
+# measures pos_doc[0] only (data/qa.py:85-91) — the default floor would silently
+# drop about a sixth of the dataset.
+min_doc_length: 0
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+force_thinking: true
+split: train
+num_workers: 16
+distill: false
+shuffle_seed: 42

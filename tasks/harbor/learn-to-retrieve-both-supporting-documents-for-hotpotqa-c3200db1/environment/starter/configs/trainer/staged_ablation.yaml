@@ -1,0 +1,80 @@
+# Staged recipe re-timed for ablation studies (LR sweeps, teammate CPT handoff).
+#
+# Differences from staged.yaml:
+#   * Uniform 15k-step windows for the first three stages so ablation arms all
+#     see the same amount of stage-0/1/2 supervision regardless of the tail
+#     length, and stage 3 gets the remainder up to trainer.steps (100k default).
+#   * Every stage's warmup is pinned to 2500 absolute steps — not a fraction of
+#     stage length, not the shorter 1000 that first landed here. 2500 is derived
+#     from β₂=0.999 (optax adamw default, unoverridden): (a) main_model's cold
+#     moments in stage 3 need ~2/(1-β₂) = 2000 steps of warmup before Adam's
+#     bias correction stops distorting updates; (b) the stage-transition graft
+#     at trainer.py:706-716 resets Adam's `count` to 0 while carrying old mu/nu
+#     forward for previously-trainable groups, which under-scales grafted-param
+#     updates by ~20% at t=1000 and washes out to <2% by t=3000 — 2500 masks
+#     the artifact for the warm groups AND covers main_model's cold floor.
+#     Deterministic (not a fraction of stage length) so the schedule shape is
+#     not a confound in cross-arm comparisons.
+#   * Stage 3 uses WSD (warmup -> stable peak -> short cooldown) instead of
+#     cosine. Rationale: cosine bakes total_steps into the shape from step 0,
+#     so any pre-max_step checkpoint has already had LR ratchet down and is a
+#     bad branch point for continued pretraining on a new mixture. WSD gives
+#     an uncooled 90k branch point BY CONSTRUCTION (stage_duration - decay_steps
+#     = 55000 - 10000 = 45000 stage-local = global 90000): teammate takes the
+#     90k checkpoint, cools their own tail on the new mixture; we keep training
+#     to 100k for our final artifact. Bonus: future stage-3-boundary sweeps
+#     don't reshape the whole trajectory — moving the boundary only changes
+#     when main_model joins, and the cooldown stays anchored to end-of-stage.
+#
+# Stage boundaries (max_step is ABSOLUTE, warmup/decay counters are STAGE-LOCAL):
+#   Stage 0:      0 -> 15000   (mem + embed_proj_conv only, ce off)
+#   Stage 1:  15000 -> 30000   (embed_model unfreezes, ce still off)
+#   Stage 2:  30000 -> 45000   (ce on)
+#   Stage 3:  45000 -> trainer.steps  (main_model unfreezes, WSD tail)
+#     stage-local: warmup 0->2500, stable 2500->45000, cool 45000->55000
+#     global:      warmup 45000->47500, stable 47500->90000, cool 90000->100000
+defaults:
+  - staged
+  - _self_
+
+training_stages:
+  - trainable_params: [".*mem_.*", ".*embed_proj_conv.*"]
+    max_step: 15000
+    ce_weight: 0.0
+    warmup_steps: 2500
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: 30000
+    ce_weight: 0.0
+    warmup_steps: 2500
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: 45000
+    ce_weight: 1.0
+    warmup_steps: 2500
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  # WSD tail. decay_steps is the ONE knob for cooldown length; decay_start is
+  # derived internally as stage_duration - decay_steps, so re-timing this
+  # stage's boundary can't leave a truncated cooldown (that failure mode is
+  # what the "never write decay_start_step in config" rule prevents).
+  # LR ends at exactly final_lr_frac * peak_group at global step trainer.steps.
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*main_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: wsd
+    warmup_steps: 2500
+    decay_steps: 10000        # 10% of stage-3 duration (55k). Cooldown lands at max_step.
+    final_lr_frac: 0.1
+    decay_shape: linear       # 'one_minus_sqrt' is a marginal improvement (Hägele et al.); linear is simpler.
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1

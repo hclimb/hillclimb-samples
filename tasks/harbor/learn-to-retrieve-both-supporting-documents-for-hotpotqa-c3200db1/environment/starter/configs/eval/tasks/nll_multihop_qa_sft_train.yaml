@@ -1,0 +1,16 @@
+defaults:
+  - /eval@eval: nll
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: multihop_qa_sft
+  - _self_
+
+eval:
+  eval_steps: 10
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 16
+  min_doc_length: 0
+  num_workers: 0
+  batch_size: 16

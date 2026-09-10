@@ -1,0 +1,32 @@
+defaults:
+  - standard
+
+# Per-group learning rates, mirroring staged.yaml's own group rates (opt-in via
+# cfg.trainer.learning_rates, utils.py::setup_optimizer_for_stage): mem trains fast, embed/main
+# stay at staged_sim's "protect the 4B" rate. Group assignment is by ORDERED regex match on the
+# leaf name (mem-first, so main_model.layers.14.mem_q_proj lands in `mem`, not `main`) and only
+# applies to LEAVES ACTUALLY TRAINABLE this stage — a config with main_model entirely frozen
+# (e.g. midtraining_frozen_telemetry) simply has 0 leaves in the `main` group, so its rate is inert.
+# The base cosine/etc. schedule is built off the `mem` peak (1e-4); embed/main scale by a fixed
+# ratio to it (0.1) rather than following their own independent schedule shape.
+#
+# ⚠️ Any script that already relies on `trainer.learning_rate=<X>` as a single UNIFORM rate across
+# mem/embed/main (train_musique_sft_midtrain.sh, train_multihop_sft_midtrain.sh,
+# train_musique_ground4layer_midtrain.sh all currently do, at 1e-4) now gets this per-group split
+# instead on any re-run — `trainer.learning_rate` becomes inert once `learning_rates` is set
+# (utils.py's comment: "used only for schedule construction sanity"). This was NOT re-verified
+# against those three scripts' documented comparisons before making this the shared default.
+learning_rates:
+  mem:   1e-4
+  embed: 1e-5
+  main:  1e-5
+
+training_stages:
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*main_model.*14.*", ".*main_model.*13.*", ".*main_model.*15.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: cosine
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+  

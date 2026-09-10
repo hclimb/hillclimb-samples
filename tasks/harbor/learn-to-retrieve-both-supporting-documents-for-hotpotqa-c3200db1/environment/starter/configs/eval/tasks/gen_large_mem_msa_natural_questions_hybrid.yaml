@@ -1,0 +1,48 @@
+# MSA natural_questions RAG->memory HYBRID eval @ target_docs=10000 (or the full corpus when smaller).
+# Generated for the 2026-07-22 MSA sweep — same protocol as gen_large_mem_msmarco_hybrid
+# (inject_query_gold corpus, per-query gathered banks, B=8 data-parallel, max_new_tokens 512)
+# with auto-K: rag.top_k is replaced in-run by the smallest candidate whose all-golds
+# coverage clears 0.96 (cap 200); the choice lands in metrics.rag_top_k.
+defaults:
+  - /eval@eval: generation_large_mem_rag_hybrid
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: msa_natural_questions_qa
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: msa_natural_questions_docs
+  - _self_
+
+eval:
+  num_samples: 128
+  output_file: outputs/msa_natural_questions_hybrid.json
+  max_new_tokens: 512
+  inject_query_gold: true
+  prompt_pad_len: 512
+  gather_bank: true
+  metrics:
+    llm_judge_accuracy:
+      model_id: Qwen/Qwen3-4B
+      tensor_parallel_size: 4
+    llm_judge_score:
+      model_id: Qwen/Qwen3-4B
+      tensor_parallel_size: 4
+    lexical_grounding: {}
+  rag:
+    query_dataset: "${oc.env:HF_USERNAME}/msa-natural-questions-qa-with-ids"
+    top_k: 50
+    auto_k_threshold: 0.96
+  doc_dataset:
+    max_docs: null
+    target_docs: 10000
+    max_chunks_per_doc: 1
+    chunk_size: 256
+
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 1
+  num_workers: 0
+  force_thinking: true
+  provide_docs: true
+  batch_size: 8
+  shuffle: false

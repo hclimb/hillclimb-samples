@@ -1,0 +1,2 @@
+campaign_id	seed	array	training_job_id	report_job_id	soft_constraint	tf32	status	status_reason	git_revision
+loss52-capped-k4-s42-20260720	42	0-51%5	83184	83185	capped_simplex_k4	False	cancelled	Muon_GlobalSoft_alpaca_exceeded_gpu02_3d_limit	997a1a93662854ebf23d1c179a09d9e843b94698

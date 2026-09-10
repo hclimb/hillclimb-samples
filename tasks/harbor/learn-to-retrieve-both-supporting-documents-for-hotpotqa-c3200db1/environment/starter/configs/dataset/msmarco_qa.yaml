@@ -1,0 +1,16 @@
+defaults:
+  - /dataset/sources@sources.flashrag_msmarcoqa: flashrag_msmarcoqa
+  - _self_
+
+name: "qa"
+seq_len: 1024
+doc_chunk_seq_len: 256
+batch_size: 32
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+num_chunks_per_doc: 4
+split: train
+num_workers: 0
+distill: false

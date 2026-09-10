@@ -1,0 +1,27 @@
+defaults:
+  - /eval@eval: generation_large_mem
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: fanoutqa_qa
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: fanoutqa_docs
+  - _self_
+
+eval:
+  num_samples: 8
+  max_new_tokens: 1024
+  metrics:
+    llm_judge_accuracy: {}
+  doc_dataset:
+    max_docs: 5000
+    max_chunks_per_doc: 40
+  temperature: 0.6
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 120
+  num_workers: 0
+  force_thinking: true
+  think_field: null
+  batch_size: 8
+  provide_docs: false

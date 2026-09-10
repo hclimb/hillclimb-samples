@@ -1,0 +1,6 @@
+hf_name: "ragrawal36/etd-wikianswers-hard-neg-sft"
+field_map: {"question": "pos_doc", "answer": "query", "pos_doc": "query", "neg_doc": "neg_docs"}
+think_field: null
+prompt_path: "data/prompts/similarity_recall.txt"
+doc_separator: "<doc_separator>"
+weight: 1.0

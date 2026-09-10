@@ -1,0 +1,78 @@
+# Warm-starting from a `staged` checkpoint (main_model already unfrozen, e.g.
+# qa_hard_neg_think_sft4b_topk64_seq512_chunks16_bs16_pf32_indexed_lr_masked) onto
+# multihop_hard_neg_full, with the same doc-access-focused first sub-stage as
+# staged_ground_batched_isolation_docaccess_warmstart.yaml (see that file's header for the
+# rationale: push hard on retrieval quality against the harder 200-hard-negative distribution
+# before the normal ce_weight/doc_access_per_query_loss balance takes back over) -- but built on
+# `staged` (not `staged_ground_batched_isolation`) so main_model stays trainable throughout, at
+# `learning_rates.main` (inherited from staged.yaml, currently 1e-5) rather than frozen.
+#
+# doc_access_loss -> doc_access_per_query_loss swap for the same reason as
+# staged_batched_isolation.yaml: mem_batched_isolation never builds the cross-batch grid
+# doc_access_loss needs, so it would silently contribute zero.
+#
+# trainable_params include main_model from step 0 in BOTH stages (not staged.yaml's
+# progressive per-stage unfreeze) -- deliberately simpler than re-deriving a fresh unfreeze
+# schedule for an already-warm-started run, and low-risk during stage 1 specifically since
+# ce_weight=0.1 there already dampens main_model's own (CE-driven) gradient tenfold.
+#
+# main_model/embed_model patterns EXCLUDE embed_tokens/lm_head (negative lookahead) --
+# confirmed necessary 2026-08-13: with those included, promote_trainable_to_fp32 + full Adam
+# moments on Qwen3's vocab-sized embedding tables push multihop_hard_neg_full's already-large
+# activation footprint over a v6e chip's HBM (RESOURCE_EXHAUSTED compiling jit__train_step,
+# short by ~2.7G). tp_devices=2 is NOT a workaround: the 151669 vocab dim (=7x21667) has no
+# factor of 2, so resharding it 2-ways raises a divisibility ValueError. Freezing just the
+# embedding tables (bf16, no promotion, no moments) closes the gap without needing multi-chip
+# sharding; the transformer layers + final norm still fully unfreeze on both models.
+defaults:
+  - staged
+  # staged.yaml -> standard.yaml defaults evals to eval_set/standard, which doesn't exist on
+  # this branch (same gotcha staged_ground.yaml already works around) -- we eval on dedicated
+  # boxes, so use the empty eval set instead of letting Hydra fail to resolve it.
+  - override /eval_set@evals: none
+  - _self_
+
+# Weight-0 read-channel telemetry (merges with standard.yaml's base aux_losses dict and with
+# each stage's doc_access_loss/doc_access_per_query_loss override below -- see
+# trainer/trainer.py's base_aux_loss_dict + _apply_stage_loss_overrides). Same block as
+# staged_telemetry.yaml/staged_ground.yaml. These log as train/<name> every log_interval steps
+# and contribute exactly 0 to the gradient. See wiki/training/auxiliary-losses.md.
+aux_losses:
+  mem_write_norm: {enabled: true, weight: 0.0}
+  mem_write_ratio: {enabled: true, weight: 0.0}
+  mem_topk_entropy: {enabled: true, weight: 0.0}
+  mem_effective_slots: {enabled: true, weight: 0.0}
+  mem_top1_weight: {enabled: true, weight: 0.0}
+  mem_o_proj_norm: {enabled: true, weight: 0.0}
+  mem_boundary_straddle: {enabled: true, weight: 0.0}
+  mem_pos_weight_mass: {enabled: true, weight: 0.0}
+  mem_hit_rate: {enabled: true, weight: 0.0}
+  mem_head_query_cos: {enabled: true, weight: 0.0}
+  mem_cross_layer_cos: {enabled: true, weight: 0.0}
+  mem_kv_cos: {enabled: true, weight: 0.0}
+  mem_value_anisotropy: {enabled: true, weight: 0.0}
+
+training_stages:
+  - trainable_params: [".*mem_.*", "embed_model\\.(?!embed_tokens)", ".*value_model.*", "main_model\\.(?!embed_tokens|lm_head)"]
+    max_step: 5000
+    ce_weight: 0.1
+    warmup_steps: 500
+    aux_losses:
+      doc_access_loss:
+        enabled: false
+      doc_access_per_query_loss:
+        enabled: true
+        weight: 1.0
+        temperature: 1.0
+
+  - trainable_params: [".*mem_.*", "embed_model\\.(?!embed_tokens)", ".*value_model.*", "main_model\\.(?!embed_tokens|lm_head)"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    warmup_steps: 500
+    aux_losses:
+      doc_access_loss:
+        enabled: false
+      doc_access_per_query_loss:
+        enabled: true
+        weight: 0.1
+        temperature: 1.0

@@ -1,0 +1,41 @@
+{
+  "scope": "Relocated compiler-produced solver file view on macOS CPU; not Linux GPU qualification",
+  "host_adaptation": "Paths relocated under build-input; writable TMPDIR outside starter; only plain pretrained Tiny used for check-weights",
+  "commands": [
+    {
+      "command": "python /environment/starter/optifine_public_tests/run.py --help",
+      "exit_code": 0,
+      "seconds": 0.03852275002282113,
+      "result": "passed",
+      "stderr_tail": ""
+    },
+    {
+      "command": "python /environment/starter/optifine_public_tests/run.py --submission /environment/starter/train_retriever.sh --output /environment/starter/runs/public",
+      "exit_code": 1,
+      "seconds": 0.8638087080034893,
+      "result": "CUDA infrastructure unavailable; no training or invalid-submission score",
+      "stderr_tail": "ts/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/verifiers/public_run.py\", line 28, in main\n    result = run(Path.cwd(), args.submission, trusted / 'assets', trusted / 'public_panel', args.output,\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/prdev/Desktop/side_projects/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/verifiers/runner.py\", line 136, in run\n    check_environment(assets, output, trusted)\n  File \"/Users/prdev/Desktop/side_projects/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/verifiers/runner.py\", line 54, in check_environment\n    phase([sys.executable, '-I', '-c', code], trusted, output, 'environment', 30)\n  File \"/Users/prdev/Desktop/side_projects/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/utils/process.py\", line 51, in phase\n    raise PhaseFailure(detail)\nutils.process.PhaseFailure: {'seconds': 0.502930958988145, 'timeout': False, 'exit_code': 1, 'output_excerpt': 'Traceback (most recent call last):\\n  File \"<string>\", line 1, in <module>\\nAssertionError: Two CUDA GPUs are required\\n'}\n"
+    },
+    {
+      "command": "python /environment/starter/optifine_public_tests/run.py --submission /environment/starter/train_retriever.sh --output /environment/starter/runs/smoke --smoke",
+      "exit_code": 1,
+      "seconds": 0.8461157080018893,
+      "result": "CUDA infrastructure unavailable; no training or invalid-submission score",
+      "stderr_tail": "s/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/verifiers/public_run.py\", line 28, in main\n    result = run(Path.cwd(), args.submission, trusted / 'assets', trusted / 'public_panel', args.output,\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/prdev/Desktop/side_projects/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/verifiers/runner.py\", line 136, in run\n    check_environment(assets, output, trusted)\n  File \"/Users/prdev/Desktop/side_projects/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/verifiers/runner.py\", line 54, in check_environment\n    phase([sys.executable, '-I', '-c', code], trusted, output, 'environment', 30)\n  File \"/Users/prdev/Desktop/side_projects/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/utils/process.py\", line 51, in phase\n    raise PhaseFailure(detail)\nutils.process.PhaseFailure: {'seconds': 0.5579407080076635, 'timeout': False, 'exit_code': 1, 'output_excerpt': 'Traceback (most recent call last):\\n  File \"<string>\", line 1, in <module>\\nAssertionError: Two CUDA GPUs are required\\n'}\n"
+    },
+    {
+      "command": "python /environment/starter/optifine_public_tests/run.py --check-weights /environment/starter/runs/manual/model.safetensors --output /environment/starter/runs/validity",
+      "exit_code": 0,
+      "seconds": 1.6241870000085328,
+      "result": "passed",
+      "stderr_tail": ""
+    },
+    {
+      "command": "python /environment/starter/optifine_public_tests/run.py --submission /environment/starter/train_retriever.sh --output /environment/starter/runs/paired --paired",
+      "exit_code": 1,
+      "seconds": 0.8131758329982404,
+      "result": "CUDA infrastructure unavailable; no training or invalid-submission score",
+      "stderr_tail": "s/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/verifiers/public_run.py\", line 28, in main\n    result = run(Path.cwd(), args.submission, trusted / 'assets', trusted / 'public_panel', args.output,\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/prdev/Desktop/side_projects/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/verifiers/runner.py\", line 136, in run\n    check_environment(assets, output, trusted)\n  File \"/Users/prdev/Desktop/side_projects/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/verifiers/runner.py\", line 54, in check_environment\n    phase([sys.executable, '-I', '-c', code], trusted, output, 'environment', 30)\n  File \"/Users/prdev/Desktop/side_projects/taskforge/output/manual_building/2026-09-09-hotpot-bert-tiny/construction/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1/build-input/.repair-tmp/startup-compiled/environment/starter/optifine_public_tests/utils/process.py\", line 51, in phase\n    raise PhaseFailure(detail)\nutils.process.PhaseFailure: {'seconds': 0.5052309160237201, 'timeout': False, 'exit_code': 1, 'output_excerpt': 'Traceback (most recent call last):\\n  File \"<string>\", line 1, in <module>\\nAssertionError: Two CUDA GPUs are required\\n'}\n"
+    }
+  ]
+}

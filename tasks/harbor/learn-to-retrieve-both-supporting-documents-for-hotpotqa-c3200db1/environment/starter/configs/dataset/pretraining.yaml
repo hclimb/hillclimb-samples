@@ -1,0 +1,20 @@
+defaults:
+  - /dataset/sources@sources.science_summarization: science_summarization
+  - /dataset/sources@sources.science_qa: science_qa
+  - /dataset/sources@sources.science_doc_completion: science_doc_completion
+  - /dataset/sources@sources.multihop_qa_sft: multihop_qa_sft
+  - /dataset/sources@sources.diverse_qa: diverse_qa
+  - _self_
+
+name: "qa"
+seq_len: 512
+doc_chunk_seq_len: 256
+batch_size: 32
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+num_chunks_per_doc: 4
+split: train
+num_workers: 16
+distill: false

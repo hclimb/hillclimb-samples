@@ -1,0 +1,38 @@
+# Corpus-size eval for MEM_EMBED models (e.g. qwen3_mem_embed) on HotpotQA.
+# Mirrors gen_large_mem_msmarco_v1_embed but on the msa HotpotQA corpus+queries: builds ONE
+# memory bank from a corpus of `eval.doc_dataset.max_docs` docs (with each query's gold doc
+# injected via inject_query_gold), then all queries retrieve from it. Uses the plain
+# generation_large_mem evaluator (no MSA cfg block needed). Reports llm_judge_accuracy +
+# lexical_grounding + doc_access_acc. Sweep corpus size via +eval.doc_dataset.max_docs=<N>.
+defaults:
+  - /eval@eval: generation_large_mem
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: msa_hotpotqa_qa
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: msa_hotpotqa_docs
+  - _self_
+
+eval:
+  num_samples: 128
+  output_file: outputs/hotpotqa_v1_embed.json
+  max_new_tokens: 512
+  doc_access_acc: true
+  inject_query_gold: true
+  metrics:
+    llm_judge_accuracy: {}
+    lexical_grounding: {}
+  doc_dataset:
+    max_docs: null
+    max_chunks_per_doc: 1
+    chunk_size: 256
+
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 1
+  num_workers: 0
+  force_thinking: true
+  provide_docs: true
+  batch_size: 16
+  shuffle: false

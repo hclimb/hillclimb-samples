@@ -1,0 +1,74 @@
+# `staged` (see staged.yaml) with doc_access_loss swapped for doc_access_per_query_loss in every
+# stage. doc_access_loss (standard.yaml's base aux_losses entry) needs aux_data["mem_scores"] as
+# the FULL cross-batch [B,T,N,B*m_per_query] grid -- something mem_lookup_batched (models/
+# memory.py, models.memory.mem_batched_isolation) structurally never builds, so under that mode
+# doc_access_loss's own guard (`if not mem_scores_list: return 0.0`) always fires and it silently
+# contributes exactly zero. Discovered 2026-08-02 after ~1300 steps of `Loss: 0.0000` throughout a
+# multihop_hard_neg_full run -- see
+# wiki/implementations/2026-08-02-hard-neg-full-efficient-retrieval.md.
+#
+# doc_access_per_query_loss (losses/doc_access_per_query_loss.py) is the same contrastive
+# objective restricted to a query's own m_per_query slots -- which IS what mem_lookup_batched
+# populates (aux_data["mem_scores"], gated by model.memory.mem_collect_full_scores=true, same
+# [B,T,N,·] shape family, just m_per_query instead of B*m_per_query in the last axis).
+#
+# Use this trainer config (instead of `staged`) for any recipe with
+# model.memory.mem_batched_isolation=true. `staged.yaml` itself is shared by non-batched-isolation
+# recipes (mem_lookup / mem_lookup_two_pass), so it is NOT changed -- doc_access_loss is exactly
+# right for those (they DO build the cross-batch grid it needs).
+#
+# List overrides replace wholesale in OmegaConf (no element-wise merge), so every stage's other
+# fields are repeated here verbatim from staged.yaml, not just the aux_losses diff.
+defaults:
+  - staged
+  - _self_
+
+training_stages:
+  - trainable_params: [".*mem_.*", ".*embed_proj_conv.*"]
+    max_step: 5000
+    ce_weight: 0.0
+    warmup_frac: 0.1
+    aux_losses:
+      doc_access_loss:
+        enabled: false
+      doc_access_per_query_loss:
+        enabled: true
+        weight: 0.1
+        temperature: 1.0
+
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: 10000
+    ce_weight: 0.0
+    warmup_frac: 0.1
+    aux_losses:
+      doc_access_loss:
+        enabled: false
+      doc_access_per_query_loss:
+        enabled: true
+        weight: 0.1
+        temperature: 1.0
+
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: 15000
+    ce_weight: 1.0
+    warmup_frac: 0.1
+    aux_losses:
+      doc_access_loss:
+        enabled: false
+      doc_access_per_query_loss:
+        enabled: true
+        weight: 0.1
+        temperature: 1.0
+
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*main_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: cosine
+    warmup_frac: 0.1
+    aux_losses:
+      doc_access_loss:
+        enabled: false
+      doc_access_per_query_loss:
+        enabled: true
+        weight: 0.1
+        temperature: 1.0

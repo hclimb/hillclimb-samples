@@ -1,0 +1,29 @@
+# Dolci32k Muon-matrix-only concave mode coverage weighted by target beta_r.
+method: LayerWiseMuonMatrixSpectralSatP
+finetuning: Full
+learning_rate: 1.00e-05
+selection_mode: topk
+use_second_order: false
+subset_mode: one_pass
+
+scoring:
+  method: reduced_ghost
+
+optimizer:
+  type: muon
+
+optimizer_aware:
+  target_mode: opta
+  matrix_geometry: auto
+  vector_geometry: adamw
+
+muon_surrogate:
+  include_adamw_scores: false
+  alpha: 1.0
+  mode_weighting: singular_value
+  saturation: true
+  rank: 32
+  full_svd_max_dim: 256
+  rtol: 1e-6
+  oversample: 8
+  power_iters: 2

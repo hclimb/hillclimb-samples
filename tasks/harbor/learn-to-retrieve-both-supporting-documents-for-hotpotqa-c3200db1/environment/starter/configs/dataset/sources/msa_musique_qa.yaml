@@ -1,0 +1,4 @@
+hf_name: "${oc.env:HF_USERNAME}/msa-musique-qa-with-ids"
+split: train
+prompt_path: null
+doc_separator: "\n||||\n"

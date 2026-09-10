@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "npx hillclimb@latest git-traces --tool=copilot-chat"
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "npx hillclimb@latest git-traces --tool=copilot-chat"
+      },
+      {
+        "type": "command",
+        "command": "npx hillclimb@latest upload --tool=copilot-chat"
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+hf_name: "ragrawal36/nemotron-cc-v21-Parsed-QA4-Summarization-Qwen3-1.7B"
+field_map: {"answer": "synthetic_answer"}
+think_field: "think"
+teacher_prompt_path: "data/prompts/teacher_summarization_qa.txt"
+student_prompt_path: "data/prompts/summarization_qa.txt"
+prompt_path: "data/prompts/summarization_qa.txt"

@@ -1,0 +1,16 @@
+defaults:
+  # hard-neg (think) variants — new
+  - /eval/tasks@gen_embed_science_qa_hard_neg_think: gen_embed_science_qa_hard_neg_think
+  - /eval/tasks@gen_embed_diverse_qa_hard_neg_think: gen_embed_diverse_qa_hard_neg_think
+  - /eval/tasks@gen_embed_combined_hard_neg_sft4b: gen_embed_combined_hard_neg_sft4b
+  - /eval/tasks@nll_science_qa_hard_neg_think: nll_science_qa_hard_neg_think
+  - /eval/tasks@nll_diverse_qa_hard_neg_think: nll_diverse_qa_hard_neg_think
+  - /eval/tasks@nll_combined_hard_neg_sft4b: nll_combined_hard_neg_sft4b
+  # baseline non-hard-neg think variants (already use think_field=think + force_thinking=true)
+  - /eval/tasks@gen_embed_science_qa: gen_embed_science_qa
+  - /eval/tasks@gen_embed_diverse_qa: gen_embed_diverse_qa
+  - /eval/tasks@gen_embed_multihop_qa_sft: gen_embed_multihop_qa_sft
+  - /eval/tasks@nll_science_qa: nll_science_qa
+  - /eval/tasks@nll_diverse_qa: nll_diverse_qa
+  - /eval/tasks@nll_multihop_qa_sft: nll_multihop_qa_sft
+  - _self_

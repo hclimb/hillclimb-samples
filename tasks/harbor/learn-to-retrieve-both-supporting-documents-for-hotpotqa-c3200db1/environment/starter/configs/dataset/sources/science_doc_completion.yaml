@@ -1,0 +1,6 @@
+hf_name: "ragrawal36/nemotron-science-completion"
+field_map: null
+think_field: null
+teacher_prompt_path: "data/prompts/teacher_doc_completion.txt"
+student_prompt_path: "data/prompts/doc_completion.txt"
+prompt_path: "data/prompts/doc_completion.txt"

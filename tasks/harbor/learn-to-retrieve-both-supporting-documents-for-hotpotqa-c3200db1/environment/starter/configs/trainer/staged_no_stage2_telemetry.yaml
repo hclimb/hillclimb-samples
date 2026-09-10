@@ -1,0 +1,54 @@
+# Original staged.yaml timing (0-5k, 5k-10k) with the original stage 2 SKIPPED, and
+# stage 3 as a single full-unfreeze stage 10k→trainer.steps under cosine. Experimental
+# recipe testing the hypothesis that the "ce=1.0 with only mem+embed trainable, main
+# still frozen" window (staged_ablation.yaml stage 2 at 30k-45k) hurts more than it
+# helps: adds CE gradient pressure to the retriever + embed_model with no downstream
+# consumer adaptation possible (main is frozen). If the hypothesis holds, skipping
+# straight from "doc-access-only training" to "full unfreeze + CE" should give a
+# cleaner trajectory.
+#
+# LR SCHEDULE — cosine reaches exactly 0 at trainer.steps (=100000 default):
+#   Stage 2 (renamed from stage 3): stage_duration = trainer.steps - 10000 = 90000
+#   warmup_steps=8000, decay_steps=stage_duration-warmup=82000
+#   At adams.count=90000 (= global step 100000, since count resets at stage entry),
+#   optax.warmup_cosine_decay_schedule reaches end_value=0. Full clean decay.
+#
+# WARMUP: stages 0-1 use 500 (matches original staged.yaml — these stages train only
+# mem/embed which have no cold-moment issue). Stage 2 uses 8000 (matches original
+# staged.yaml stage 3), sized to cover main_model's β₂=0.999 cold-moment floor
+# (2/(1-β₂) ≈ 2000 steps) plus the stage-transition graft under-scaling wash-out
+# (~2% by step 3000). Extra buffer above the minimum since main_model is a 4B param
+# unfreeze — cheap insurance. See wiki/implementations/2026-08-13-schedule-adam-
+# counter-decoupling.md for the design smell.
+defaults:
+  - staged_telemetry
+  - _self_
+
+training_stages:
+  - trainable_params: [".*mem_.*", ".*embed_proj_conv.*"]
+    max_step: 5000
+    ce_weight: 0.0
+    warmup_steps: 500
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: 10000
+    ce_weight: 0.0
+    warmup_steps: 500
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  # SKIPPED original stage 2 (10k-15k, ce=1.0 with mem+embed only, main frozen).
+  # This is the "stage 3" from staged.yaml but shifted earlier: full unfreeze
+  # at step 10k instead of 15k, cosine tail (unchanged from staged.yaml stage 3).
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*main_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: cosine
+    warmup_steps: 8000
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1

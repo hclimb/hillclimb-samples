@@ -1,0 +1,8 @@
+hf_name: "ragrawal36/nemotron-cc-v21-Parsed-QA4-filtered-1.7B-evensplit-RQ-8B-CoT-8B1-parts-0-23"
+field_map: {"answer": "original_answer","question": "synthetic_question"}
+think_field: "synthetic_think"
+teacher_prompt_path: null
+student_prompt_path: null
+prompt_path: null
+
+

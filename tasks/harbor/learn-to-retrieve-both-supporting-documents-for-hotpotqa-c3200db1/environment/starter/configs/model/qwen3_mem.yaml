@@ -1,0 +1,17 @@
+name: qwen3_mem
+trainable_params: [".*mem_.*"] # regex patterns
+
+main_model:
+  model_id: Qwen/Qwen3-1.7B
+  load_weights: true
+
+memory:
+  mem_layers: [14]
+  mem_size: 2048
+  mem_num_heads: 4
+  mem_k_dim: 1024
+  mem_v_dim: 1024
+  mem_top_k: 8
+  mem_use_product_keys: true
+  mem_placement: "replace_mlp" # "after_attention", "after_mlp"
+  mem_collect_full_scores: true

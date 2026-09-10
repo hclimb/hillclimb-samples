@@ -1,0 +1,59 @@
+defaults:
+  - /eval_set@evals: standard
+  - _self_
+
+steps: 100000
+learning_rate: 1e-4
+weight_decay: 0.1
+clip_grad_norm: 1.0
+ce_weight: 0.1
+
+checkpoint_interval: 10000
+# Orbax keeps only the last N checkpoints, so a checkpoint stays evaluable for
+# N * checkpoint_interval steps. Raise it when checkpointing frequently, or an eval box loses
+# checkpoints to rotation before it can score them (wiki/evaluation/eval-boxes.md).
+max_to_keep: 4
+eval_interval: 5000
+log_interval: 100
+stop_grad_frozen: false
+
+# Abort after this many CONSECUTIVE non-finite samples (sampled at log_interval, so the default 50
+# = ~5000 steps at log_interval=100). A persistent NaN grad freezes weights AND opt_state, so Adam's
+# count never advances and the LR stays pinned at the schedule's init_value — the run looks alive
+# but makes zero progress. 0 disables. See wiki/training/nan-guard.md.
+nan_abort_after_samples: 50
+
+tp_devices: 1
+resume_from: null
+
+use_wandb: true
+wandb_project: "memory-layers"
+# null => wandb generates a fresh id per launch (legacy behaviour). "auto" => a deterministic id
+# derived from the run name, which (a) lets an eval box attach to this same run and log eval/*
+# beside train/*, and (b) makes a preemption-resume continue one curve instead of opening a second
+# run. Only set it on runs with a stable explicit trainer.run_name — otherwise re-running a config
+# appends to the earlier run. See wiki/evaluation/eval-boxes.md.
+wandb_run_id: null
+# null => the run-dir's timestamp comes from hydra.run.dir at launch. Set to YYYY-MM-DD-HH-MM-SS
+# to PIN it, which makes the run-dir (and so the wandb id) knowable BEFORE training starts — how
+# multi-tpu-box-run.sh hands the same identity to a training box and an eval box in parallel.
+# Reusing a pinned value with the same run_name recreates the collision run-dirs exist to prevent.
+run_start_time: null
+
+aux_losses:
+  mem_uniform_kl:
+    enabled: false
+    weight: 0
+  doc_access_acc:
+    enabled: true
+    weight: 0.0
+  doc_access_loss:
+    enabled: true
+    weight: 0.1
+    temperature: 1.0
+  distillation_loss:
+    enabled: true
+    weight: 0.0
+    temperature: 1.0
+
+  

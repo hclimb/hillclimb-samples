@@ -1,0 +1,233 @@
+[
+  {
+    "recipe": "control",
+    "seed": 1729,
+    "exit_code": 0,
+    "training": {
+      "seconds": 8.226919638000002,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "[W910 00:39:31.330711509 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:39:36.549367072 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:39:36.574244716 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n"
+    },
+    "retrieval": {
+      "seconds": 30.936569880000004,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "{\"retrieval_seconds\": 26.01534769, \"peak_cuda_bytes\": 725019648}\n"
+    },
+    "count": 3072,
+    "ndcg_at10": 0.1874132460052403,
+    "both_supports_at2": 0.011393229166666666,
+    "slices": {
+      "bridge": {
+        "count": 2467,
+        "ndcg_at10": 0.19027839786140255,
+        "both_supports_at2": 0.012971220105391163
+      },
+      "comparison": {
+        "count": 605,
+        "ndcg_at10": 0.17573005653556656,
+        "both_supports_at2": 0.0049586776859504135
+      }
+    },
+    "valid": 1
+  },
+  {
+    "recipe": "starter",
+    "seed": 1729,
+    "exit_code": 0,
+    "training": {
+      "seconds": 118.83205479700001,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "[W910 00:40:10.625373904 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:40:15.606606019 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:40:15.624733884 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n{\"step\": 0, \"loss\": 3.9649219512939453, \"seconds\": 91.551275658}\n{\"step\": 100, \"loss\": 1.9168281555175781, \"seconds\": 92.942704688}\n{\"step\": 200, \"loss\": 1.5691227912902832, \"seconds\": 94.322246427}\n{\"step\": 300, \"loss\": 1.5428680181503296, \"seconds\": 95.705832129}\n{\"step\": 400, \"loss\": 1.249507188796997, \"seconds\": 97.086581014}\n{\"step\": 500, \"loss\": 1.0449265241622925, \"seconds\": 98.47194605}\n{\"step\": 600, \"loss\": 0.9984756708145142, \"seconds\": 100.000870785}\n{\"step\": 700, \"loss\": 1.0223935842514038, \"seconds\": 101.564181538}\n{\"step\": 800, \"loss\": 1.0152127742767334, \"seconds\": 103.126928852}\n{\"step\": 900, \"loss\": 0.8872236609458923, \"seconds\": 105.095367986}\n{\"step\": 1000, \"loss\": 0.8360785245895386, \"seconds\": 106.90649739000001}\n{\"step\": 1100, \"loss\": 0.7957888245582581, \"seconds\": 108.436780826}\n{\"steps\": 1200, \"seconds\": 109.957261946}\n"
+    },
+    "retrieval": {
+      "seconds": 36.45795621200003,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "{\"retrieval_seconds\": 28.35283921200002, \"peak_cuda_bytes\": 725019648}\n"
+    },
+    "count": 3072,
+    "ndcg_at10": 0.4473084751630653,
+    "both_supports_at2": 0.08821614583333333,
+    "slices": {
+      "bridge": {
+        "count": 2467,
+        "ndcg_at10": 0.38995611756567405,
+        "both_supports_at2": 0.05715443858937981
+      },
+      "comparison": {
+        "count": 605,
+        "ndcg_at10": 0.6811733779610385,
+        "both_supports_at2": 0.21487603305785125
+      }
+    },
+    "valid": 1
+  },
+  {
+    "recipe": "starter",
+    "seed": 2027,
+    "exit_code": 0,
+    "training": {
+      "seconds": 117.0528271,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "[W910 00:42:46.211122962 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:42:51.227374267 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:42:51.230196603 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n{\"step\": 0, \"loss\": 3.875274658203125, \"seconds\": 92.12942459199999}\n{\"step\": 100, \"loss\": 2.077423572540283, \"seconds\": 93.52371307299998}\n{\"step\": 200, \"loss\": 1.6602697372436523, \"seconds\": 94.90293010299999}\n{\"step\": 300, \"loss\": 1.429706335067749, \"seconds\": 96.28826703399997}\n{\"step\": 400, \"loss\": 1.2675342559814453, \"seconds\": 97.676153352}\n{\"step\": 500, \"loss\": 1.1966642141342163, \"seconds\": 99.05399358899999}\n{\"step\": 600, \"loss\": 0.9243253469467163, \"seconds\": 100.435740805}\n{\"step\": 700, \"loss\": 0.9810452461242676, \"seconds\": 101.81625180199998}\n{\"step\": 800, \"loss\": 0.8901453018188477, \"seconds\": 103.20360062799998}\n{\"step\": 900, \"loss\": 0.8768678903579712, \"seconds\": 104.59519337399999}\n{\"step\": 1000, \"loss\": 0.8241140246391296, \"seconds\": 105.98100392899997}\n{\"step\": 1100, \"loss\": 0.8488309383392334, \"seconds\": 107.36512227199998}\n{\"steps\": 1200, \"seconds\": 108.75365596499998}\n"
+    },
+    "retrieval": {
+      "seconds": 31.102772067000046,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "{\"retrieval_seconds\": 26.123957366000013, \"peak_cuda_bytes\": 725019648}\n"
+    },
+    "count": 3072,
+    "ndcg_at10": 0.4462740254506628,
+    "both_supports_at2": 0.091796875,
+    "slices": {
+      "bridge": {
+        "count": 2467,
+        "ndcg_at10": 0.39018322669687633,
+        "both_supports_at2": 0.061207944872314554
+      },
+      "comparison": {
+        "count": 605,
+        "ndcg_at10": 0.6749946874764424,
+        "both_supports_at2": 0.21652892561983472
+      }
+    },
+    "valid": 1
+  },
+  {
+    "recipe": "starter",
+    "seed": 4093,
+    "exit_code": 0,
+    "training": {
+      "seconds": 117.43025297500003,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "[W910 00:45:14.536359044 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:45:20.868422754 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:45:20.889373341 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n{\"step\": 0, \"loss\": 3.956958293914795, \"seconds\": 92.389678866}\n{\"step\": 100, \"loss\": 1.8450356721878052, \"seconds\": 93.77693278599997}\n{\"step\": 200, \"loss\": 1.4951961040496826, \"seconds\": 95.15422666900002}\n{\"step\": 300, \"loss\": 1.5095124244689941, \"seconds\": 96.53459651999998}\n{\"step\": 400, \"loss\": 1.1747756004333496, \"seconds\": 97.91925088599999}\n{\"step\": 500, \"loss\": 1.2114460468292236, \"seconds\": 99.29820708199998}\n{\"step\": 600, \"loss\": 0.9649810194969177, \"seconds\": 100.675763507}\n{\"step\": 700, \"loss\": 0.962963879108429, \"seconds\": 102.05596012000001}\n{\"step\": 800, \"loss\": 0.8319091200828552, \"seconds\": 103.43452367700002}\n{\"step\": 900, \"loss\": 0.8713109493255615, \"seconds\": 104.81353906599998}\n{\"step\": 1000, \"loss\": 0.8861551880836487, \"seconds\": 106.19241649600002}\n{\"step\": 1100, \"loss\": 0.8854306936264038, \"seconds\": 107.57111906900002}\n{\"steps\": 1200, \"seconds\": 108.955814412}\n"
+    },
+    "retrieval": {
+      "seconds": 31.213899368,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "{\"retrieval_seconds\": 26.088126069999987, \"peak_cuda_bytes\": 725019648}\n"
+    },
+    "count": 3072,
+    "ndcg_at10": 0.44528236500925805,
+    "both_supports_at2": 0.09375,
+    "slices": {
+      "bridge": {
+        "count": 2467,
+        "ndcg_at10": 0.38795947062417496,
+        "both_supports_at2": 0.06404539927036887
+      },
+      "comparison": {
+        "count": 605,
+        "ndcg_at10": 0.6790271260803488,
+        "both_supports_at2": 0.21487603305785125
+      }
+    },
+    "valid": 1
+  },
+  {
+    "recipe": "reference",
+    "seed": 1729,
+    "exit_code": 0,
+    "training": {
+      "seconds": 120.53771579899995,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "[W910 00:47:43.415842371 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:47:48.346309614 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:47:48.404141837 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n{\"step\": 0, \"loss\": 3.9649219512939453, \"seconds\": 93.063902686}\n{\"step\": 100, \"loss\": 1.9168281555175781, \"seconds\": 94.46969758199998}\n{\"step\": 200, \"loss\": 1.5691227912902832, \"seconds\": 95.85778213499998}\n{\"step\": 300, \"loss\": 1.5428680181503296, \"seconds\": 97.250931702}\n{\"step\": 400, \"loss\": 1.249507188796997, \"seconds\": 98.63866480000002}\n{\"step\": 500, \"loss\": 1.0449265241622925, \"seconds\": 100.02764711300006}\n{\"step\": 600, \"loss\": 1.6156593561172485, \"seconds\": 103.14746668400005}\n{\"step\": 700, \"loss\": 1.6326667070388794, \"seconds\": 104.63780520199998}\n{\"step\": 800, \"loss\": 1.5836994647979736, \"seconds\": 106.12461612800007}\n{\"step\": 900, \"loss\": 1.3900235891342163, \"seconds\": 107.61149437200004}\n{\"step\": 1000, \"loss\": 1.3773709535598755, \"seconds\": 109.10128789700002}\n{\"step\": 1100, \"loss\": 1.2086130380630493, \"seconds\": 110.59180492600001}\n{\"steps\": 1200, \"seconds\": 112.08219184200004}\n"
+    },
+    "retrieval": {
+      "seconds": 31.197848591000024,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "{\"retrieval_seconds\": 26.102349638999954, \"peak_cuda_bytes\": 725019648}\n"
+    },
+    "count": 3072,
+    "ndcg_at10": 0.5038652441449583,
+    "both_supports_at2": 0.11458333333333333,
+    "slices": {
+      "bridge": {
+        "count": 2467,
+        "ndcg_at10": 0.4471564398673406,
+        "both_supports_at2": 0.07580056749087961
+      },
+      "comparison": {
+        "count": 605,
+        "ndcg_at10": 0.735105938612552,
+        "both_supports_at2": 0.2727272727272727
+      }
+    },
+    "valid": 1
+  },
+  {
+    "recipe": "reference",
+    "seed": 2027,
+    "exit_code": 0,
+    "training": {
+      "seconds": 121.68112586900008,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "[W910 00:50:15.432426616 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:50:21.671710141 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:50:21.673176234 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n{\"step\": 0, \"loss\": 3.875274658203125, \"seconds\": 94.653519631}\n{\"step\": 100, \"loss\": 2.077423572540283, \"seconds\": 96.03780039799994}\n{\"step\": 200, \"loss\": 1.6602697372436523, \"seconds\": 97.40795054299997}\n{\"step\": 300, \"loss\": 1.429706335067749, \"seconds\": 98.77986273299996}\n{\"step\": 400, \"loss\": 1.2675342559814453, \"seconds\": 100.15585912100005}\n{\"step\": 500, \"loss\": 1.1966642141342163, \"seconds\": 101.53577562999999}\n{\"step\": 600, \"loss\": 1.6211353540420532, \"seconds\": 104.62727562999999}\n{\"step\": 700, \"loss\": 1.3865032196044922, \"seconds\": 106.11125131799997}\n{\"step\": 800, \"loss\": 1.4305505752563477, \"seconds\": 107.59467834300006}\n{\"step\": 900, \"loss\": 1.4401576519012451, \"seconds\": 109.07348577599998}\n{\"step\": 1000, \"loss\": 1.2958276271820068, \"seconds\": 110.549414694}\n{\"step\": 1100, \"loss\": 1.3328187465667725, \"seconds\": 112.02724069299995}\n{\"steps\": 1200, \"seconds\": 113.51049531499996}\n"
+    },
+    "retrieval": {
+      "seconds": 31.33620902400014,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "{\"retrieval_seconds\": 26.207050736999918, \"peak_cuda_bytes\": 725019648}\n"
+    },
+    "count": 3072,
+    "ndcg_at10": 0.5103525207687316,
+    "both_supports_at2": 0.12044270833333333,
+    "slices": {
+      "bridge": {
+        "count": 2467,
+        "ndcg_at10": 0.45340378262699077,
+        "both_supports_at2": 0.07782732063234699
+      },
+      "comparison": {
+        "count": 605,
+        "ndcg_at10": 0.7425715901830909,
+        "both_supports_at2": 0.29421487603305785
+      }
+    },
+    "valid": 1
+  },
+  {
+    "recipe": "reference",
+    "seed": 4093,
+    "exit_code": 0,
+    "training": {
+      "seconds": 118.989595097,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "[W910 00:52:48.580511190 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:52:54.594384997 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n[W910 00:52:54.606511539 socket.cpp:209] [c10d] The hostname of the client socket cannot be retrieved. err=-3\n{\"step\": 0, \"loss\": 3.956958293914795, \"seconds\": 92.03724202399997}\n{\"step\": 100, \"loss\": 1.8450356721878052, \"seconds\": 93.40953914900001}\n{\"step\": 200, \"loss\": 1.4951961040496826, \"seconds\": 94.77342571999998}\n{\"step\": 300, \"loss\": 1.5095124244689941, \"seconds\": 96.15132153000002}\n{\"step\": 400, \"loss\": 1.1747756004333496, \"seconds\": 97.52019972699998}\n{\"step\": 500, \"loss\": 1.2114460468292236, \"seconds\": 98.89549742099996}\n{\"step\": 600, \"loss\": 1.7177547216415405, \"seconds\": 101.95856445200002}\n{\"step\": 700, \"loss\": 1.5182008743286133, \"seconds\": 103.43426266300003}\n{\"step\": 800, \"loss\": 1.3273143768310547, \"seconds\": 104.907748061}\n{\"step\": 900, \"loss\": 1.5201976299285889, \"seconds\": 106.38174729399998}\n{\"step\": 1000, \"loss\": 1.2908687591552734, \"seconds\": 107.84671336200006}\n{\"step\": 1100, \"loss\": 1.4243286848068237, \"seconds\": 109.32308848599996}\n{\"steps\": 1200, \"seconds\": 110.79811948300005}\n"
+    },
+    "retrieval": {
+      "seconds": 30.976465176000033,
+      "timeout": false,
+      "exit_code": 0,
+      "output_excerpt": "{\"retrieval_seconds\": 26.065902822999988, \"peak_cuda_bytes\": 725019648}\n"
+    },
+    "count": 3072,
+    "ndcg_at10": 0.5112121465745426,
+    "both_supports_at2": 0.125,
+    "slices": {
+      "bridge": {
+        "count": 2467,
+        "ndcg_at10": 0.45306665466000834,
+        "both_supports_at2": 0.08147547628698824
+      },
+      "comparison": {
+        "count": 605,
+        "ndcg_at10": 0.7483112020343261,
+        "both_supports_at2": 0.30247933884297523
+      }
+    },
+    "valid": 1
+  }
+]

@@ -1,0 +1,13 @@
+name: qwen3_msa
+trainable_params: [".*router_.*"]
+
+main_model:
+  model_id: EverMind-AI/MSA-4B
+  load_weights: true
+
+# MSA hyperparameters are read from the HF config.json `msa_config` block at load
+# time (router_layers 18..35, pooling_kernel_size 64, top_k_docs 16, INFONCE_DECOUPLE
+# reductions). Listed here for reference / override:
+msa:
+  pooling_kernel_size: 64
+  top_k_docs: 16

@@ -1,0 +1,36 @@
+# MEM_EMBED corpus-grounding eval @ 1000 docs, on the 3 target datasets (MS MARCO / HotpotQA /
+# MuSiQue). Each task builds ONE memory bank from max_docs=1000 corpus docs (gold docs injected
+# via inject_query_gold) and all queries retrieve from it. Reports llm_judge_accuracy +
+# lexical_grounding + doc_access_acc per dataset.
+# batch_size=8 keeps the doc_access aux-prefill score matrix (M~250k) within HBM at 1000 docs.
+# Run: python eval.py model=qwen3_mem_embed_16q4kv MEM_REPLICATE_BANK=1 \
+#        '~eval_set@evals=pretraining' '+eval_set@evals=embed_corpus_1000' checkpoint_dir=gs://... tp_devices=1
+defaults:
+  - /eval/tasks@gen_large_mem_msmarco:  gen_large_mem_msmarco_v1_embed
+  - /eval/tasks@gen_large_mem_hotpotqa: gen_large_mem_hotpotqa_v1_embed
+  - /eval/tasks@gen_large_mem_musique:  gen_large_mem_musique_v1_embed
+  - _self_
+
+gen_large_mem_msmarco:
+  eval:
+    num_samples: 128
+    doc_dataset:
+      max_docs: 1000
+  dataset:
+    batch_size: 8
+
+gen_large_mem_hotpotqa:
+  eval:
+    num_samples: 128
+    doc_dataset:
+      max_docs: 1000
+  dataset:
+    batch_size: 8
+
+gen_large_mem_musique:
+  eval:
+    num_samples: 128
+    doc_dataset:
+      max_docs: 1000
+  dataset:
+    batch_size: 8

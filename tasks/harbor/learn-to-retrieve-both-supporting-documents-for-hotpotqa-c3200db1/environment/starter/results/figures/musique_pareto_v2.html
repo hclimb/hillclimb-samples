@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MuSiQue Pareto v2 — accuracy × throughput</title>
+<style>
+.viz-root{
+  color-scheme:light;
+  --surface-1:#fcfcfb; --surface-2:#f1f1ef; --grid:#e4e4e0;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#8a8a85;
+  --s-rag:#2a78d6; --s-mem:#eb6834; --s-hyb:#1baf7a; --s-snap:#eda100;
+  --ref:#8a8a85;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])) .viz-root{
+    color-scheme:dark;
+    --surface-1:#1a1a19; --surface-2:#232322; --grid:#33332f;
+    --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8b8b84;
+    --s-rag:#3987e5; --s-mem:#d95926; --s-hyb:#199e70; --s-snap:#c98500;
+    --ref:#8b8b84;
+  }
+}
+:root[data-theme="dark"] .viz-root{
+  color-scheme:dark;
+  --surface-1:#1a1a19; --surface-2:#232322; --grid:#33332f;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8b8b84;
+  --s-rag:#3987e5; --s-mem:#d95926; --s-hyb:#199e70; --s-snap:#c98500;
+  --ref:#8b8b84;
+}
+body{margin:0;background:var(--surface-1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif}
+.viz-root{background:var(--surface-1);color:var(--text-primary);max-width:1040px;margin:0 auto;padding:28px 24px 40px}
+h1{font-size:19px;margin:0 0 4px;text-wrap:balance}
+.sub{font-size:12.5px;color:var(--text-secondary);margin:0 0 18px;max-width:80ch;line-height:1.5}
+.panels{display:flex;gap:26px;flex-wrap:wrap}
+.panel{flex:1 1 420px;min-width:380px}
+.panel h2{font-size:13px;margin:0 0 6px;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase}
+svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin:16px 0 0;font-size:12.5px;color:var(--text-secondary)}
+.legend .it{display:flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:50%;flex:0 0 10px}
+.note{font-size:11.5px;color:var(--text-muted);margin-top:14px;max-width:86ch;line-height:1.5}
+#tip{position:fixed;pointer-events:none;background:var(--surface-2);color:var(--text-primary);
+  border:1px solid var(--grid);border-radius:7px;padding:7px 10px;font-size:12px;line-height:1.45;
+  box-shadow:0 3px 10px rgba(0,0,0,.14);opacity:0;transition:opacity .1s;max-width:260px;z-index:10}
+table.data{border-collapse:collapse;font-size:12.5px;margin-top:20px;width:100%}
+table.data th,table.data td{padding:5px 10px;border-bottom:1px solid var(--grid);text-align:left;
+  font-variant-numeric:tabular-nums}
+table.data th{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-secondary)}
+details{margin-top:18px}summary{font-size:12.5px;color:var(--text-secondary);cursor:pointer}
+</style></head>
+<body><div class="viz-root">
+<h1>MuSiQue: accuracy × end-to-end throughput, v2</h1>
+<p class="sub">Adds the RAG→memory hybrid, the oracle-retrieval ceiling, and the SnapKV
+context-stuffing baseline to the 2026-07-19 systems. Judge Qwen3-4B, n=128, matched corpora.
+Throughput is end-to-end queries/sec (log scale); RAG/memory values from the 07-19 measured
+primitives, SnapKV measured directly (its per-query cost re-streams the whole corpus —
+question-conditioned selection cannot amortize).</p>
+<div class="panels">
+  <div class="panel"><h2>c512 — 512-doc corpus</h2><div id="p512"></div></div>
+  <div class="panel"><h2>c2048 — 2048-doc corpus</h2><div id="p2048"></div></div>
+</div>
+<div class="legend">
+  <span class="it"><span class="sw" style="background:var(--s-rag)"></span>RAG top-5</span>
+  <span class="it"><span class="sw" style="background:var(--s-mem)"></span>Memory layer (full bank)</span>
+  <span class="it"><span class="sw" style="background:var(--s-hyb)"></span>Hybrid RAG@50 → memory</span>
+  <span class="it"><span class="sw" style="background:var(--s-snap)"></span>SnapKV context stuffing</span>
+  <span class="it"><span class="sw" style="background:none;border:1.6px dashed var(--ref)"></span>Oracle-50 ceiling (not deployable)</span>
+</div>
+<p class="note">Dashed step = Pareto frontier of deployable systems in each panel. The oracle
+point uses perfect retrieval and marks the memory layer's headroom, not a system. SnapKV c2048
+was stopped at 71/128 queries (unjudged partial preserved; measured pace ≈0.007 q/s shown as a tick); checkpoint hard-neg
+midtrain @750 throughout; hybrid throughput ≈ the memory decode floor (retrieval adds ~ms).
+Sources: results/musique_pareto_v2.json.</p>
+<details><summary>Data table</summary><table class="data" id="dtable"></table></details>
+</div>
+<div id="tip"></div>
+<script>
+const DATA = {
+  "512": [
+    {s:"rag",  n:"RAG top-5",            acc:0.3906, qps:0.579,  d:"top-5 docs in prompt; 07-19 reference (repeat run 0.3984)"},
+    {s:"mem",  n:"Memory (full bank)",   acc:0.2810, qps:0.505,  d:"131k-slot bank, attention dilution (mass 0.34)"},
+    {s:"hyb",  n:"Hybrid RAG@50→mem",    acc:0.3984, qps:0.505,  d:"bank masked to top-50 docs; mass 0.72; ties RAG"},
+    {s:"snap", n:"SnapKV comp=4",        acc:0.5312, qps:0.0134, d:"whole corpus in context, 4x KV compression; 74.8 s/query"},
+    {s:"ref",  n:"Oracle-50 ceiling",    acc:0.4844, qps:0.505,  d:"perfect retrieval + fill to 50; mass 0.93"}
+  ],
+  "2048": [
+    {s:"rag",  n:"RAG top-5",            acc:0.3281, qps:0.579,  d:"07-19 reference"},
+    {s:"mem",  n:"Memory (full bank)",   acc:0.3125, qps:0.478,  d:"524k-slot bank"},
+    {s:"hyb",  n:"Hybrid RAG@50→mem",    acc:0.2734, qps:0.505,  d:"all-golds@50 falls to 0.688 — recall-capped"},
+    {s:"ref",  n:"Oracle-50 ceiling",    acc:0.4531, qps:0.505,  d:"perfect retrieval; recall was the whole gap"},
+    {s:"snap", n:"SnapKV comp=16",       acc:null,   qps:0.0067, d:"stopped at 71/128 queries; ~150 s/query measured; unjudged partial on GCS"}
+  ]
+};
+const COL = {rag:"--s-rag", mem:"--s-mem", hyb:"--s-hyb", snap:"--s-snap", ref:"--ref"};
+const W=470,H=380,M={l:52,r:16,t:12,b:42};
+const X0=0.004,X1=1.0,Y0=0.24,Y1=0.56;
+const xs=q=>M.l+(Math.log10(q)-Math.log10(X0))/(Math.log10(X1)-Math.log10(X0))*(W-M.l-M.r);
+const ys=a=>H-M.b-(a-Y0)/(Y1-Y0)*(H-M.b-M.t);
+const css=v=>getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(v).trim();
+
+function panel(id, pts){
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="accuracy vs throughput">`;
+  const xticks=[0.01,0.03,0.1,0.3,1];
+  for(const t of xticks){ const x=xs(t);
+    s+=`<line x1="${x}" y1="${M.t}" x2="${x}" y2="${H-M.b}" stroke="var(--grid)" stroke-width="1"/>`;
+    s+=`<text x="${x}" y="${H-M.b+16}" font-size="10.5" fill="var(--text-muted)" text-anchor="middle">${t}</text>`; }
+  for(let a=0.25;a<=0.551;a+=0.05){ const y=ys(a);
+    s+=`<line x1="${M.l}" y1="${y}" x2="${W-M.r}" y2="${y}" stroke="var(--grid)" stroke-width="1"/>`;
+    s+=`<text x="${M.l-8}" y="${y+3.5}" font-size="10.5" fill="var(--text-muted)" text-anchor="end">${a.toFixed(2)}</text>`; }
+  s+=`<text x="${(M.l+W-M.r)/2}" y="${H-8}" font-size="11" fill="var(--text-secondary)" text-anchor="middle">queries / sec (log)</text>`;
+  s+=`<text x="14" y="${(M.t+H-M.b)/2}" font-size="11" fill="var(--text-secondary)" text-anchor="middle" transform="rotate(-90 14 ${(M.t+H-M.b)/2})">judge accuracy</text>`;
+  // Pareto frontier over deployable measured points (desc qps, keep rising acc)
+  const dep=pts.filter(p=>p.s!=='ref'&&p.acc!=null).sort((a,b)=>b.qps-a.qps);
+  let best=-1, fr=[];
+  for(const p of dep){ if(p.acc>best){ fr.push(p); best=p.acc; } }
+  if(fr.length>1){ let d=`M ${xs(fr[0].qps)} ${ys(fr[0].acc)}`;
+    for(let i=1;i<fr.length;i++){ d+=` L ${xs(fr[i].qps)} ${ys(fr[i-1].acc)} L ${xs(fr[i].qps)} ${ys(fr[i].acc)}`; }
+    s+=`<path d="${d}" fill="none" stroke="var(--text-muted)" stroke-width="1.4" stroke-dasharray="5 4" opacity="0.75"/>`; }
+  for(const p of pts){
+    const c=`var(${COL[p.s]})`;
+    if(p.acc==null){ const x=xs(p.qps);
+      s+=`<line x1="${x}" y1="${H-M.b}" x2="${x}" y2="${H-M.b-14}" stroke="${c}" stroke-width="2.4"/>`;
+      s+=`<text x="${x+5}" y="${H-M.b-18}" font-size="10.5" fill="var(--text-secondary)">SnapKV — acc pending</text>`;
+      continue; }
+    const x=xs(p.qps), y=ys(p.acc);
+    if(p.s==='ref'){
+      s+=`<circle cx="${x}" cy="${y}" r="7.5" fill="none" stroke="${c}" stroke-width="1.8" stroke-dasharray="3 2.4" data-i="${p.n}" data-d="${p.d}" data-a="${p.acc}" data-q="${p.qps}"/>`;
+    } else {
+      s+=`<circle cx="${x}" cy="${y}" r="6.5" fill="${c}" stroke="var(--surface-1)" stroke-width="2" data-i="${p.n}" data-d="${p.d}" data-a="${p.acc}" data-q="${p.qps}"/>`;
+    }
+    const dx=p.lx||10, dy=p.ly||4;
+    s+=`<text x="${x+dx}" y="${y+dy}" font-size="11" fill="var(--text-secondary)">${p.acc.toFixed(3)}</text>`;
+  }
+  s+=`</svg>`;
+  document.getElementById(id).innerHTML=s;
+}
+DATA["512"].find(p=>p.s==='mem').ly=14;  DATA["512"].find(p=>p.s==='hyb').ly=-8;
+DATA["512"].find(p=>p.s==='ref').ly=-8;
+DATA["2048"].find(p=>p.s==='mem').ly=-8; DATA["2048"].find(p=>p.s==='hyb').ly=14;
+DATA["2048"].find(p=>p.s==='ref').ly=-8;
+panel("p512", DATA["512"]); panel("p2048", DATA["2048"]);
+
+const tip=document.getElementById('tip');
+document.querySelectorAll('circle[data-i]').forEach(c=>{
+  c.addEventListener('mousemove',e=>{
+    tip.innerHTML=`<strong>${c.dataset.i}</strong><br>accuracy ${(+c.dataset.a).toFixed(4)} · ${(+c.dataset.q).toFixed(3)} q/s<br><span style="color:var(--text-secondary)">${c.dataset.d}</span>`;
+    tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY+10)+'px'; tip.style.opacity=1;});
+  c.addEventListener('mouseleave',()=>tip.style.opacity=0);
+});
+let rows='<tr><th>corpus</th><th>system</th><th>accuracy</th><th>q/s</th><th>note</th></tr>';
+for(const k of ["512","2048"]) for(const p of DATA[k])
+  rows+=`<tr><td>c${k}</td><td>${p.n}</td><td>${p.acc==null?'pending':p.acc.toFixed(4)}</td><td>${p.qps}</td><td>${p.d}</td></tr>`;
+document.getElementById('dtable').innerHTML=rows;
+</script>
+</body></html>

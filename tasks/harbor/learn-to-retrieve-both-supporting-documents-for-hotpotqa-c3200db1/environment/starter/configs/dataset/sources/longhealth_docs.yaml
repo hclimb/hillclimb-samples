@@ -1,0 +1,6 @@
+# LongHealth clinical documents (133 docs, ~149k tokens). Built by
+# datagen/longhealth/prepare_longhealth.py. Private on HF: a third-party benchmark, not ours
+# to re-host publicly.
+hf_name: "${oc.env:HF_USERNAME}/longhealth-docs-with-ids"
+split: train
+column: pos_doc

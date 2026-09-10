@@ -1,0 +1,21 @@
+# standard trainer + the weight-0 read-channel telemetry (same block staged_ground uses). Each logs
+# train/<name> every step and contributes 0 to the gradient. Used by the full-FT msmarco isolation
+# runs so they get mem_pos_weight_mass / mem_hit_rate / mem_top1_weight / etc. like the staged runs.
+defaults:
+  - standard
+  - _self_
+
+aux_losses:
+  mem_write_norm: {enabled: true, weight: 0.0}
+  mem_write_ratio: {enabled: true, weight: 0.0}
+  mem_topk_entropy: {enabled: true, weight: 0.0}
+  mem_effective_slots: {enabled: true, weight: 0.0}
+  mem_top1_weight: {enabled: true, weight: 0.0}
+  mem_o_proj_norm: {enabled: true, weight: 0.0}
+  mem_boundary_straddle: {enabled: true, weight: 0.0}
+  mem_pos_weight_mass: {enabled: true, weight: 0.0}
+  mem_hit_rate: {enabled: true, weight: 0.0}
+  mem_head_query_cos: {enabled: true, weight: 0.0}
+  mem_cross_layer_cos: {enabled: true, weight: 0.0}
+  mem_kv_cos: {enabled: true, weight: 0.0}
+  mem_value_anisotropy: {enabled: true, weight: 0.0}

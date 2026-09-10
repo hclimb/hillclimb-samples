@@ -1,0 +1,13 @@
+name: generation_base
+type: generation_base
+output_file: gen_base_results.json
+vllm_model: Qwen/Qwen3-4B
+vllm_base_url: http://localhost:8001/v1
+vllm_tensor_parallel_size: 8
+vllm_max_model_len: 32768
+max_new_tokens: 2048
+temperature: 0.6
+concurrency: 32
+num_samples: null
+metrics:
+  llm_judge_accuracy: {}

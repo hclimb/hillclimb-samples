@@ -1,0 +1,12 @@
+name: generation_large_mem
+type: generation_large_mem
+output_file: gen_large_mem_results.json
+max_new_tokens: 64
+temperature: 0.0
+top_k: 20
+top_p: 0.8
+num_samples: null
+embed_batch_size: 2048
+max_docs: null
+lookup_chunk_size: 8192
+doc_access_acc: true

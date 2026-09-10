@@ -1,0 +1,16 @@
+{
+  "schema_v3": true,
+  "required_paths": true,
+  "repository_boundary": true,
+  "syntax": true,
+  "public_private_helper_parity": true,
+  "frozen_starter_parity": true,
+  "compiled_public_files_unchanged": 22,
+  "compiled_overlay_unchanged": true,
+  "root_wrappers_removed": true,
+  "taskforge_loader": "No module named 'taskforge'",
+  "previous_deterministic_compile": "Attempt 2 accepted; not reopened",
+  "current_compile_rerun": false,
+  "model_calls": 0,
+  "gpu_sandboxes": 0
+}

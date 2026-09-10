@@ -1,0 +1,14 @@
+name: novelhopqa
+books_hf_name: "mihir-1999/novelhopqa-books"
+prompt_path: data/prompts/novelhopqa.txt
+split: hop_1
+seq_len: 1024
+doc_chunk_seq_len: 256
+num_chunks_per_doc: 4096
+batch_size: 1
+shuffle: false
+num_workers: 0
+mask_prefix: true
+provide_docs: true
+chat_template: true
+force_thinking: true

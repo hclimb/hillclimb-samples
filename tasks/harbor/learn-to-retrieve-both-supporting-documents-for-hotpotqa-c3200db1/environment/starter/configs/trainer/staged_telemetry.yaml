@@ -1,0 +1,28 @@
+# The `staged` 4-stage recipe + the weight-0 read-channel telemetry block.
+#
+# Naming: this is `staged` PLUS telemetry, in the same way standard_ground.yaml is `standard` plus
+# telemetry. It is NOT a variant of staged_ground.yaml — that name is taken by a different
+# *recipe* (2-stage, main model frozen throughout), not by "staged + telemetry".
+#
+# Every entry logs train/<name> (per-layer entries log train/<name>/l0 and /mean) every
+# log_interval steps and contributes EXACTLY 0 to the gradient: registry.py stop_gradient-s a
+# weight-0 loss before weighting, so a NaN in a diagnostic can't poison the step.
+# See wiki/training/auxiliary-losses.md.
+defaults:
+  - staged
+  - _self_
+
+aux_losses:
+  mem_write_norm: {enabled: true, weight: 0.0}
+  mem_write_ratio: {enabled: true, weight: 0.0}
+  mem_topk_entropy: {enabled: true, weight: 0.0}
+  mem_effective_slots: {enabled: true, weight: 0.0}
+  mem_top1_weight: {enabled: true, weight: 0.0}
+  mem_o_proj_norm: {enabled: true, weight: 0.0}
+  mem_boundary_straddle: {enabled: true, weight: 0.0}
+  mem_pos_weight_mass: {enabled: true, weight: 0.0}
+  mem_hit_rate: {enabled: true, weight: 0.0}
+  mem_head_query_cos: {enabled: true, weight: 0.0}
+  mem_cross_layer_cos: {enabled: true, weight: 0.0}
+  mem_kv_cos: {enabled: true, weight: 0.0}
+  mem_value_anisotropy: {enabled: true, weight: 0.0}

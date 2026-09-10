@@ -1,0 +1,20 @@
+# Eval suite for the hard-neg (think) SFT4B run: MS MARCO / HotpotQA / MuSiQue corpus evals at
+# 512 docs + ScienceQA NLL, all at n=128.
+#
+#   msmarco/hotpotqa/musique  -> llm_judge_accuracy + lexical_grounding + mem_pos_weight_mass
+#                                (+ doc_access_acc / doc_hit_rate / doc_token_hit_rate)
+#   science_qa                -> nll + mem_pos_weight_mass  (batch-level bank; see the task yaml —
+#                                the 512-doc corpus has no analog for the NLL evaluator)
+#
+# RUN THIS FROM AN EVAL BOX, NOT IN-LOOP. llm_judge_accuracy and lexical_grounding are computed by
+# evals/shared.py::run_metrics_pipeline in eval.py's PARENT process, after the JAX worker exits and
+# frees the TPU for the vLLM judge. The trainer's _run_evals only keeps evaluator.evaluate()'s
+# inference_metrics and never calls run_metrics, so a task's `metrics:` block is INERT in-loop —
+# pointing trainer.evals at this set would silently yield no judge/grounding numbers.
+# Driver: scripts/misc/hard_neg_eval_box.py. See wiki/evaluation/eval-boxes.md.
+defaults:
+  - /eval/tasks@gen_large_mem_msmarco:  gen_large_mem_msmarco_c512
+  - /eval/tasks@gen_large_mem_hotpotqa: gen_large_mem_hotpotqa_c512
+  - /eval/tasks@gen_large_mem_musique:  gen_large_mem_musique_c512
+  - /eval/tasks@nll_science_qa:         nll_science_qa_hard_neg_think_n128
+  - _self_

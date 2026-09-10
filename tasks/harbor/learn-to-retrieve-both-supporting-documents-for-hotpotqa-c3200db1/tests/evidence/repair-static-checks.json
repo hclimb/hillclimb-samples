@@ -1,0 +1,14 @@
+{
+  "schema_v3_valid": true,
+  "required_paths_exist": true,
+  "repository_boundary_preserved": true,
+  "python_syntax_valid": true,
+  "authored_python_under_300_lines": true,
+  "public_closure_identical": true,
+  "frozen_starter_identical": true,
+  "public_file_allowlist_valid": true,
+  "public_overlay_duplicate": false,
+  "optimization_build_plan_loader": "unavailable: taskforge module absent; host project venv blocked by sandbox",
+  "standard_compiler_rerun": false,
+  "compiled_linux_image_rerun": false
+}

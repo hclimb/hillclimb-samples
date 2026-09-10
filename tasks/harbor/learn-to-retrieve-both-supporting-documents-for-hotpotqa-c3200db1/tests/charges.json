@@ -1,0 +1,59 @@
+{
+  "external_model_requests": 0,
+  "external_model_charge_usd": 0,
+  "solver_trials_run": 0,
+  "construction_assistant_charge_usd": null,
+  "construction_assistant_charge_note": "Harness billing not available in construction_manifest usage at handoff.",
+  "gpu_invoice_charge_usd": null,
+  "gpu_charge_note": "No billing invoice API consulted. Wall times include image build and are not billable GPU-seconds. Phase times and device UUIDs are retained in evidence.",
+  "runs": [
+    {
+      "sandbox_id": "sb-bCpkeqatJ7I0dL5tCwMEDu",
+      "gpu": "H200:2",
+      "mode": "public qualification/debug",
+      "observed_wall_seconds": 526.3919658660889,
+      "terminated": true,
+      "evidence": "evidence"
+    },
+    {
+      "sandbox_id": "sb-atsOjHiSqpsYjZXKwD3Afs",
+      "gpu": "H200:2",
+      "mode": "public qualification/debug",
+      "observed_wall_seconds": 170.44511318206787,
+      "terminated": true,
+      "evidence": "evidence/1789000360"
+    },
+    {
+      "sandbox_id": "sb-OmMpFhiUU9vHVTYRWSzgSv",
+      "gpu": "H200:2",
+      "mode": "public qualification/debug",
+      "observed_wall_seconds": 1002.0223386287689,
+      "terminated": true,
+      "evidence": "evidence/1789000716"
+    },
+    {
+      "sandbox_id": "sb-FIaFAcOrPSqNGwErNq4uKI",
+      "gpu": "H200:2",
+      "mode": "boundary",
+      "observed_wall_seconds": 982.5439879894257,
+      "terminated": true,
+      "evidence": "evidence/1789001595"
+    },
+    {
+      "sandbox_id": "sb-cA698YvZeAwenrYcAJpdnL",
+      "gpu": "H200:2 requested; no workload or GPU measurement",
+      "mode": "packaged boundary startup; host TLS CA failure",
+      "observed_wall_seconds": 881.3000540733337,
+      "terminated": true,
+      "evidence": "evidence/1789014600"
+    },
+    {
+      "sandbox_id": "sb-ilT3LE6u6ecyPmpPmsaqvG",
+      "gpu": "H200:2 verified by nvidia-smi",
+      "mode": "packaged public tools and generated private launcher",
+      "observed_wall_seconds": 862.6209018230438,
+      "terminated": true,
+      "evidence": "evidence/1789015668"
+    }
+  ]
+}

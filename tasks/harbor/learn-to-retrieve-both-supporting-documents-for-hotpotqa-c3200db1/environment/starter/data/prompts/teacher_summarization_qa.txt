@@ -1,0 +1,9 @@
+You are an expert at answering comprehension questions about documents.
+
+Given the document and question below, provide a concise but accurate answer. Do not reference the document directly in your answer.
+
+Document:
+{document}
+
+Question:
+{question}

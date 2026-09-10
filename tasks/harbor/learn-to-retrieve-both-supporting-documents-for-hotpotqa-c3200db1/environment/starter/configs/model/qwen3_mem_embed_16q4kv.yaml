@@ -1,0 +1,42 @@
+# Model config matching the MaxText-ported run qwen3_4b_mem_16q4kv_3L_topk32_bank131k:
+# GQA memory (16 query / 4 kv heads, k=128, v=256), 3 mem layers [9,18,27], top_k=32, no conv.
+# Pass `model=qwen3_mem_embed_16q4kv` to eval.py so the default qwen3_mem_embed config
+# (mem_k_dim=1024, mem_num_heads=4, mem_layers=[14]) does NOT clobber this architecture via
+# the eval's OmegaConf.merge(train_cfg.model, cfg.model).
+name: qwen3_mem_embed
+trainable_params: [".*mem_.*", ".*embed_model.*"]
+main_model:
+  model_id: Qwen/Qwen3-4B
+  load_weights: true
+memory:
+  mem_layers: [9, 18, 27]
+  mem_size: 16384
+  mem_num_heads: 16
+  mem_num_kv_heads: 4
+  mem_k_dim: 128
+  mem_v_dim: 256
+  mem_top_k: 32
+  mem_t_chunk: 16          # query-token chunk for the GQA score matrix (bounds HBM at large corpora)
+  mem_score_activation: softmax
+  mem_softmax_temp: 1.0
+  mem_phantom_log_n: 0.0
+  mem_use_product_keys: false
+  mem_placement: "after_attention"
+  mem_use_gating: false
+  mem_lookup_chunk_size: null
+  two_pass_topk: false
+  mem_value_read_kchunk: 0
+  mem_collect_full_scores: false
+  mem_o_proj_zero_init: false
+embed_model:
+  model_id: Qwen/Qwen3-Embedding-0.6B
+  load_weights: true
+  lora:
+    enabled: false
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]
+    rank: 256
+    alpha: 256
+  mask_type: 'bidirectional'
+  embed_conv: false
+  embed_conv_kernel_size: 1
+  embed_conv_stride: 1

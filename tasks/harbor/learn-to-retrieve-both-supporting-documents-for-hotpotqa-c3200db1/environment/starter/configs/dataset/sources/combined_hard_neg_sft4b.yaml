@@ -1,0 +1,9 @@
+hf_name: "vm2825/triviaqa-hotpotqa-nq-squad-msmarco-hard-neg-sft4b"
+field_map: {"question": "query", "neg_doc": "neg_docs", "answer": "generated_answer"}
+think_field: "think"
+teacher_prompt_path: null
+student_prompt_path: null
+prompt_path: null
+doc_separator: "<doc_seperator>"
+neg_score_threshold: 0.95
+min_neg_docs: 2

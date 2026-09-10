@@ -1,0 +1,26 @@
+# staged_ablation + weight-0 telemetry aux_losses, same relation as
+# staged_telemetry <- staged. Ablation runs typically want the observability
+# to compare against LR-sweep siblings like e3m3/e6m6.
+#
+# Each entry logs train/<name> every log_interval steps and contributes EXACTLY
+# 0 to the gradient (registry.py stop_gradient-s a weight-0 loss before
+# weighting, so a NaN in a diagnostic can't poison the step). See
+# wiki/training/auxiliary-losses.md.
+defaults:
+  - staged_ablation
+  - _self_
+
+aux_losses:
+  mem_write_norm: {enabled: true, weight: 0.0}
+  mem_write_ratio: {enabled: true, weight: 0.0}
+  mem_topk_entropy: {enabled: true, weight: 0.0}
+  mem_effective_slots: {enabled: true, weight: 0.0}
+  mem_top1_weight: {enabled: true, weight: 0.0}
+  mem_o_proj_norm: {enabled: true, weight: 0.0}
+  mem_boundary_straddle: {enabled: true, weight: 0.0}
+  mem_pos_weight_mass: {enabled: true, weight: 0.0}
+  mem_hit_rate: {enabled: true, weight: 0.0}
+  mem_head_query_cos: {enabled: true, weight: 0.0}
+  mem_cross_layer_cos: {enabled: true, weight: 0.0}
+  mem_kv_cos: {enabled: true, weight: 0.0}
+  mem_value_anisotropy: {enabled: true, weight: 0.0}

@@ -1,0 +1,2 @@
+array_task	campaign_id	optimizer	setting	train	task	method	seed	status	run_dir	result_file	detail
+25	dolci32k-qwen3_1_7b-s42	adamw	mixed_if	mixed_32k	ifbench	LayerwiseSoft	42	evaluated	/home/nakyungl/drpt-next/Dr.Post-Training-Next/drpt_opus/SFT/runs/campaigns/dolci32k-qwen3_1_7b-s42/mixed_if-LayerwiseSoft-adamw-p1.0-lr1e-5-b16-v64-s42-Qwen3-1.7B-Base	/home/nakyungl/drpt-next/Dr.Post-Training-Next/drpt_opus/SFT/runs/campaigns/dolci32k-qwen3_1_7b-s42/mixed_if-LayerwiseSoft-adamw-p1.0-lr1e-5-b16-v64-s42-Qwen3-1.7B-Base/ifbench_results.json	evaluation completed and validated

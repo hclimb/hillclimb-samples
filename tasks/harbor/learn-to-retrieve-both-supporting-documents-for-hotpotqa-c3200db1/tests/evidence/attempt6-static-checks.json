@@ -1,0 +1,26 @@
+{
+  "schema_v3": true,
+  "required_paths": true,
+  "repository_boundary": true,
+  "syntax": true,
+  "public_allowlist_file_count": 22,
+  "public_private_helper_parity": true,
+  "frozen_starter_parity": true,
+  "packaged_public_parity": true,
+  "compiler_loader_available": false,
+  "self_test": "22 passed with no skips; PATH contains python3 but not python",
+  "generated_launcher_sha256": "f686240ea47f79c357780a16bb51e9d9493e646229d7a4ab05c5be1dfcbf94d3",
+  "accepted_training_and_inference_unchanged": {
+    "training.py": true,
+    "train_retriever.sh": true,
+    "inference.py": true,
+    "model.py": true
+  },
+  "current_plan_sha256": "a5c6be61493592ab36d5970571422fc0b69fdac3fcc7073a94ece3f9ab069318",
+  "compiled_dockerfile_unchanged": true,
+  "final_schema_and_syntax": true,
+  "all_six_owned_sandboxes_stopped": true,
+  "final_self_test": "22 passed with no skips; attempt6-final-self-test.log",
+  "fresh_packaged_gpu_run": "evidence/1789015668/summary.json",
+  "standard_solver_trials": 0
+}

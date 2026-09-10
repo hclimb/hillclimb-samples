@@ -1,0 +1,5 @@
+name: documents
+batch_size: 64
+max_docs: null
+chunk_size: 256
+max_chunks_per_doc: 4

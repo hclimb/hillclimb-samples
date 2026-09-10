@@ -1,0 +1,44 @@
+# MuSiQue RAG->memory HYBRID eval. Same corpus construction, queries, judge and protocol as
+# gen_large_mem_musique_c512 (inject_query_gold keeps every gold, fills to target_docs), but
+# the bank is restricted per query to the RAG top-k docs' slots. Corpus size is a knob:
+# override eval.doc_dataset.target_docs (512 = the c512 setup; 2048 = the Pareto-plot
+# reference point measured with the hard-neg checkpoint). batch_size 1 = the legacy tiled
+# mode every number on this task was measured in (row_divergence determinism check); since
+# 2026-07-21 the evaluator also supports batch_size = a multiple of the mesh data axis
+# (per-example [B, M] mem_mask, ~Bx query throughput) — see gen_large_mem_msmarco_hybrid.
+defaults:
+  - /eval@eval: generation_large_mem_rag_hybrid
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: msa_musique_qa
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: msa_musique_docs
+  - _self_
+
+eval:
+  num_samples: 128
+  output_file: outputs/musique_hybrid.json
+  max_new_tokens: 512
+  inject_query_gold: true
+  prompt_pad_len: 512
+  metrics:
+    llm_judge_accuracy: {}
+    lexical_grounding: {}
+  rag:
+    query_dataset: "${oc.env:HF_USERNAME}/msa-musique-qa-with-ids"
+    top_k: 50
+  doc_dataset:
+    max_docs: null
+    target_docs: 512
+    max_chunks_per_doc: 1
+    chunk_size: 256
+
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 1
+  num_workers: 0
+  force_thinking: true
+  provide_docs: true
+  batch_size: 1
+  shuffle: false

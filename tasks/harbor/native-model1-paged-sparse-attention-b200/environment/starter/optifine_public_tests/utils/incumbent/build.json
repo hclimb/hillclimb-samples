@@ -1,0 +1,7 @@
+{
+  "wheel": "flash_mla-1.0.0+2026.9.4.23.57.42-cp312-cp312-linux_x86_64.whl",
+  "sha256": "50c67a55f928077c181d0e0d196813bbab0507773c5f7bf7ed6e993aeeacc3a7",
+  "torch": "2.11.0+cu130",
+  "cuda": "13.0",
+  "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Aug_20_01:58:59_PM_PDT_2025\nCuda compilation tools, release 13.0, V13.0.88\nBuild cuda_13.0.r13.0/compiler.36424714_0\n"
+}

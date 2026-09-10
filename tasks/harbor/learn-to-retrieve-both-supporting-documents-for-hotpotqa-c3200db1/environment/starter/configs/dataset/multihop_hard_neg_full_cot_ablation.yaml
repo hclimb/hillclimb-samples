@@ -1,0 +1,28 @@
+# Ablation of multihop_hard_neg_full: identical recipe, one source swap --
+# multihop_qa_sft_hard_neg_cot instead of multihop_qa_sft_hard_neg (same mined rows, `think`
+# joined in and forwarded via cot_field so data/qa.py::qa_transform_item appends it as an extra
+# positive doc in the memory bank -- see configs/dataset/sources/multihop_qa_sft_hard_neg_cot.yaml
+# and the "Ablation" section of
+# wiki/experiments/2026-08-13-doc-access-per-query-loss-investigation.md).
+#
+# Everything else -- num_chunks_per_doc, doc_chunk_seq_len, batch_size, retrieval-mode notes --
+# is unchanged from multihop_hard_neg_full.yaml; see that file for the full rationale. Kept as a
+# literal copy rather than a defaults-inheriting variant so nothing about the "exact same setup"
+# the ablation is testing against can drift silently if the base file changes later.
+defaults:
+  - /dataset/sources@sources.multihop_qa_sft_hard_neg_cot: multihop_qa_sft_hard_neg_cot
+  - _self_
+
+name: "qa"
+seq_len: 512
+doc_chunk_seq_len: 256
+num_chunks_per_doc: 256   # overridden to 224 at launch time for the main_model-unfrozen recipe (HBM) -- see the launch script
+batch_size: 8             # must be a multiple of device count (8 chips)
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+split: train
+num_workers: 16
+distill: false
+shuffle_seed: 42

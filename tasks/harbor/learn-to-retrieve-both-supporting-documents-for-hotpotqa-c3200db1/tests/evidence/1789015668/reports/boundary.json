@@ -1,0 +1,27 @@
+{
+  "checks": {
+    "self_test": 0,
+    "private_labels_denied": true,
+    "control_weights": 0,
+    "public_help": 0,
+    "check_weights": 0,
+    "smoke": 0,
+    "public_candidate_only": 0,
+    "install_reference": 0,
+    "public_paired": 0,
+    "private_paired": 0
+  },
+  "public": {
+    "valid": 1,
+    "diagnostic_only": 0,
+    "C": 0.5036661771241525,
+    "R": 0.10409057242626805,
+    "B": 0.4473084751630653
+  },
+  "private": {
+    "valid": 1,
+    "reward": 0.126115124533209,
+    "baseline_ndcg": 0.4610020179916334,
+    "ndcg_at10": 0.5158677789913978
+  }
+}

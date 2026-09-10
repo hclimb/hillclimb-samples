@@ -1,0 +1,21 @@
+# vm2825/hotpotqa-hard-neg-reasoning-embedding-modified-SFT-4B-parts-0-1: 78,755 HotpotQA rows,
+# each with 1 pos_doc + exactly 3 neg_docs. Same vm2825 hard-neg-SFT4B schema/convention as
+# combined_hard_neg_sft4b / diverse_qa_hard_neg_think (query/neg_docs/generated_answer/think,
+# "<doc_seperator>"-joined), but "-modified-": neg_scores is NOT a real mined similarity score
+# here -- verified via the HF datasets-server rows endpoint, every row's neg_scores is the
+# literal placeholder string "0.0<doc_seperator>0.0<doc_seperator>0.0" (same convention as
+# datagen/create_hard_neg_sft_dataset.py's "cheap negs" placeholder). The sibling sources'
+# neg_score_threshold: 0.95 is tuned for real cosine-similarity scores near 1.0 (drop
+# near-duplicate/false negatives); it happens to be harmless here too since 0.0 <= 0.95, but
+# neg_score_threshold: 0.0 is set explicitly so the filter's intent (keep everything -- there is
+# no real score to threshold on) is legible from the config rather than relying on a borrowed
+# 0.95 that means something else for this dataset.
+hf_name: "vm2825/hotpotqa-hard-neg-reasoning-embedding-modified-SFT-4B-parts-0-1"
+field_map: {"question": "query", "neg_doc": "neg_docs", "answer": "generated_answer"}
+think_field: "think"
+teacher_prompt_path: null
+student_prompt_path: null
+prompt_path: null
+doc_separator: "<doc_seperator>"
+neg_score_threshold: 0.0
+min_neg_docs: 2

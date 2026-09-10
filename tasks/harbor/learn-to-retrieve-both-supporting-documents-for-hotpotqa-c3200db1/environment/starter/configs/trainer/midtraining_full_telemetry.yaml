@@ -1,0 +1,32 @@
+# `midtraining_telemetry` with the MAIN MODEL FULLY UNFROZEN — every parameter trains.
+#
+# Between the two neighbours:
+#   midtraining_telemetry        main layers 13/14/15 only (the neighbourhood of a single memory
+#                                layer at 14 — arbitrary for a multi-layer memory model)
+#   midtraining_frozen_telemetry main frozen entirely (matches the staged_ground line's regime)
+#   THIS                         everything, i.e. `staged`'s stage-3 trainable set as one stage
+#
+# ⚠️ COST. Unfreezing the 4B main model creates optimizer state for every one of its parameters
+# — with Adam that is two extra moment tensors on top of the gradients, none of which exist when
+# it is frozen. On a memory-layer model that is stacked on top of a doc bank that is already
+# large (batch x num_chunks_per_doc x doc_chunk_seq_len slots, read once PER MEMORY LAYER), so
+# expect this to be the OOM-prone configuration. Drop dataset.batch_size or
+# dataset.num_chunks_per_doc first if it does not fit.
+#
+# ⚠️ CATASTROPHIC FORGETTING. `staged` reaches this trainable set only in stage 3, after 15k
+# steps of warmup with the main model frozen, and staged_sim explicitly lowers stage-3 peak LR to
+# 1e-5 "to protect the 4B". Here the full model is trainable from step 0 on a warm start. On a
+# small finetuning set the LR wants to be well below the 1e-4 that suits a memory-only run —
+# 1e-5 to 5e-5 is the defensible range; 1e-4 is the aggressive end.
+defaults:
+  - midtraining_telemetry
+  - _self_
+
+training_stages:
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*main_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: cosine
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1

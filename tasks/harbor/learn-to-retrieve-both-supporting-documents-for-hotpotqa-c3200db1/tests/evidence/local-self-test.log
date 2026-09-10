@@ -1,0 +1,15 @@
+test_invalid_results (test_contract.MetricTests.test_invalid_results) ... ok
+test_normalization_and_rank (test_contract.MetricTests.test_normalization_and_rank) ... ok
+test_partial_and_absent (test_contract.MetricTests.test_partial_and_absent) ... ok
+test_query_association_and_slices (test_contract.MetricTests.test_query_association_and_slices) ... ok
+test_reward (test_contract.MetricTests.test_reward) ... ok
+test_failure_excerpt_and_timeout (test_contract.ProcessTests.test_failure_excerpt_and_timeout) ... ok
+test_isolated_import (test_contract.ProcessTests.test_isolated_import) ... ok
+test_paired_validity_gate (test_contract.ProcessTests.test_paired_validity_gate) ... ok
+test_snapshot_retains_sources_not_generated_state (test_contract.ProcessTests.test_snapshot_retains_sources_not_generated_state) ... ok
+test_exact_encoder_state (test_weights.WeightTests.test_exact_encoder_state) ... skipped 'Tensor tests run in the compiled PyTorch image'
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.151s
+
+OK (skipped=1)

@@ -1,0 +1,5 @@
+hf_name: "RUC-NLPIR/FlashRAG_datasets"
+hf_config: "hotpotqa"
+normalizer_type: "flashrag"
+flashrag_context_key: "context"
+prompt_path: null

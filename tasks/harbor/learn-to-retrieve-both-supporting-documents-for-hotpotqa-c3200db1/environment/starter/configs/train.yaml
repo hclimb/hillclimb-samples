@@ -1,0 +1,10 @@
+defaults:
+  - model: qwen3_mem_embed
+  - dataset: pretraining_cot
+  - trainer: staged
+  - override hydra/job_logging: disabled
+  - _self_
+
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}

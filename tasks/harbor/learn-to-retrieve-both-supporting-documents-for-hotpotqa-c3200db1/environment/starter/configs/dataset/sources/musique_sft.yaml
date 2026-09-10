@@ -1,0 +1,20 @@
+# MuSiQue multi-hop QA with CoT, built by datagen/musique/{prepare_musique_sft_base,generate_musique_sft}.py
+# TRAIN SPLIT ONLY — MuSiQue validation is a live eval benchmark (configs/eval_set/hard_neg_think_c512.yaml).
+#
+# pos_doc/neg_doc are native list columns, so no doc_separator is needed:
+# make_normalizer passes lists through unchanged (data/utils.py:130,139).
+#
+# No neg_score_threshold: MuSiQue's distractors are human-annotated
+# (is_supporting=false), not embedding-mined, so there are no false negatives
+# to threshold away and no neg_scores column to read.
+hf_name: "${oc.env:HF_USERNAME}/musique-sft"
+# No field_map: train on the GOLD `answer` column, not `generated_answer`.
+# The vm2825/* sources map answer->generated_answer because they are synthetic and have no
+# gold. MuSiQue does, and gold is far better here: median 12 chars vs 151 for the model's
+# paraphrase, and it matches the short-form answer the official evaluator and the existing
+# MuSiQue eval tasks score against. The judge has already confirmed the generation agrees
+# with gold, so the `think` block stays consistent with the target.
+# `generated_answer` is kept in the parquet for analysis.
+think_field: "think"
+prompt_path: null
+min_neg_docs: 2

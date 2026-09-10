@@ -1,0 +1,9 @@
+hf_name: "vm2825/nemotron-cc-v21-Parsed-QA4-hard-negatives-scored-2M-modified"
+field_map: {"question": "query", "neg_doc": "neg_docs"}
+think_field: null
+teacher_prompt_path: null
+student_prompt_path: null
+prompt_path: null
+doc_separator: "<doc_seperator>"
+neg_score_threshold: 0.95
+min_neg_docs: 2

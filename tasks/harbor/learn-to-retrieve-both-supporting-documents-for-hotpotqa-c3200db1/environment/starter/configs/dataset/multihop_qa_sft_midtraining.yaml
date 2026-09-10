@@ -1,0 +1,17 @@
+defaults:
+  - /dataset/sources@sources.multihop_qa_sft: multihop_qa_sft
+  - _self_
+
+name: "qa"
+seq_len: 512
+doc_chunk_seq_len: 256
+batch_size: 16          # starting point; tune for v6-8 memory (try 8 if OOM, 32 if headroom)
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+num_chunks_per_doc: 16  # multi-hop: ~5-10 paragraphs per question
+min_doc_length: 0       # individual split paragraphs may be short
+split: train
+num_workers: 16
+distill: false

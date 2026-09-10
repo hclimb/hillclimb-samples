@@ -1,0 +1,40 @@
+defaults:
+  - /eval@eval: generation_large_mem
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: flashrag_msmarcoqa_with_ids
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: msmarco_docs
+  - _self_
+
+eval:
+  num_samples: 500
+  output_file: outputs/flashrag_msmarcoqa.json
+  max_new_tokens: 512
+  metrics:
+    llm_judge_accuracy:
+      tensor_parallel_size: 4
+  doc_dataset:
+    max_docs: null
+    max_chunks_per_doc: 4
+
+dataset:
+  split: train
+  seq_len: 64
+  doc_chunk_seq_len: 128
+  num_chunks_per_doc: 4
+  num_workers: 0
+  force_thinking: true
+  batch_size: 64
+
+rag:
+  doc_dataset: mihir-1999/msmarco-qa-positive-passages-dev
+  query_dataset: RUC-NLPIR/FlashRAG_datasets
+  query_hf_config: msmarco-qa
+  query_split: dev
+  query_column: question
+  query_gt_column: golden_answers
+  num_queries: 500
+  gen_model: Qwen/Qwen3-4B
+  gen_tensor_parallel_size: 4
+  judge_model: Qwen/Qwen3-4B
+  judge_tensor_parallel_size: 4

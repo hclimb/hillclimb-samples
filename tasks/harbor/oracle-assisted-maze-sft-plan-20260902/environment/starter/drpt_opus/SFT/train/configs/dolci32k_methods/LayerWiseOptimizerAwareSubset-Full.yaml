@@ -1,0 +1,22 @@
+# Dolci32k layer-wise optimizer-aware subset curation with full fine-tuning
+method: LayerWiseOptimizerAwareSubset
+finetuning: Full
+learning_rate: 1.00e-05
+
+scoring:
+  method: reduced_ghost
+
+optimizer:
+  type: adamw
+
+optimizer_aware:
+  # Same-state Raw comparison is diagnostic-only; sample it off the hot path.
+  diagnostic_interval: 100
+  matrix_geometry: muon
+  vector_geometry: adamw
+  muon_reference: momentum_proxy
+  muon_momentum: 0.95
+  muon_steps: 5
+  muon_lr_shape_scale: true
+  lora_optimizer: adamw
+  spectral_lambda: 0.0

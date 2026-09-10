@@ -1,0 +1,3 @@
+hf_name: "${oc.env:HF_USERNAME}/hotpotqa-distractor-qa-with-ids-validation"
+normalizer_type: "hotpotqa"
+prompt_path: null

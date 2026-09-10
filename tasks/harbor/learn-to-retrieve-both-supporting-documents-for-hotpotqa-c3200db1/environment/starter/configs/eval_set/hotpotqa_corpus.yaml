@@ -1,0 +1,8 @@
+defaults:
+  - /eval/tasks@gen_large_mem_hotpotqa: gen_large_mem_hotpotqa_distractor
+  - _self_
+
+gen_large_mem_hotpotqa:
+  eval:
+    num_samples: 16
+    lookup_chunk_size: 8192

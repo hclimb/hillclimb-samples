@@ -1,0 +1,5 @@
+model_profile: olmo3_7b
+model: allenai/Olmo-3-1025-7B
+model_revision: a81bae42db3975be1671e27b9c9a56da1a9f980f
+tokenizer: allenai/olmo-3-tokenizer-instruct-release
+tokenizer_revision: 134a8a9166b45a96f21cf1e66b928fe6e6c0b9b1

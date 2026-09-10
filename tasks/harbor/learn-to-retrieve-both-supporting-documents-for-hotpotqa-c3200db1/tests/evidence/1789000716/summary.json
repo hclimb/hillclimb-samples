@@ -1,0 +1,14 @@
+{
+  "seconds": 966.732246272,
+  "starter_mean": 0.4462882885409954,
+  "reference_mean": 0.5084766371627442,
+  "paired_differences": [
+    0.056556768981892935,
+    0.0640784953180688,
+    0.06592978156528456
+  ],
+  "paired_difference_mean": 0.06218834862174877,
+  "paired_difference_stdev": 0.004964154723848926,
+  "consistent_gain": true,
+  "solver_trials": "Not yet run; required separately"
+}

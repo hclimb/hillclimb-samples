@@ -1,0 +1,55 @@
+defaults:
+  - /dataset/sources@sources.science_qa_hard_neg_think: science_qa_hard_neg_think
+  - /dataset/sources@sources.diverse_qa_hard_neg_think: diverse_qa_hard_neg_think
+  - /dataset/sources@sources.combined_hard_neg_sft4b: combined_hard_neg_sft4b
+  - /dataset/sources@sources.multihop_qa_sft: multihop_qa_sft
+  - /dataset/sources@sources.etd_allnli: etd_allnli
+  - /dataset/sources@sources.etd_quora_triplets: etd_quora_triplets
+  - /dataset/sources@sources.etd_stackexchange_tt: etd_stackexchange_tt
+  - /dataset/sources@sources.etd_altlex: etd_altlex
+  - /dataset/sources@sources.etd_coco_captions: etd_coco_captions
+  - /dataset/sources@sources.etd_specter: etd_specter
+  - /dataset/sources@sources.etd_sentence_compression: etd_sentence_compression
+  - /dataset/sources@sources.etd_ccnews_title_text: etd_ccnews_title_text
+  - _self_
+
+name: "qa"
+seq_len: 512
+doc_chunk_seq_len: 256
+batch_size: 16
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+num_chunks_per_doc: 16
+split: train
+num_workers: 4
+distill: false
+min_doc_length: 8
+shuffle_seed: 42
+
+sources:
+  etd_allnli:
+    weight: 0.0882
+    mask_ce: true
+  etd_quora_triplets:
+    weight: 0.0882
+    mask_ce: true
+  etd_stackexchange_tt:
+    weight: 0.0882
+    mask_ce: true
+  etd_altlex:
+    weight: 0.0882
+    mask_ce: true
+  etd_coco_captions:
+    weight: 0.0882
+    mask_ce: true
+  etd_specter:
+    weight: 0.0882
+    mask_ce: true
+  etd_sentence_compression:
+    weight: 0.0882
+    mask_ce: true
+  etd_ccnews_title_text:
+    weight: 0.0882
+    mask_ce: true

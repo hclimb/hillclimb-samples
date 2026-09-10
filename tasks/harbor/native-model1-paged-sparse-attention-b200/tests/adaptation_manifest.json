@@ -1,0 +1,166 @@
+{
+  "status": "public_checkpoint_and_fixed_anchor_gpu_validated_short_trials_stopped_by_user",
+  "release_decision": "keep",
+  "scope": "One fixed B200 MODEL1 attention workload scored against a declared estimated dense-BF16 roofline, with all original22 profiles retained as correctness gates.",
+  "source_revision": "d302d1e622c27b5202efa20ed5d94fc77e862e9f",
+  "source_license": "MIT; retained in native.tar.gz and utils/NATIVE_LICENSE",
+  "missing_artifacts": [
+    {
+      "original": "CUTLASS submodule headers",
+      "replacement": "NVIDIA CUTLASS commit 147f5673d0c1c3dcf66f78d677fd647e4a020219, retrieved from codeload.github.com. Include trees and upstream license retained in cutlass.tar.gz; exact upstream and repacked archive hashes are in utils/artifacts.json. This restores a missing prerequisite, not a replacement kernel. The unchanged native wheel compiled successfully with these headers and completed attempt-04 public/private native runs.",
+      "visibility": "Public and protected, identical bytes"
+    },
+    {
+      "original": "Compiled immutable incumbent wheel",
+      "replacement": "Built from the unchanged pinned FlashMLA source. utils/incumbent contains the wheel, installed site tree, complete build.log and build.json. Wheel SHA256 is 50c67a55f928077c181d0e0d196813bbab0507773c5f7bf7ed6e993aeeacc3a7. This is the timing incumbent, not the optimized reference candidate.",
+      "visibility": "Identical wheel, site tree and build records in protected utils/incumbent and public_tests/utils/incumbent"
+    }
+  ],
+  "workload": {
+    "manifest": "utils/manifest.json",
+    "counts": "14 equally weighted timed cases plus eight unscored correctness fixtures and their changed-input/same-storage repeats",
+    "preserved": "Both long cases use batch 148, query length 2, heads 64/128, nominal cache length 32768, topk 16384 and page size 64. The twelve production-derived cases use all four approved configurations and batch/query pairs (2,1), (74,2), (128,3). Eight fixtures cross heads/scopes/sinks with primary (650,576,53) and optional extra (512,64,61). Scale is 512**(-0.55).",
+    "transformations": "The twelve primary windows end at cache_length-query_length+row+1. Other indices use the frozen native uniform-sampling helper. Physical page permutations, tensors and finite sink values vary by seed, while work profiles and sink categories are fixed. Fixture length vectors are [0,7,650,317] and [0,5,512,129]; masks are [0,topk,topk//2+1,0]; batch 2 query row 1 is entirely padded in both scopes. One valid selected token per fixture scope is zero-valued.",
+    "distribution": "Native BF16 clamped normal queries and clamped normal/10 caches. Length vectors use Python normalvariate as native lib.py does. Frozen topk lengths and normal sink categories are generated once with Python Random rather than device RNG, with the same distributions; they never vary privately. Cache generation is chunked into at most 1024 pages to bound temporary memory, using the frozen native padded-stride generator and MODEL1 quantizer. This changes random-number ordering, not marginal distributions, shapes, mask profiles, scale, or stored precision.",
+    "poisoning": "Every unselected or length-masked token, including ragged tails, is poisoned before quantization unless another row validly selects it. Unlike native lib.py's mask indexing, -1 padding is filtered before marking selected slots, so it cannot accidentally spare the final physical token.",
+    "reference": "Readable independent selected-byte decoding avoids full-cache dequantization and gathers only valid entries. E8M0 exponent bytes are decoded as powers of two, with 255 treated as NaN. Valid selected values must be finite, including zeros. Expected results use preserved inputs after the timed native call. Frozen native compare.py defines tolerances and zero-reference distance handling.",
+    "public_private": "The shared public/protected workload and runner closure is byte-identical. utils/protocol.py publishes nine fixed public seeds and derives REPETITIONS from that tuple. Both metrics and both entrypoints use it; private seeds are nine distinct samples drawn at execution. Every paired incumbent/candidate input is identical. Only values and equivalent index/page realizations differ between public and private. No case, work profile, precision, tolerance or timing boundary changed."
+  },
+  "toolchain": {
+    "lock": "utils/artifacts.json",
+    "actual": "pytorch/pytorch:2.11.0-cuda13.0-cudnn9-devel@sha256:6e8a7a6dedf900096f90190f66f988e7e658cda4f1e6cbc7c17e3a38980a4f89 supplies Python 3.12 and Torch 2.11.0+cu130. Installed build.json records CUDA 13.0 and NVCC 13.0.88. No standalone PyPI Torch download is claimed. MAX_JOBS=8, NVCC_THREADS=2 and SM90 disabled identically for incumbent and candidate, without changing SM100 source.",
+    "verified": "Coordinator-built solver and evaluator images and successful native wheel build. The installed CPython 3.12 Linux x86_64 wheel and compiler log are retained locally. Build helpers preserve prior CPATH and add CUDA 13's existing include/cccl directory; a single setup.py bdist_wheel invocation avoids upstream's timestamp fallback version changing between metadata and build steps. These compile-only repairs leave native sources unchanged.",
+    "not_verified": "Adjacent-pair sampling has not yet been GPU-qualified. Attempt-07 establishes the unchanged reference, incumbent, numerical gate, startup repair and public packaging on B200; renewed score-comparability and release review remain coordinator-owned."
+  },
+  "qualification": {
+    "modal": "The existing coordinator authenticated Modal/Werm, built both images and validated B200 allocations with 183359 MiB. Human-7 assigns GPU execution to that orchestrator; no host helper, alternate provisioner, credential access or nested model/pipeline is used for this scoped repair.",
+    "astra": "This repair remains inside the existing Astra/OpenRouter construction pipeline; no nested model or pipeline was launched.",
+    "cpu_tests": "All 22 focused CPU self-tests pass without skips after the sampling repair. Benchmark tests cover build placement, alternating pair order, full repetition accounting, preflight/early/late incumbent failures, candidate build/numerical failures, infrastructure OSError, invalid statistics, subset diagnostics and stale-reward removal. Existing startup, timing, packed-layout, arity and mutant regressions remain intact.",
+    "packaging_tests": "The public closure remains evaluator/public_tests with starter-overlay/solve.sh. Both benchmark.py copies receive the identical sampling-only repair. The public benchmark assumes the documented completed build; the protected entrypoint builds after its unscored preflight. Both finish compilation before scored comparisons and use the same worker pairs. Actual public build, full benchmark and clock commands remain unchanged. Attempt-07 GPU public execution supports the previous sampling order, not qualification of this repair.",
+    "native_probe": {
+      "source": "Coordinator's human-3 evidence; full report retained at attention/native-probe-01/report.json",
+      "gpu": "NVIDIA B200",
+      "seed": 771731,
+      "wheel_sha256": "50c67a55f928077c181d0e0d196813bbab0507773c5f7bf7ed6e993aeeacc3a7",
+      "cases_passed": 22,
+      "same_storage_repeats_passed": 8,
+      "workload_seconds": 7.764543452,
+      "peak_gpu_bytes": 14639666688,
+      "limitations": "Original worker before all-stream clock repair. Establishes native numerical feasibility for one public seed only; its per-case times are not corrected-clock qualification or candidate improvement."
+    },
+    "timing_repair": {
+      "source": "Coordinator's human-3 controlled B200 auxiliary-stream diagnostic in the same pinned image",
+      "sleep_cycles": 50000000,
+      "old_event_ms": 0.0355199985,
+      "old_wall_ms": 25.541209,
+      "corrected_event_ms": 25.4908161,
+      "corrected_wall_ms": 25.5107,
+      "change": "Both workers synchronize all device work after the call and before recording the end event, then synchronize that event before reading elapsed time. The initial synchronization remains. All workloads, tolerances, repetitions and scoring remain unchanged; no stream restriction or new scoring gate is added.",
+      "rerun": "Attempt-04 retained three event/wall ratios of 0.9972530532027936, 0.9989851542701549 and 0.9991543500659444 in jobs/solution/approved-plan__gkbdDix/agent/attention-timing.json. The unchanged diagnostic remains in solution/solve.sh for the next qualification; it is not a scoring gate."
+    },
+    "measurements": "Attempts 04/05 failed reproducible reference gain; attempts 06/07 established real direct-schedule improvement and preserved raw reports. Human-7 crossover evidence now contradicts acceptance of time-separated block sampling as sufficiently representative, not acceptance of the native task or reference. Replace that block order with adjacent alternating fresh-worker pairs after compilation. Keep nine scored reports per implementation, all 22 cases, median-per-case geometric-mean scoring, the complete eager-call clock, 30/120-second phases and 180-second child limit. One unscored incumbent preflight adds at most 180 seconds, separate from the nine reports; external repeated_runs=1 and the overall private budget stays 3600 seconds. No exact score equality or causal mechanism is asserted. GPU qualification must measure agreement and ordinary variation again.",
+    "retained_timing_spread": "Computed from attempt-04 raw repetitions: per-case relative range is (maximum-minimum)/median. Across 14 cases, median relative ranges are public incumbent 9.72%, public unsplit candidate 6.18%, private incumbent 12.71%, private unsplit candidate 12.74%; their maximum ranges are 40.19%, 29.02%, 33.83% and 44.79%. These three-sample diagnostics do not establish confidence intervals or stable new-reference gain and do not introduce a scoring gate.",
+    "attempt_04": {
+      "source": "runtime/attempt-04/qualification.json and jobs/solution/approved-plan__gkbdDix/{agent/attention-public,verifier}/diagnostics.json, inspected during repair",
+      "starter_private_reward": 1.0190132884152243,
+      "reference_public_reward": 0.9695997269201616,
+      "reference_private_reward": 0.9822607832119841,
+      "validity": "Untouched starter and previous unsplit reference valid. manual-gpu-checks/extra.json confirms all eight fixtures reject zero, empty, singleton, wrong-index and stale outputs. All 22 native cases and eight same-storage repeats passed. These accepted checks are preserved, not reopened.",
+      "outcome": "Reference qualification failed on real speedup, not correctness or infrastructure."
+    },
+    "reference_repair": {
+      "files": "solution/direct_schedule.patch and solution/solve.sh; obsolete balanced_scheduler.patch removed",
+      "mechanism": "Fuse rectangular request/split scheduling into the native attention blocks for SM100 MODEL1 uniform selection lengths or sufficiently large batches. Derive interval and split offsets arithmetically inside the measured call instead of launching a metadata kernel. Large batches use unsplit direct output, eliminating both metadata allocations, both accumulation allocations and the combine kernel; the 128-head tensor-map encoder skips its absent accumulator. Small uniform batches retain multiple disjoint splits with the native combine arithmetic. Small variable-length batches keep native scheduling. Inputs and outputs are never cached.",
+      "rationale": "The retained profile shows allocation and launch/configuration overhead alongside a scheduler kernel. The previous balanced scan changed GPU scheduling but did not reproducibly reduce complete-call latency. This reference instead removes whole launches and unnecessary buffers; unlike the previous unsplit patch, direct metadata is computed in the attention block itself.",
+      "tradeoffs": "One request per block or cluster changes wave balance and loses persistent cross-request scheduling. Short uniform splits may have more epilogue traffic. The 64/128-head arithmetic pipelines and packed-byte gathers remain native, leaving tensor-core scheduling, sparse loads, dequantization and cross-query reuse as deeper research directions. This is not an experimentally established speedup ceiling or proof of weeks of improvement.",
+      "status": "Accepted direct_schedule.patch is unchanged. Attempt-07 Werm reference was valid at 1.119410743820843 publicly and 1.0666773520640507 privately. Requalify the same reference with the new sampling order; no optimization redesign is needed."
+    },
+    "loader": "plan.json passes task/build-plan.schema.json v3. The local validation interpreter has no taskforge package. The genuine OptimizationBuildPlan loader and normal preflight remain coordinator-owned; schema validation is not a substitute loader, and no host sandbox bypass was attempted.",
+    "local_validation": {
+      "self_tests": "22 tests pass without skips in 6.219 seconds under local Python 3.12.13 / CPU Torch 2.11.0; separate fresh-interpreter startup and timing regressions also pass. Logs are in build-input/.validation/sampling-results; previous repair-results logs are retained.",
+      "schema": "Supplied schema v3, declared repository/evaluator/solution paths, external repeated_runs=1, shell/Python syntax, authored verifier line limits and unchanged patch dry-run pass. The genuine taskforge loader is unavailable in this local interpreter (ModuleNotFoundError retained in loader-availability.log); coordinator loader/preflight is still required, without a fabricated substitute.",
+      "artifacts": "All 33 shared public/protected files are byte-identical. Native and CUTLASS hashes match artifacts.json; all 130 archived native files match the read-only source. Installed incumbent files match the unchanged wheel SHA256 50c67a55f928077c181d0e0d196813bbab0507773c5f7bf7ed6e993aeeacc3a7. direct_schedule.patch retains SHA256 585b0444ae5da8b1167776bb7248de39f7839fdf2b7a82de70735a91942ceba6. Worker/startup/timer, oracle, workloads, metrics, process helper, protocol, build helper and private entrypoint match the accepted compiled snapshot.",
+      "public_view": "Re-exercised build, full benchmark, subset benchmark and clock entrypoints in the public-only solver replica. All help commands pass and the complete public closure is present, without private entrypoint, construction notes or solution. Local macOS cannot load the packaged Linux CUDA incumbent: benchmark and subset fail in unscored incumbent preflight with diagnostics, empty scored lists and no reward. Build and clock fail on CPU-only Torch, not missing public dependencies. Shell scripts are syntax-checked; absolute /environment/starter commands and full repaired workflows must still run in the coordinator compiled B200 image. Prior GPU public execution is preserved, not relabeled as qualification of the new sampling order."
+    },
+    "release_blockers": [
+      "Coordinator: qualify the exact adjacent-pair evaluator and unchanged reference in the cached B200 image using the normal loader/preflight and Werm pipeline.",
+      "Retain controlled-comparison results and repeat public/private measurements to assess comparability within measured ordinary variation; keep all raw reports, resource peaks and auxiliary-stream diagnostics.",
+      "Complete Astra release review; the task is retained but not released. Solver transfer recovery is resolved infrastructure evidence, not a candidate-invalidity requirement."
+    ],
+    "attempt_05": {
+      "source": "runtime/attempt-05/manual-reference-probe/{public,private}-{reward,diagnostics}.json and result.json, inspected in this repair",
+      "reference_public_reward": 1.0470697643460076,
+      "reference_private_reward": 0.9739172457332741,
+      "valid": 1,
+      "image": "im-4seQOHUiPIV9piveDa5yK5",
+      "outcome": "Balanced scheduler passes correctness but short-case ratios reverse on the same B200; long cases remain near parity. Not reproducible improvement."
+    },
+    "attempt_06_probe": {
+      "invocations": 1,
+      "command": "/Users/prdev/Desktop/side_projects/taskforge/.venv/bin/python -u /Users/prdev/Desktop/side_projects/taskforge/output/manual_review/2026-09-04-astra-deep-optimization/run_reference_probe.py --generated build-input --source source-repository --output runtime/reference-development/attempt-06-probe-01 --image im-4seQOHUiPIV9piveDa5yK5",
+      "exit_code": 1,
+      "stderr_excerpt": "Fatal Python error: init_import_site: Failed to import the site module\nFile \"<frozen site>\", line 537, in venv\nPermissionError: [Errno 1] Operation not permitted: '/Users/prdev/Desktop/side_projects/taskforge/.venv/pyvenv.cfg'",
+      "result": "Historical builder-local interpreter startup failure; this invocation never reached the helper. Later coordinator GPU evidence is recorded in attempt_06 below. No repeated invocation or credential access was attempted."
+    },
+    "attempt_06": {
+      "source": "Inspected runtime/attempt-06/manual-reference-probe/{public,private}-{reward,diagnostics}.json, manual-gpu-checks/{self_test.stderr.txt,extra.json}, and jobs/solution/approved-plan__e4xy33G/{agent,verifier} reports.",
+      "probe_public_reward": 1.0375121333656465,
+      "probe_private_reward": 1.083860797602212,
+      "werm_public_reward": 1.1023614790968157,
+      "starter_private_reward": 0.9826894248894913,
+      "evidence": "Both probe paths and Werm public contain nine baseline and nine candidate reports. Final-package GPU checks pass the 22 numerical cases and eight same-storage checks; all eight fixtures reject zero, empty, singleton, wrong-index and stale results. Werm clock samples retain event/wall ratios 0.9964668141811599, 0.9990754600034246 and 0.9991496593370774; the accepted all-stream timing fix is unchanged.",
+      "werm_private_failure": "evaluator_failure=true with baseline=[] and candidate=[]. The incumbent worker's first disposable fixture lazily imported torch._inductor.config -> torch._dynamo -> sympy through native sampling, exhausting the 30-second warmup alarm. No candidate was built or called in this private run, and no reward was written. This is evaluator infrastructure failure, not candidate invalidity.",
+      "startup_repair": "Both workers explicitly import torch._inductor.config and its lazy dependency closure before arming the candidate warmup alarm. The import does not sample tensors, toggle deterministic settings, build performance inputs or invoke candidate code; it stays inside the existing 180-second process cap. The 30/120-second phase limits, full-call timer, nine repetitions, workload, oracle, score, incumbent and optimized patch remain unchanged. No retry or new timeout framework is introduced."
+    },
+    "attempt_07": {
+      "source": "Inspected runtime/attempt-07/COORDINATOR-REVIEW.md and recovered-rfUfATM/corrected-original-evidence.json; crossover values are coordinator-reported there and in human-7, while remaining raw stage reports are host-owned. Also inspected the recovered isolated verifier/reward.json directly; its 1.1526639055505379 result agrees with the coordinator report.",
+      "native_checks": "Accepted B200 checks passed 16 self-tests, all 22 native cases, eight same-storage checks and all five deliberate wrong-answer variants for every fixture. Startup failure did not recur. Preserve this evidence and all accepted fixes.",
+      "starter_private_reward": 1.0157553572839966,
+      "reference_public_reward": 1.119410743820843,
+      "reference_private_reward": 1.0666773520640507,
+      "crossover": "Frozen C45w7u6 on the same B200 and identical public seeds scored 1.1639373943 in public-style block order (B=4543.5291, C=5288.3835), then 1.2910918156 with build-between blocks (B=4300.8789, C=5552.8296). Nine runs and all 22 cases passed. Second-build reuse means this does not isolate cold compilation. Return-to-public and held-out stages were still running at the coordinator handoff.",
+      "transport": "Resolved by the coordinator, not reopened: rfUfATM checkpoint chain hashes verified to d2b1f79b15333b0399e56d6e90c2780e291565e787803cd3bf476b576e568430. Source and public report match the final submission. Exact-task isolated reverification is valid at 1.1526639055505379 versus public 1.1890791869. Original failed final_app transfer is retained as infrastructure evidence with reward=null and valid=null in corrected-original-evidence.json. The host qualification guard handles transport; candidate validity rules are unchanged. No additional solver experiment is needed."
+    },
+    "sampling_repair": {
+      "change": "Reuse the existing bounded repetitions helper for one unscored incumbent preflight, then one fresh worker per implementation per seed in adjacent pairs alternating baseline/candidate and candidate/baseline. Build completes before scored comparisons. Preflight uses the first seed and same selected cases in both paths; reports stay separate from all nine scored reports. No retry, new execution framework, security protocol, case exclusion, rescaling or timing gate is added.",
+      "failure_ownership": "Explicit setup/preflight/build/baseline/candidate phase tracking replaces the old sticky baseline_valid flag, which would misclassify a later incumbent failure after interleaving. Incumbent errors in any pair or final statistics, and OSError infrastructure failures, raise with diagnostics and no reward; candidate build/numerical failures remain zero. Stale reward files are removed at startup. Preflight failure still prevents candidate build.",
+      "status": "CPU regressions pass; exact-image public/private timing agreement and renewed GPU qualification remain required. The coordinator owns target-GPU execution."
+    }
+  },
+  "recovery": "Current protocol and validation status are in roofline_revision. Earlier recovery and qualification statements are historical; retain their raw evidence without interpreting it as acceptance of the current score.",
+  "throughput_revision": {
+    "date": "2026-09-09",
+    "metric": "steady_state_query_tokens_per_second",
+    "workload": "Ten large-batch cases, each with call-frequency weight 1; 2720 query tokens per mix. Four batch-two timings remain unscored diagnostics and all 22 cases remain numerical gates.",
+    "timing": "32 warmups per performance case followed by 128 eager calls, reused scheduling metadata, warm allocator, monotonic wall clock and device-wide synchronization only at block boundaries.",
+    "aggregation": "Median amortized seconds per case over nine paired seeds; sum(weight * batch * queries) / sum(weight * seconds). Reward is candidate/baseline throughput.",
+    "state_checks": "All 22 cases replace query/cache/sink values in the same storage and reuse metadata; final timed outputs are also checked.",
+    "historical_evidence": "All earlier timings, rewards and qualification statements in this file describe the superseded complete-call latency protocol.",
+    "validation": "25 CPU tests and full public/private B200 comparisons passed. Reference rewards: public 0.9852674719, private 0.9848183618. Existing reference does not improve throughput; automated release review remains pending.",
+    "evidence": "internal/qualification/throughput-2026-09-09/summary.json"
+  },
+  "roofline_revision": {
+    "date": "2026-09-10",
+    "metric": "estimated_dense_bf16_roofline",
+    "workload": "Batch 128, queries 3, heads 128, dimension 512; 128+1024 selected entries, pages 256/64, exactly 32768 positions per cache scope, finite sinks.",
+    "reward": "ideal_seconds / median(candidate_seconds_per_call); no baseline timing. Dense BF16 roofline estimate 2.25e15 FLOP/s and 8e12 HBM bytes/s, nominal QK+PV FLOPs and optimistic warm-cache traffic. Unclamped and not a universal upper bound.",
+    "timing": "32 disjoint warmup queries then 128 fresh measured queries; three output snapshots charged inside the synchronized wall-clock block and checked independently.",
+    "correctness": "All original 22 profiles plus fixed scored case, cold and same-storage outputs across nine seeds; sampled measured outputs. Public/private code and profiles are identical except seeds.",
+    "historical_evidence": "All earlier qualification and reward sections concern superseded latency or mixed-throughput scoring, not this revision.",
+    "validation": "29 CPU tests passed locally and in the B200 image. All 23 cases passed on all nine seeds for starter and reference public/private comparisons and three concurrent 15-minute solver trials. Starter public/private: 0.293816734/0.293743746; reference: 0.254010079/0.254014950; solver private rewards: 0.294336939, 0.294530504, 0.297395679. Recorded model cost $1.5046525, excluding GPUs. All seven owned sandboxes terminated.",
+    "qualification_limits": "Short solver trials are not a full one-hour or automated release review. Final solver sources lacked complete public reruns. Best observed improvement is about 1.24% against a separately measured starter; the old reference regresses and the roofline remains an estimate, not demonstrated attainable performance.",
+    "evidence": "internal/qualification/roofline-2026-09-10/"
+  },
+  "fixed_anchor_revision": {
+    "anchor": 0.2938167337239794,
+    "formula": "(efficiency-anchor)/(1-anchor)",
+    "calibration": "internal/qualification/roofline-2026-09-10/: untouched starter public measurement",
+    "public_checkpoint": "Source snapshot plus exact tested compiled package and unique retained results; archiving outside timed work.",
+    "qualification": "31 CPU tests and packaged public/private GPU preflights passed. One Astra and one Fable 20-minute trial ran; Fable private grade valid at -0.00016987281903092544, Astra private grade cancelled by user. All four public archives restored and compiled hashes matched; three complete public scores, one partial final candidate run. Manual checkpoint reminders removed for publication.",
+    "preflight_public_reward": -0.005996073632236263,
+    "preflight_private_reward": -0.005634005442290276,
+    "preflight_evidence": "/Users/prdev/Desktop/side_projects/taskforge/output/checkpoint-pathways-20260910/flash-probe",
+    "probe_sandbox_terminated": true,
+    "evidence": "internal/qualification/checkpoints-2026-09-10/summary.json"
+  }
+}

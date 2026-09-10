@@ -1,0 +1,8 @@
+defaults:
+  # NLL-only eval set for MSA training. The gen_embed_* tasks in
+  # qa_hard_neg_think_sft4b assume the qwen3_mem_embed forward (separate embedder);
+  # MSA's train_forward serves the NLL path directly (model.forward({batch,docs})).
+  - /eval/tasks@nll_science_qa_hard_neg_think: nll_science_qa_hard_neg_think
+  - /eval/tasks@nll_diverse_qa_hard_neg_think: nll_diverse_qa_hard_neg_think
+  - /eval/tasks@nll_combined_hard_neg_sft4b: nll_combined_hard_neg_sft4b
+  - _self_

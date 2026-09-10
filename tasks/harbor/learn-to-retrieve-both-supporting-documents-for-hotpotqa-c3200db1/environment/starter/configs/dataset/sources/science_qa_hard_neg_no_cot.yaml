@@ -1,0 +1,5 @@
+defaults:
+  - science_qa_hard_neg
+  - _self_
+
+think_field: null

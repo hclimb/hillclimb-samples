@@ -1,0 +1,5 @@
+hf_name: "ragrawal36/multihop_qa_sft"
+field_map: {"pos_doc": "paragraphs", "answer": "generated_answer"}
+think_field: "think"
+doc_separator: "<|doc_separator|>"
+prompt_path: null

@@ -1,0 +1,56 @@
+defaults:
+  - standard
+
+# Per-group learning rates. Group assignment is ORDERED regex match in
+# utils.py::setup_optimizer_for_stage: mem-first, then embed, then main. That's
+# what ensures main_model.layers.14.mem_q_proj lands in `mem` (not `main`), and
+# embed_model.mem_k_proj lands in `mem` (not `embed`).
+# `trainer.learning_rate` (from standard.yaml) is used only for schedule
+# construction sanity; the effective peak per leaf comes from the group entry.
+learning_rates:
+  mem:   1e-4
+  embed: 1e-5
+  main:  1e-5
+
+training_stages:
+  # Stage 0: Train memory + conv projection only, no aux losses (warmup)
+  # warmup_steps is ABSOLUTE (not warmup_frac) — deterministic across runs of
+  # different lengths so LR-ablation results aren't confounded by schedule shape.
+  - trainable_params: [".*mem_.*", ".*embed_proj_conv.*"]
+    max_step: 5000
+    ce_weight: 0.0
+    warmup_steps: 500
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  # Stage 1: Train memory + conv projection, introduce aux losses
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: 10000
+    ce_weight: 0.0
+    warmup_steps: 500
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  # Stage 2: Unfreeze embed model, full aux losses
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: 15000
+    ce_weight: 1.0
+    warmup_steps: 500
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  # Stage 3: Fine-tune with cosine decay LR.
+  # warmup_steps=8000 was chosen as a clean round number close to the previous
+  # 0.1 fraction at 100k steps (=8500); pin it so a shorter recipe doesn't
+  # silently give the main model less warmup.
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*main_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: cosine
+    warmup_steps: 8000
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1

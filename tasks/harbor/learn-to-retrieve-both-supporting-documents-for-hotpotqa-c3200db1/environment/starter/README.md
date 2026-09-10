@@ -1,0 +1,3 @@
+# Memory Layers
+
+A research framework for augmenting transformer language models with learnable external memory. The core idea is to insert trainable memory layers into a frozen pre-trained LLM (e.g., Qwen3) so the model can store and retrieve document-level knowledge without expanding its context window. This enables efficient multi-hop reasoning and retrieval-augmented generation over large document collections.

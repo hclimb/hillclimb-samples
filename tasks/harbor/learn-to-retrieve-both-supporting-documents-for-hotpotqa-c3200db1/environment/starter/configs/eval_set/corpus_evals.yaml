@@ -1,0 +1,21 @@
+defaults:
+  - /eval/tasks@gen_large_mem_hotpotqa: gen_large_mem_hotpotqa_distractor
+  - /eval/tasks@gen_large_mem_musique: gen_large_mem_musique_supporting
+  - /eval/tasks@gen_large_mem_msmarco: gen_large_mem_flashrag_msmarcoqa
+  - _self_
+
+gen_large_mem_musique:
+  eval:
+    num_samples: 128
+    lookup_chunk_size: 8192
+
+gen_large_mem_hotpotqa:
+  eval:
+    num_samples: 128
+    lookup_chunk_size: 8192
+
+gen_large_mem_msmarco:
+  eval:
+    num_samples: 128
+    lookup_chunk_size: 8192
+

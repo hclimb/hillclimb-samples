@@ -1,0 +1,5 @@
+defaults:
+  - science_summarization
+  - _self_
+
+think_field: null

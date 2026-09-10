@@ -1,0 +1,64 @@
+defaults:
+  - staged_ground
+  - override /eval_set@evals: none
+
+# staged_ground + a THIRD stage that unfreezes the main 4B at step 38000.
+#
+# Why a separate file rather than editing staged_ground.yaml: stages A/B are the recipe that
+# actually produced `ground_s1_zeroinit_4layer-2026-07-04-09-42-55` @ 38000. Editing them in place
+# would make that checkpoint's own config a lie. This file inherits everything else (steps,
+# checkpoint_interval, the weight-0 telemetry aux_losses) and replaces ONLY training_stages —
+# a Hydra list override replaces wholesale, so all three stages are restated verbatim below.
+#
+# ⚠️ LR 1e-5 for stage C is the load-bearing choice, NOT a typo, and NOT stage B's 2e-4.
+# A full unfreeze of this model at 1e-4 was already tried on the MuSiQue midtrain and REGRESSED
+# THE LM: retrieval improved (doc_access_loss 2.68 -> ~0.7, acc 0.095 -> 0.26) while train/ce_loss
+# bottomed at ~0.357 near step 50 and then climbed past its own 0.560 starting value — the language
+# model degrading as the memory pathway improved. See the header of
+# scripts/embed/train_musique_ground4layer_midtrain.sh. staged_sim uses 1e-5 for exactly this
+# reason. staged_ground's 4B is PRISTINE (never trained in stage A or B), so it is precisely the
+# thing at risk. Do not raise this without a reason and a smoke test.
+#
+# Note on resume mechanics: trainer.py forces one stage re-application on any resume
+# (current_stage_idx = -1), so landing at 38000 rebuilds the optimizer with stage C's trainable
+# mask (Adam mu/nu carried over positionally) and RESTARTS the LR schedule at stage C's start.
+# That restart is why stage C's own peak LR matters so much — it is applied immediately, not
+# inherited from wherever stage B's cosine had decayed to.
+
+training_stages:
+  # Stage A (0 -> 1000) — unchanged from staged_ground. Wire the memory read/route on
+  # off-the-shelf embeddings before the embed model moves.
+  - trainable_params: [".*mem_.*"]
+    max_step: 1000
+    ce_weight: 1.0
+    learning_rate: 1e-4
+    warmup_frac: 0.1
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  # Stage B (1000 -> 38000) — unchanged from staged_ground EXCEPT max_step, which was
+  # ${trainer.steps}; it is pinned to 38000 here because that is where the checkpoint we resume
+  # from stopped, and it is where stage C must take over.
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*value_model.*"]
+    max_step: 38000
+    ce_weight: 1.0
+    learning_rate: 2e-4
+    lr_schedule: cosine
+    warmup_frac: 0.005
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  # Stage C (38000 -> end) — NEW: main 4B joins the trainable set at a 20x lower LR.
+  # warmup_frac 0.01 (~1120 steps of the 112k remaining) eases the pristine 4B in rather than
+  # hitting it with peak LR on step one — the earlier failure turned exactly when warmup ended.
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*value_model.*", ".*main_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    learning_rate: 1e-5
+    lr_schedule: cosine
+    warmup_frac: 0.01
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1

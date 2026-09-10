@@ -1,0 +1,19 @@
+uv run python -m inference.run_inference \
+      --checkpoint_dir /home/suhas/memory-layers/downloaded/04-09-50/04-09-50/04-09-50 \
+      --docs_dataset vm2825/nemotron-cc-v21-Parsed-QA4-filtered-1.7B-test \
+      --docs_split train \
+      --docs_column pos_doc \
+      --queries_dataset vm2825/nemotron-cc-v21-Parsed-QA4-filtered-1.7B-test \
+      --queries_split train \
+      --queries_column question \
+      --answer_column synthetic_answer \
+      --max_docs 32 \
+      --max_queries 32 \
+      --batch_size 32 \
+      --max_new_tokens 512 \
+      --doc_seq_len 256 \
+      --doc_chunk_size 256 \
+      --doc_batch_size 32 \
+      --temperature 0.0 \
+      --output_file inference_results_science_qa_no_think_32.json \
+      --use_chunked_retrieval

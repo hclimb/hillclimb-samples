@@ -1,0 +1,13 @@
+# MSA benchmark eval suite — all 9 datasets from the MSA paper
+# Run with: python eval.py eval_set=msa_evals ...
+defaults:
+  - /eval/tasks@gen_large_mem_msa_msmarco_v1:        gen_large_mem_msa_msmarco_v1
+  - /eval/tasks@gen_large_mem_msa_natural_questions:  gen_large_mem_msa_natural_questions
+  - /eval/tasks@gen_large_mem_msa_narrativeqa:        gen_large_mem_msa_narrativeqa
+  - /eval/tasks@gen_large_mem_msa_2wikimultihopqa:    gen_large_mem_msa_2wikimultihopqa
+  - /eval/tasks@gen_large_mem_msa_hotpotqa:           gen_large_mem_msa_hotpotqa
+  - /eval/tasks@gen_large_mem_msa_musique:            gen_large_mem_msa_musique
+  - /eval/tasks@gen_large_mem_msa_dureader:           gen_large_mem_msa_dureader
+  - /eval/tasks@gen_large_mem_msa_popqa:              gen_large_mem_msa_popqa
+  - /eval/tasks@gen_large_mem_msa_triviaqa_10m:       gen_large_mem_msa_triviaqa_10m
+  - _self_

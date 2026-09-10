@@ -1,0 +1,38 @@
+# DuReader — 277K tokens corpus
+defaults:
+  - /eval@eval: generation_large_mem
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: msa_dureader_qa
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: msa_dureader_docs
+  - _self_
+
+eval:
+  type: generation_large_mem_msa
+  num_samples: 500
+  output_file: outputs/msa_dureader.json
+  max_new_tokens: 512
+  metrics:
+    llm_judge_accuracy: {}
+  doc_dataset:
+    max_docs: null
+    max_chunks_per_doc: 4
+    chunk_size: 256
+
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 4
+  num_workers: 0
+  force_thinking: true
+  provide_docs: true
+  batch_size: 16
+  shuffle: false
+
+rag:
+  doc_dataset: ${oc.env:HF_USERNAME}/msa-dureader-docs-with-ids
+  query_dataset: ${oc.env:HF_USERNAME}/msa-dureader-qa-with-ids
+  query_column: question
+  query_gt_column: answer
+  num_queries: 500

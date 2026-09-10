@@ -1,0 +1,52 @@
+# Ground-Stage-1 4-layer zero-init + DOC-CODE + slim retrieval heads (2026-07-22).
+# vs ground_s1_zeroinit_4layer (which was qwen3_mem_embed + CLI overrides):
+#   - mem_k_dim 1024 -> 128, mem_v_dim 1024 -> 256 (the 16q4kv dimensionality, but on the
+#     single shared bank — NOT the GQA variant, so the hybrid/gather eval tooling applies)
+#   - mem_doc_code_dim: 128 — bank keys become [token_key(128) ; doc_code(128)]: each chunk's
+#     pad-masked mean-pooled embed state through the new doc_code_proj, concatenated onto
+#     every token key of the chunk (models/qwen3_mem_embed.py::embed_forward). q_proj and the
+#     retrieval norms are sized to the concatenated dim automatically
+#     (models/memory_utils.py::add_memory_layer). q·k = token-similarity + doc-affinity —
+#     value-position slots carry a subject binding their local context lacks (the
+#     key-hit-value-miss / document-hopping failure measured 2026-07-22).
+name: qwen3_mem_embed
+trainable_params: [".*mem_.*", ".*embed_model.*"]
+
+main_model:
+  model_id: Qwen/Qwen3-4B
+  load_weights: true
+
+memory:
+  mem_layers: [9, 14, 20, 27]
+  mem_size: 16384
+  mem_num_heads: 4
+  mem_k_dim: 128
+  mem_v_dim: 256
+  mem_doc_code_dim: 128
+  mem_top_k: 128
+  mem_approx_topk: true
+  mem_approx_recall: 0.99
+  mem_score_activation: softmax
+  mem_softmax_temp: 1.0
+  mem_phantom_log_n: 0.0
+  mem_use_product_keys: false
+  mem_placement: "after_attention"
+  mem_use_gating: false
+  mem_lookup_chunk_size: null
+  two_pass_topk: false
+  mem_value_read_kchunk: 0
+  mem_collect_full_scores: true
+  mem_o_proj_zero_init: true
+
+embed_model:
+  model_id: Qwen/Qwen3-Embedding-0.6B
+  load_weights: true
+  lora:
+    enabled: false
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]
+    rank: 256
+    alpha: 256
+  mask_type: 'bidirectional'
+  embed_conv: true
+  embed_conv_kernel_size: 1
+  embed_conv_stride: 1

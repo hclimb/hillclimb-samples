@@ -1,0 +1,30 @@
+# Pre-existing upstream/source checkouts kept beside the tracked project workspace.
+/DeepEP/
+/DeepGEMM/
+/FlashMLA/
+/Megatron-LM/
+/TensorRT-LLM/
+/ThunderKittens/
+/TransformerEngine/
+/cudnn-frontend/
+/cutlass/
+/flash-attention/
+/flash-linear-attention/
+/flashinfer/
+/megablocks/
+/repos/
+/sglang/
+/sota-rl-infra-repos/
+/tilelang/
+/triton/
+/vllm/
+/xformers/
+
+# Local editor / agent state.
+/.claude/
+/.codex/
+/.cursor/
+
+# Generated Python bytecode.
+__pycache__/
+*.py[cod]

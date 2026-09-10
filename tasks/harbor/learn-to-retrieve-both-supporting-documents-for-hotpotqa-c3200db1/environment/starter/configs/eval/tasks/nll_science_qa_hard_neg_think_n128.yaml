@@ -1,0 +1,30 @@
+# ScienceQA (hard-neg think) NLL + mem_pos_weight_mass for the hard-neg (think) run, at n=128.
+#
+# NOTE ON CORPUS SIZE: the 512-doc corpus of the msmarco/hotpotqa/musique tasks has no analog
+# here. The NLL evaluator builds memory from each BATCH's own docs (the training-time path), not
+# from a shared corpus bank — only the generation_large_mem evaluator builds a corpus. So this
+# task's bank is batch_size x num_chunks_per_doc = 16 x 16 = 256 chunks of that batch's own
+# pos+hard-neg docs, and n is set by eval_steps x batch_size = 8 x 16 = 128.
+#
+# mem_pos_weight_mass here is therefore the train-like (in-batch, hard-negative) retrieval read,
+# which is exactly what makes it comparable to train/mem_pos_weight_mass; the corpus tasks'
+# mem_pos_weight_mass is the 512-distractor read. Both are reported; they are not the same number.
+# It is emitted only when the aux config enables mem_pos_weight_mass (evals/nll.py) — the eval box
+# passes it explicitly so this does not depend on how the checkpoint was trained.
+defaults:
+  - /eval@eval: nll
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: science_qa_hard_neg_think
+  - _self_
+
+eval:
+  eval_steps: 8          # x batch_size 16 = 128 samples
+  output_file: outputs/science_qa_nll_n128.json
+
+dataset:
+  split: validation
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 16
+  num_workers: 0
+  batch_size: 16

@@ -1,0 +1,2 @@
+campaign_id	profile	optimizer	seed	array	training_dependency	dependency_mode	evaluation_job_id	collector_job_id	n_test	batch_size	max_new_tokens	force	git_revision
+baseline9-layerwise-s43-20260721	baseline9	adamw	43	0-19%4	83322	afterany	83334	83335	500	64	128	false	9ff4d3cf3e4a2648d0e6923e781da2eb2f5457b9

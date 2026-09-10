@@ -1,0 +1,2 @@
+campaign_id	profile	model_profile	optimizer	seed	array	training_dependency	dependency_mode	evaluation_job_id	collector_job_id	n_test	batch_size	max_new_tokens	force	artifact_build_id	git_revision
+dolci32k-qwen3_1_7b-s42	dolci32k	qwen3_1_7b	adamw	42	0-34%2	none	afterany	7093	7094	-1	1	task-policy	false	68215f282c0954521df63ca2bbe2fbf626817e14e4041c773c205d87bab5f9ae	5642b2b5815248b5f9340aa2b7dcac8cad61a012

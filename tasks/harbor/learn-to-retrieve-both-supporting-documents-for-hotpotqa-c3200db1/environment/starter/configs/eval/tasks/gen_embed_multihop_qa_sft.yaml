@@ -1,0 +1,19 @@
+defaults:
+  - /eval@eval: generation_embed
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: multihop_qa_sft
+  - _self_
+
+eval:
+  num_samples: 32
+  max_new_tokens: 2048
+  metrics:
+    llm_judge_accuracy: {}
+dataset:
+  split: validation
+  seq_len: 2048
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 16
+  min_doc_length: 0
+  num_workers: 0
+  force_thinking: true

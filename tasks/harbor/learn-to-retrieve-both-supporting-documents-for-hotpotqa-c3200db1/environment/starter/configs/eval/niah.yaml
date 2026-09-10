@@ -1,0 +1,25 @@
+name: niah
+type: niah
+output_file: niah_results.json
+
+context_lengths: [1024, 2048, 4096, 8192]
+
+depth_percents: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+
+# mem_lookup_chunk_size to set on the model during eval (overrides model config null default)
+lookup_chunk_size: 8192
+
+# Tokens per doc chunk
+chunk_size: 256
+
+# Sliding-window stride for overlapping chunks (must be <= chunk_size - needle_len).
+# Overlapping chunks ensure the needle always appears fully in at least one chunk.
+chunk_stride: 196
+
+# Generation budget (answer is a short number, 32 is more than enough)
+max_new_tokens: 32
+
+# PG19 haystack settings
+# ~4 chars/token → 40M chars ≈ 10M tokens; reduce for faster local runs
+haystack_max_chars: 40000000
+haystack_cache_dir: /tmp/pg19_haystack

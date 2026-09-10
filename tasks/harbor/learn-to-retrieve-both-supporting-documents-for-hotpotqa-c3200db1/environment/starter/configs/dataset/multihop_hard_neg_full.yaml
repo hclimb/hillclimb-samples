@@ -1,0 +1,59 @@
+# multihop_qa_sft hard-negative recipe: ALL of a row's documents in the memory layer at once
+# (~4 positives + 200 negatives = ~204 docs per question).
+#
+# The two settings that matter, and why they move together:
+#
+#   num_chunks_per_doc: the TOTAL doc-chunk budget per example, not chunks per document.
+#     data/utils.py::pack_docs does `doc_chunks = doc_chunks[:num_chunks_per_doc]`, so a
+#     budget of 16 (the qa_hard_neg_think_sft4b default) silently discards ~188 of 204 docs.
+#     Corpus docs are short (median ~114 tok, mean ~174, p90 ~383), so at
+#     doc_chunk_seq_len=256 most take one chunk and p90 takes two — 256 covers ~204 docs.
+#
+#   batch_size: 256 chunks x 256 tokens = 65,536 doc tokens per example, 16x the default
+#     recipe, so the default batch_size=16 (~1M doc tokens/step) will not fit AT THE DEFAULT
+#     RETRIEVAL MODE — see the isolation note directly below, this is no longer the blocker it
+#     looks like.
+#     MUST BE A MULTIPLE OF jax.device_count(): the batch is sharded P('data', None), so a
+#     non-multiple dies with "global size of its dimension 0 should be divisible by 4, but it
+#     is equal to 2". On the 4-chip v4-8 the smallest legal value is therefore 4, not 2; on an
+#     8-chip v6e-8 (incl. the 2x4 flex-start slice — still 8 chips total) it is 8 or 16, not 4.
+#
+#   RETRIEVAL MODE: this recipe's whole point (all of a row's docs in the bank) makes the
+#   memory layer's default cross-batch retrieval attend every query to EVERY row's docs, not
+#   just its own — at 8+ hard-neg-heavy rows that's an 8x+ larger score/gather than needed and
+#   it's what caps batch_size at 8 in the first place (OOMs at 16 on our v6e-8: measured 32.03G
+#   vs a 31.25G cap, RETRIEVAL KERNEL ONLY). Use model.memory.mem_batched_isolation=true (+
+#   per_query_isolation=true, isolation_group_size=1) — true per-row retrieval, ~1.5x faster than
+#   the default mode AND flat peak memory in B for the retrieval kernel in isolation. See
+#   wiki/implementations/2026-08-02-hard-neg-full-efficient-retrieval.md for the full sweep and
+#   scripts/embed/train_multihop_hard_neg_full.sh for the launch command with these overrides set.
+#
+#   batch_size=16 with mem_batched_isolation STILL OOMS END-TO-END (33.66G vs 31.25G, over by
+#   2.42G) despite the retrieval kernel alone fitting in ~23.7G at that batch — the isolated
+#   benchmark didn't include the embed model's (Qwen3-Embedding-0.6B) forward+backward over all
+#   B*num_chunks_per_doc doc chunks, which DOES scale with B and apparently accounts for the gap.
+#   batch_size=8 is the verified-working point end-to-end; treat 16 as a follow-up (needs
+#   remat/gradient-checkpointing on the embed model, or measuring the embed-model cost in
+#   isolation, neither done yet) rather than assume it works from the retrieval-only numbers.
+#
+# Throughput expectation (measured, not the ~8-16x guess this comment used to make): the
+# retrieval step itself is ~65ms/step in isolation at batch_size=8 with batched isolation on a
+# v6e-8 — see the implementation note for the full comparison across modes and the real
+# end-to-end step time once training is confirmed stable.
+defaults:
+  - /dataset/sources@sources.multihop_qa_sft_hard_neg: multihop_qa_sft_hard_neg
+  - _self_
+
+name: "qa"
+seq_len: 512
+doc_chunk_seq_len: 256
+num_chunks_per_doc: 256   # was 16 — the doc budget that has to hold all ~204 docs
+batch_size: 8             # must be a multiple of device count (8 chips); 16 OOMs end-to-end even with mem_batched_isolation (see above) — 8 is the verified-working point
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+split: train
+num_workers: 16
+distill: false
+shuffle_seed: 42

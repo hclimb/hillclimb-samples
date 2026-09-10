@@ -1,0 +1,23 @@
+# multihop_qa_sft with mined hard negatives, stored as doc IDs.
+#
+# Rows carry pos_doc_ids / neg_doc_ids; normalizer_type=docid resolves them to text against
+# the memory-mapped corpus at corpus_path. Storing ids is what makes 200 negatives/row
+# possible: as text that would be ~187 GB (vs ~1.7 GB for ids + corpus), which does not fit
+# the box disk.
+#
+# Stage both files on the box first:
+#     python datagen/download_multihop_hardneg.py
+# then run with HF_HUB_OFFLINE=1 so data/qa.py reads local parquet (see the livelock warning
+# in scripts/embed/train_hard_neg_think.sh).
+#
+# max_neg_docs: negatives are stored hardest-first, so this keeps the K hardest. null keeps
+# all 200 — note the doc budget is num_chunks_per_doc in the dataset recipe, which truncates
+# pos+neg chunks; 204 docs needs ~256 chunks there or most negatives are silently dropped.
+hf_name: "mihir-1999/multihop_qa_sft-hard-neg-train"
+normalizer_type: "docid"
+# The default MUST be quoted inside the interpolation: OmegaConf's grammar cannot lex a bare
+# '~' and fails with "token recognition error at: '~'" before Hydra even composes the config.
+corpus_path: "${oc.env:MULTIHOP_CORPUS,'~/hf_parquet/multihop_doc_corpus.arrow'}"
+max_neg_docs: null
+min_neg_docs: 2
+prompt_path: null

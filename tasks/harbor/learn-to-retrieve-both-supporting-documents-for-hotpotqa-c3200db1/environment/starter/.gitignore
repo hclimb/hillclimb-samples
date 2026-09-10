@@ -1,0 +1,31 @@
+__pycache__/
+*.py[cod]
+venv/
+data/cache/
+wandb/
+checkpoints/
+checkpoints_embed/
+build/
+*.egg-info/
+trash/
+# Ignore toy data files
+data/Bios/bios-data/
+data/Bios/bios-qa/
+uv.lock
+outputs/
+*.json
+wandb/
+.env
+temp_qa_upload/.claude/
+.claude/
+*.db*
+.env*
+temp_qa_upload/
+temp_cot_upload/
+*.log
+embeddings_cache/
+.codex
+
+# Hillclimb hook files
+/.claude/settings.local.json
+/.claude/settings.local.json.malformed-*

@@ -1,0 +1,25 @@
+defaults:
+  - /eval@eval: generation_large_mem
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: science_qa_synthetic_cot
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: science_docs
+  - _self_
+
+eval:
+  num_samples: 64
+  max_new_tokens: 512
+  metrics:
+    llm_judge_accuracy: {}
+  doc_dataset:
+    max_docs: 1000
+  temperature: 0.0
+dataset:
+  split: validation
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 4
+  num_workers: 0
+  force_thinking: false
+  think_field: null
+  batch_size: 8

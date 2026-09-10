@@ -1,0 +1,5 @@
+model_profile: qwen3_1_7b
+model: Qwen/Qwen3-1.7B-Base
+model_revision: ea980cb0a6c2ae4b936e82123acc929f1cec04c1
+tokenizer: Qwen/Qwen3-1.7B-Base
+tokenizer_revision: ea980cb0a6c2ae4b936e82123acc929f1cec04c1

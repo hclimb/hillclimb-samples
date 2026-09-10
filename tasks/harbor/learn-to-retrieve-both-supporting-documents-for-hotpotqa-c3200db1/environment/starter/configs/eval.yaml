@@ -1,0 +1,11 @@
+defaults:
+  - /eval_set@evals: pretraining
+  - model: qwen3_mem_embed
+  - override hydra/job_logging: disabled
+  - _self_
+
+checkpoint_dir: null  # Optional: specify to load weights from a training checkpoint
+seed: 42
+tp_devices: 1
+use_wandb: true
+aux_losses: {}  # Optional: override aux_loss_config keys from training config

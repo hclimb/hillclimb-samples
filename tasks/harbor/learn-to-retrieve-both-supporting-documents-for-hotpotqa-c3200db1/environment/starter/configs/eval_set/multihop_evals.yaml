@@ -1,0 +1,8 @@
+defaults:
+  - /eval/tasks@gen_large_mem_fanoutqa: gen_large_mem_fanoutqa
+  - _self_
+
+gen_large_mem_fanoutqa:
+  eval:
+    num_samples: 64
+    lookup_chunk_size: 8192

@@ -1,0 +1,6 @@
+{
+  "id": "sb-cA698YvZeAwenrYcAJpdnL",
+  "terminated": true,
+  "wall_seconds": 881.3000540733337,
+  "reason": "Startup infrastructure stalled before any workload execution"
+}

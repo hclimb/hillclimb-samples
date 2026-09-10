@@ -1,0 +1,9 @@
+defaults:
+  - gen_embed_squad_qa
+  - _self_
+
+eval:
+  temperature: 0.0
+
+dataset:
+  force_thinking: false

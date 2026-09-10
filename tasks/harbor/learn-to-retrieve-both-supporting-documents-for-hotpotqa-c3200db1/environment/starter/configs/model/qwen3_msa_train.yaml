@@ -1,0 +1,17 @@
+name: qwen3_msa
+# Fallback trainable set (the staged trainer overrides this per phase). The paper
+# trains all params in both phases; routers are the only architecture-new weights.
+trainable_params: [".*"]
+
+main_model:
+  model_id: Qwen/Qwen3-4B      # stock backbone — routers are initialized fresh
+  load_weights: true
+
+# Stock Qwen3-4B has no HF `msa_config`, so MSA hyperparams come from here.
+msa:
+  router_layers: half          # latter half of layers (paper §3.2.1); or e.g. [18,...,35]
+  pooling_kernel_size: 64
+  top_k_docs: 16
+  infonce_loss_temp: 0.1       # τ in Eq 5
+  router_init: copy            # copy q/k_proj as warm start | normal (std 1/sqrt(D))
+  force_pos_docs: true         # (train-on-short: query attends all its valid doc slots)

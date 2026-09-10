@@ -1,0 +1,6 @@
+# LongHealth multiple-choice questions (400). `pos_doc_ids` are ground truth, taken from each
+# question's `answer_location`, so doc_hit_rate is exact rather than heuristic.
+hf_name: "${oc.env:HF_USERNAME}/longhealth-qa-with-ids"
+split: train
+prompt_path: null
+doc_separator: "\n||||\n"

@@ -1,0 +1,9 @@
+defaults:
+  - /eval/tasks@gen_embed_novelhopqa_hop1: gen_embed_novelhopqa_hop1
+  - _self_
+
+gen_embed_novelhopqa_hop1:
+  eval:
+    num_samples: 32
+
+

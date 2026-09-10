@@ -1,0 +1,48 @@
+defaults:
+  - standard
+
+training_stages:
+  # Stage 0: Train memory + conv projection only, doc access loss + distillation
+  - trainable_params: [".*mem_.*", ".*embed_proj_conv.*"]
+    max_step: 5000
+    ce_weight: 0.0
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+      distillation_loss:
+        weight: 0.0
+        temperature: 1.0
+
+  # Stage 1: Unfreeze embed model, doc access + distillation
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: 10000
+    ce_weight: 0.0
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+      distillation_loss:
+        weight: 0.0
+        temperature: 1.0
+
+  # Stage 2: Add CE loss alongside distillation
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: 15000
+    ce_weight: 0.0
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+      distillation_loss:
+        weight: 1.0
+        temperature: 1.0
+
+  # Stage 3: Fine-tune with cosine decay LR, include memory layer's main model layer
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*main_model.*14.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 0.0
+    lr_schedule: cosine
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+      distillation_loss:
+        weight: 1.0
+        temperature: 1.0

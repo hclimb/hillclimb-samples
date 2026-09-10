@@ -1,0 +1,6 @@
+hf_name: "ragrawal36/BRIGHT-synthetic-QA"
+field_map: {"answer": "synthetic_answer"}
+think_field: "think"
+teacher_prompt_path: null
+student_prompt_path: null
+prompt_path: null

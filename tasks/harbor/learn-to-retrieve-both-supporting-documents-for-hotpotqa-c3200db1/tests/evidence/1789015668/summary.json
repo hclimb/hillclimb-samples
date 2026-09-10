@@ -1,0 +1,148 @@
+{
+  "reward_definition": "Fresh runs under human-2: (C-0.446)/(1-0.446); not recomputed historical rewards",
+  "checks": {
+    "self_test": 0,
+    "private_labels_denied": true,
+    "control_weights": 0,
+    "public_help": 0,
+    "check_weights": 0,
+    "smoke": 0,
+    "public_candidate_only": 0,
+    "install_reference": 0,
+    "public_paired": 0,
+    "private_paired": 0
+  },
+  "measurements": {
+    "public_candidate_only": {
+      "score": {
+        "valid": 1,
+        "diagnostic_only": 0,
+        "C": 0.4473084751630653,
+        "R": 0.0023618685253886545
+      },
+      "candidate": {
+        "ndcg_at10": 0.4473084751630653,
+        "both_supports_at2": 0.08821614583333333,
+        "slices": {
+          "bridge": {
+            "count": 2467,
+            "ndcg_at10": 0.38995611756567405,
+            "both_supports_at2": 0.05715443858937981
+          },
+          "comparison": {
+            "count": 605,
+            "ndcg_at10": 0.6811733779610385,
+            "both_supports_at2": 0.21487603305785125
+          }
+        },
+        "phase_seconds": {
+          "training": 123.42381168699998,
+          "retrieval": 31.76102208200001
+        }
+      }
+    },
+    "public_paired": {
+      "score": {
+        "valid": 1,
+        "diagnostic_only": 0,
+        "C": 0.5036661771241525,
+        "R": 0.10409057242626805,
+        "B": 0.4473084751630653
+      },
+      "baseline": {
+        "ndcg_at10": 0.4473084751630653,
+        "both_supports_at2": 0.08821614583333333,
+        "slices": {
+          "bridge": {
+            "count": 2467,
+            "ndcg_at10": 0.38995611756567405,
+            "both_supports_at2": 0.05715443858937981
+          },
+          "comparison": {
+            "count": 605,
+            "ndcg_at10": 0.6811733779610385,
+            "both_supports_at2": 0.21487603305785125
+          }
+        },
+        "phase_seconds": {
+          "training": 120.89318856600002,
+          "retrieval": 31.621280189000004
+        }
+      },
+      "candidate": {
+        "ndcg_at10": 0.5036661771241525,
+        "both_supports_at2": 0.11458333333333333,
+        "slices": {
+          "bridge": {
+            "count": 2467,
+            "ndcg_at10": 0.44668992022212467,
+            "both_supports_at2": 0.07580056749087961
+          },
+          "comparison": {
+            "count": 605,
+            "ndcg_at10": 0.735997459400705,
+            "both_supports_at2": 0.2727272727272727
+          }
+        },
+        "phase_seconds": {
+          "training": 124.20424091299995,
+          "retrieval": 31.80447264600008
+        }
+      }
+    },
+    "private_paired": {
+      "score": {
+        "valid": 1,
+        "reward": 0.126115124533209,
+        "baseline_ndcg": 0.4610020179916334,
+        "ndcg_at10": 0.5158677789913978
+      },
+      "baseline": {
+        "ndcg_at10": 0.4610020179916334,
+        "both_supports_at2": 0.09993489583333333,
+        "slices": {
+          "bridge": {
+            "count": 2467,
+            "ndcg_at10": 0.40625762756636097,
+            "both_supports_at2": 0.06931495743818403
+          },
+          "comparison": {
+            "count": 605,
+            "ndcg_at10": 0.6842324496927226,
+            "both_supports_at2": 0.22479338842975208
+          }
+        },
+        "phase_seconds": {
+          "training": 120.59341561299993,
+          "retrieval": 31.969755166000027
+        }
+      },
+      "candidate": {
+        "ndcg_at10": 0.5158677789913978,
+        "both_supports_at2": 0.1201171875,
+        "slices": {
+          "bridge": {
+            "count": 2467,
+            "ndcg_at10": 0.46147022771236645,
+            "both_supports_at2": 0.08269152817186867
+          },
+          "comparison": {
+            "count": 605,
+            "ndcg_at10": 0.7376839095788099,
+            "both_supports_at2": 0.2727272727272727
+          }
+        },
+        "phase_seconds": {
+          "training": 122.77688000199998,
+          "retrieval": 31.882648568000036
+        }
+      }
+    }
+  },
+  "hardware": "name, uuid, memory.total [MiB], driver_version\nNVIDIA H200, GPU-72abb9c4-2692-b157-f4d7-f0fd77368584, 143771 MiB, 580.95.05\nNVIDIA H200, GPU-a943ca29-cc3f-48af-226e-13a9827bea94, 143771 MiB, 580.95.05\n",
+  "cleanup": {
+    "id": "sb-ilT3LE6u6ecyPmpPmsaqvG",
+    "terminated": true,
+    "wall_seconds": 862.6209018230438
+  }
+}

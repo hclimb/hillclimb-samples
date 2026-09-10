@@ -1,0 +1,26 @@
+# Independent continuous capped-simplex weights for each layer.
+method: LayerWiseSoftWeighting
+finetuning: Full
+learning_rate: 1.00e-05
+selection_mode: topk
+use_second_order: false
+subset_mode: one_pass
+
+scoring:
+  method: reduced_ghost
+
+optimizer:
+  type: adamw
+
+optimizer_aware:
+  target_mode: opta
+  matrix_geometry: auto
+  vector_geometry: adamw
+
+soft_weighting:
+  steps: 20
+  lr: 0.1
+  tol: 1e-5
+  patience: 3
+  gamma: 0.0
+  use_optimizer_state: true

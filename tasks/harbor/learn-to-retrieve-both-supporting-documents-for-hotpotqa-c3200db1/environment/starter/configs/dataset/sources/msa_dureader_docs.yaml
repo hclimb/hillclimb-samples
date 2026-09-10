@@ -1,0 +1,3 @@
+hf_name: "${oc.env:HF_USERNAME}/msa-dureader-docs-with-ids"
+split: train
+column: text

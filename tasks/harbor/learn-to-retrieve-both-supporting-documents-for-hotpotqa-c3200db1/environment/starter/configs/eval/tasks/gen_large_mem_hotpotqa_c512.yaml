@@ -1,0 +1,37 @@
+# HotpotQA corpus eval @ 512 docs for the hard-neg (think) run. Reports llm_judge_accuracy +
+# lexical_grounding + mem_pos_weight_mass + doc_access_acc/doc_hit_rate/doc_token_hit_rate.
+# Corpus sizing: see gen_large_mem_msmarco_c512.yaml (max_docs=null for a full gold scan;
+# target_docs trims the bank to 512 = all query golds + distractors).
+defaults:
+  - /eval@eval: generation_large_mem
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: msa_hotpotqa_qa
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: msa_hotpotqa_docs
+  - _self_
+
+eval:
+  num_samples: 128
+  output_file: outputs/hotpotqa_c512.json
+  max_new_tokens: 512
+  doc_access_acc: true
+  inject_query_gold: true
+  metrics:
+    llm_judge_accuracy: {}
+    lexical_grounding: {}
+  doc_dataset:
+    max_docs: null
+    target_docs: 512
+    max_chunks_per_doc: 1
+    chunk_size: 256
+
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 1
+  num_workers: 0
+  force_thinking: true
+  provide_docs: true
+  batch_size: 8
+  shuffle: false

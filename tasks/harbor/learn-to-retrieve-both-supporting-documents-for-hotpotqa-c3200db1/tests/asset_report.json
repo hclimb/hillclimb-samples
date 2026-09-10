@@ -1,0 +1,53 @@
+{
+  "train": {
+    "questions": 16384,
+    "paragraphs": 200000,
+    "hashes": {
+      "corpus.jsonl": "520181e47bf97389f11eaa97e38537478ec82e6f12db36d6ce6e43cd67a15418",
+      "questions.jsonl": "1e0b7b024f38bf0aca26e0a6f7de3999be35c96b5edd48fdb6404cc94ae890ec"
+    },
+    "unchanged_membership": true
+  },
+  "public": {
+    "questions": 3072,
+    "paragraphs": 60000,
+    "hashes": {
+      "corpus.jsonl": "edac3b8214a95eb382531fe52c5420aae45fbaf6837a03472e2b8d919c9e079a",
+      "queries.jsonl": "c33688259366543dfd6ff859fd015b3a41517cadba40b5fce3f34494aa449f36",
+      "gold.jsonl": "ccf702b33a81bfe12261d4850a10ab0657d733d68b927e21e4b67089d06493dc",
+      "slices.jsonl": "0fa1d7cd66edda5f78f683e742d4e08b62debf2adcc10ab03ccbdb891520cff4"
+    },
+    "unchanged_membership": true
+  },
+  "private": {
+    "questions": 3072,
+    "paragraphs": 60000,
+    "hashes": {
+      "corpus.jsonl": "328182bb9ceb698d693c771b7309a32447f0385c99fa8d397a1d7a4b09c8456c",
+      "queries.jsonl": "2703e7481fa9682cae6a21ef7dd28fad84ed9b44eb980c3596c55c1bce9370d6",
+      "gold.jsonl": "21d9c1e35c3b98df3d49c169a95ba592d6b6359925bd08d0137752a29a2cc9c9",
+      "slices.jsonl": "9dbb470d30dc6bd1d99483f80aa8a0eda3f6b6555c3f6fb96ed7654ded7602a4"
+    },
+    "unchanged_membership": true
+  },
+  "model": {
+    "config.json": "508e1f01aae55d73355cbdd82609be2f43ba5a0d3428837adbe56cf8391f8b39",
+    "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+    "model.safetensors": "7fb69ad9f6866d8983183c930e33828f326470bf6ad8bbb2ad4ed957a92e9414",
+    "README.md": "d13a54d652a2a54fbbc50e063b465fb273295870867821e1b06baba1d49d68a9"
+  },
+  "overlap_paragraphs": {
+    "train/public": 24389,
+    "train/private": 24117,
+    "public/private": 9300
+  },
+  "exclusions": {
+    "exclusions": {
+      "malformed": 921,
+      "duplicate_question": 8
+    },
+    "eligible_training": 87761,
+    "training_groups_excluded": 1818,
+    "partition": "unchanged SHA256(1729:validation:partition:min_original_group_id) mod 2"
+  }
+}

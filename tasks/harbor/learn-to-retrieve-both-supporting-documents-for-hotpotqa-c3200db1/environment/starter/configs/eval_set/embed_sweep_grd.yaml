@@ -1,0 +1,6 @@
+# Corpus-size sweep eval-set (grounding-only) over the 3 datasets. max_docs is set per-run on CLI.
+defaults:
+  - /eval/tasks@gen_large_mem_msmarco:  gen_large_mem_msmarco_grd
+  - /eval/tasks@gen_large_mem_hotpotqa: gen_large_mem_hotpotqa_grd
+  - /eval/tasks@gen_large_mem_musique:  gen_large_mem_musique_grd
+  - _self_

@@ -1,0 +1,8 @@
+name: generation_embed
+type: generation_embed
+output_file: gen_embed_results.json
+max_new_tokens: 16
+temperature: 0.6
+top_k: 20
+top_p: 0.95
+num_samples: 32

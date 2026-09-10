@@ -1,0 +1,7 @@
+# Empty eval set: no in-loop evaluators. Used by the grounding recipe (staged_ground) because
+# judged-QA accuracy comes from dedicated always-on eval boxes, not in-training eval. Keeping
+# trainer.evals empty means the trainer skips constructing eval datasets at init
+# (trainer/trainer.py:82), avoiding the HF 429 storm + wasted memory of loading eval datasets
+# on every training launch.
+defaults:
+  - _self_

@@ -1,0 +1,3 @@
+Answer the following question about "{book_name}".
+
+{question}

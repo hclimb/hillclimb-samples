@@ -1,0 +1,16 @@
+defaults:
+  - /eval@eval: generation_base
+  - _self_
+
+eval:
+  vllm_model: Qwen/Qwen3-4B
+  num_samples: 8
+  max_new_tokens: 2048
+  temperature: 0.6
+  metrics:
+    llm_judge_accuracy: {}
+
+dataset:
+  hf_name: ragrawal36/fanoutqa
+  split: train
+  field_map: null

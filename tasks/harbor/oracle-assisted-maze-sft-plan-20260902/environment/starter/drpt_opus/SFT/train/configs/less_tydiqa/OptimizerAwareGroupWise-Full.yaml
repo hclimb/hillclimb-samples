@@ -1,0 +1,20 @@
+# Optimizer-aware group-wise data regularization with full-parameter fine-tuning
+method: OptimizerAwareGroupWise
+finetuning: Full
+learning_rate: 1.00e-05
+
+scoring:
+  method: reduced_ghost
+
+optimizer:
+  type: adamw
+
+optimizer_aware:
+  matrix_geometry: muon
+  vector_geometry: adamw
+  muon_reference: momentum_proxy
+  muon_momentum: 0.95
+  muon_steps: 5
+  muon_lr_shape_scale: true
+  lora_optimizer: adamw
+  spectral_lambda: 0.0

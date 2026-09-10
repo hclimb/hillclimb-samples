@@ -1,0 +1,46 @@
+# For warm-starting train_multihop_ground4layer_s1warmstart_no_multihop.sh's checkpoint onto
+# multihop_hard_neg_full. Two stages, both over the full mem_/embed_model/value_model trainable
+# set (no separate mem-only stage: the warm-start checkpoint already did that wiring during its
+# own ground_s1_zeroinit_4layer_no_multihop training) --
+#
+#   1. (0 -> 5000)      doc-access-focused warmup: ce_weight down to 0.1, doc_access_per_query_loss
+#                        up to 1.0, to push hard on retrieval quality against the harder
+#                        multihop_hard_neg_full distribution before CE starts competing for
+#                        gradient again.
+#   2. (5000 -> steps)  staged_ground_batched_isolation's normal stage 2, verbatim: ce_weight back
+#                        to 1.0, doc_access_per_query_loss back down to 0.1.
+#
+# List overrides replace wholesale in OmegaConf, so stage 2 repeats staged_ground_batched_isolation
+# stage 2's fields verbatim rather than diffing against it.
+defaults:
+  - staged_ground_batched_isolation
+  - _self_
+
+training_stages:
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*value_model.*"]
+    max_step: 5000
+    ce_weight: 0.1
+    learning_rate: 2e-4
+    lr_schedule: cosine
+    warmup_frac: 0.005
+    aux_losses:
+      doc_access_loss:
+        enabled: false
+      doc_access_per_query_loss:
+        enabled: true
+        weight: 1.0
+        temperature: 1.0
+
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*value_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    learning_rate: 2e-4
+    lr_schedule: cosine
+    warmup_frac: 0.005
+    aux_losses:
+      doc_access_loss:
+        enabled: false
+      doc_access_per_query_loss:
+        enabled: true
+        weight: 0.1
+        temperature: 1.0

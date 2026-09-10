@@ -1,0 +1,8 @@
+{
+  "id": "sb-FIaFAcOrPSqNGwErNq4uKI",
+  "started": 1789001595.550553,
+  "gpu": "H200:2",
+  "block_network": true,
+  "mode": "boundary",
+  "image": "im-SsVOSLu1I9TpcWFKJQg481"
+}

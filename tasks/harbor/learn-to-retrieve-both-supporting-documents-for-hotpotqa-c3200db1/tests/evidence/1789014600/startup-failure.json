@@ -1,0 +1,9 @@
+{
+  "sandbox_id": "sb-cA698YvZeAwenrYcAJpdnL",
+  "infrastructure_error": "Modal 1.5.3 command-router TLS handshake failed with SSLCertVerificationError: unable to get local issuer certificate. No exec request reached the workload. The command router uses ssl.create_default_context, whereas the control-plane GRPC connection uses Certifi; the host system CA bundle was insufficient. Retry uses SSL_CERT_FILE pointing to installed Certifi, with certificate verification still enabled.",
+  "observed_seconds_since_creation_request": 881.2155909538269,
+  "poll_exit_status": 137,
+  "workload_started": false,
+  "quality_score": null,
+  "trial_count": 0
+}

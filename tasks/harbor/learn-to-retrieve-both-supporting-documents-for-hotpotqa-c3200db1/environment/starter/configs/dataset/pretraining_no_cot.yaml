@@ -1,0 +1,20 @@
+defaults:
+  - /dataset/sources@sources.science_summarization_no_cot: science_summarization_no_cot
+  - /dataset/sources@sources.science_qa_no_cot: science_qa_no_cot
+  - /dataset/sources@sources.science_doc_completion: science_doc_completion
+  - /dataset/sources@sources.tiny_stories_doc_completion: tiny_stories_doc_completion
+  - /dataset/sources@sources.diverse_qa_no_cot: diverse_qa_no_cot
+  - _self_
+
+name: "qa"
+seq_len: 1024
+doc_chunk_seq_len: 256
+batch_size: 32
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+num_chunks_per_doc: 4
+split: train
+num_workers: 16
+distill: false

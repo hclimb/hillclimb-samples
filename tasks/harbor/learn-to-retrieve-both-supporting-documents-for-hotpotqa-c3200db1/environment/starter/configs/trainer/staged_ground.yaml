@@ -1,0 +1,61 @@
+defaults:
+  - standard
+  # standard.yaml defaults evals to eval_set/standard (which doesn't exist on this branch).
+  # We eval on dedicated boxes, so use the empty eval set: no in-loop evaluators, and the
+  # trainer skips constructing eval datasets at init (avoids the HF 429 storm on every launch).
+  - override /eval_set@evals: none
+
+# Grounding-experiments recipe: 2-stage, MAIN MODEL FROZEN throughout (no 4B unfreeze).
+# Replaces the 4-stage staged_sim: zero-init mem_o_proj subsumes routing warmup, and a
+# frozen main removes the delicate low-LR stage-3 + its resume-boundary hazards. Fewer
+# boundaries = cleaner attribution. See grounding_experiments_plan.md "Training recipe".
+steps: 150000
+checkpoint_interval: 2000
+# In-loop eval OFF: judged-QA accuracy comes from dedicated always-on eval boxes so training
+# stays at full throughput and doesn't fight the LLM-judge vLLM for the TPU (sim-pairs a04fc00).
+eval_interval: 1000000000
+
+# Weight-0 read-channel telemetry (merges with standard.yaml's aux_losses, which already
+# carries doc_access_acc @ weight 0). These log as train/<name> every step and contribute
+# nothing to the gradient. See grounding_experiments_plan.md "Training-time telemetry".
+aux_losses:
+  mem_write_norm: {enabled: true, weight: 0.0}
+  mem_write_ratio: {enabled: true, weight: 0.0}
+  mem_topk_entropy: {enabled: true, weight: 0.0}
+  mem_effective_slots: {enabled: true, weight: 0.0}
+  mem_top1_weight: {enabled: true, weight: 0.0}
+  mem_o_proj_norm: {enabled: true, weight: 0.0}
+  mem_boundary_straddle: {enabled: true, weight: 0.0}
+  mem_pos_weight_mass: {enabled: true, weight: 0.0}
+  mem_hit_rate: {enabled: true, weight: 0.0}
+  mem_head_query_cos: {enabled: true, weight: 0.0}
+  mem_cross_layer_cos: {enabled: true, weight: 0.0}
+  mem_kv_cos: {enabled: true, weight: 0.0}
+  mem_value_anisotropy: {enabled: true, weight: 0.0}
+
+training_stages:
+  # Stage A (0 -> 1000): wire the memory read/route on off-the-shelf embeddings before the
+  # embed model moves. Trainable = memory projections only; embed model(s) frozen.
+  # CE-from-step-0 is safe: frozen main can't collapse to closed-book.
+  - trainable_params: [".*mem_.*"]
+    max_step: 1000
+    ce_weight: 1.0
+    learning_rate: 1e-4
+    warmup_frac: 0.1
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1
+
+  # Stage B (1000 -> 150000): unfreeze embed model(s); main stays frozen.
+  # LR bumped 5e-5 -> 2e-4 (2026-07-04): CE was barely moving at 5e-5. Main is frozen so no 4B
+  # to protect; only the 0.6B embed/value models + memory projections train, which tolerate a
+  # higher LR. .*value_model.* covers the Stage-2 base-LM value model; matches nothing when absent.
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*value_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    learning_rate: 2e-4
+    lr_schedule: cosine
+    warmup_frac: 0.005
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1

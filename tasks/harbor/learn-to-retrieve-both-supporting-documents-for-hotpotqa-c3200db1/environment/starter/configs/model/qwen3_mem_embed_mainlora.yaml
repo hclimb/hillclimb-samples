@@ -1,0 +1,32 @@
+defaults:
+  - qwen3_mem_embed
+  - _self_
+
+# qwen3_mem_embed + LoRA adapters on the MAIN 4B's MLP. Exists because the base config's
+# `main_model` block has NO `lora` key at all (only `embed_model` does), so it cannot be switched
+# on with a `model.main_model.lora.enabled=true` override — Hydra raises
+# `ConfigKeyError: Key 'lora' is not in struct`.
+#
+# Why LoRA here: a FULL unfreeze of the 4B does not fit a v6e. adamw allocates mu/nu for every
+# matched param, so unfreezing costs ~32 GB/chip against v6e's ~31 GB — over by ~1 GB, at any
+# batch size (wiki/training/optimizer.md). Adapters are matched instead of the base, so optimizer
+# state drops to megabytes.
+#
+# ⚠️ NOT equivalent to a full unfreeze. Capacity is confined to a rank-R update of the MLPs;
+# ATTENTION STAYS FROZEN. Report results as LoRA, never as "main model unfrozen".
+#
+# rank/alpha 16/32 follow qwen3_mem_embed_copyinit_lora.yaml. MLP-only (gate/up/down_proj) matches
+# that precedent too. LoRA B is zero-init, so the branch starts as an exact no-op — a checkpoint
+# resumed under this config is numerically unchanged on its first step.
+#
+# `trainable_params` here is the fallback used when no training_stages are configured; a staged run
+# takes its mask from the stage instead (see staged_ground_mainunfreeze.yaml stage C, which the run
+# script overrides to the same _a_proj/_b_proj patterns under LORA=1).
+trainable_params: [".*mem_.*", ".*embed_model.*", ".*value_model.*", ".*main_model.*_a_proj", ".*main_model.*_b_proj"]
+
+main_model:
+  lora:
+    enabled: true
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]
+    rank: 16
+    alpha: 32

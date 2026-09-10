@@ -1,0 +1,7 @@
+defaults:
+  - gen_embed_science_qa
+  - override /dataset/sources@dataset: science_qa_synthetic_cot
+  - _self_
+
+dataset:
+  seq_len: 512

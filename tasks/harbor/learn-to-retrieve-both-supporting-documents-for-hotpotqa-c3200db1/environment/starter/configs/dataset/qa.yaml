@@ -1,0 +1,13 @@
+name: "qa"
+seq_len: 512
+doc_chunk_seq_len: 256
+batch_size: 32
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+num_chunks_per_doc: 4
+split: train
+num_workers: 16
+distill: false
+hf_name: ""

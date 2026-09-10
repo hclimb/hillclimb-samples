@@ -1,0 +1,3 @@
+hf_name: "${oc.env:HF_USERNAME}/msa-musique-docs-with-ids"
+split: train
+column: text

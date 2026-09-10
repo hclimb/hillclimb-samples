@@ -1,0 +1,7 @@
+defaults:
+  - nll_diverse_qa
+  - override /dataset/sources@dataset: diverse_qa_no_cot
+  - _self_
+
+eval:
+  eval_steps: 20

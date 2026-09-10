@@ -1,0 +1,11 @@
+usage: run.py [-h] [--submission SUBMISSION] [--output OUTPUT] [--paired]
+              [--smoke] [--seed SEED] [--check-weights CHECK_WEIGHTS]
+
+options:
+  -h, --help            show this help message and exit
+  --submission SUBMISSION
+  --output OUTPUT
+  --paired
+  --smoke
+  --seed SEED
+  --check-weights CHECK_WEIGHTS

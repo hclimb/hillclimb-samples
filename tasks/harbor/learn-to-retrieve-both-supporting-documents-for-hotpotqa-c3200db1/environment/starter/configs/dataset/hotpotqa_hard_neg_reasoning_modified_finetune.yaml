@@ -1,0 +1,27 @@
+# Standalone finetune set: vm2825/hotpotqa-hard-neg-reasoning-embedding-modified-SFT-4B-parts-0-1
+# on its own (78,755 rows, 1 pos_doc + 3 neg_docs/row) -- for warm-starting the hard-neg-think 4B
+# checkpoint (see scripts/embed/train_hotpotqa_hard_neg_reasoning_finetune.sh) rather than folding
+# it into the general qa_hard_neg_think_sft4b mix, same standalone-source pattern as
+# musique_sft.yaml / multihop_qa_sft_midtraining.yaml.
+#
+# seq_len/doc_chunk_seq_len/num_chunks_per_doc/batch_size match qa_hard_neg_think_sft4b.yaml (the
+# config that produced the checkpoint this is meant to warm-start) rather than being re-tuned for
+# this dataset's shorter per-row doc count (1 pos + 3 negs vs. up to a mixed source's larger
+# pool) -- keeps the memory-bank shape identical to the run that produced the checkpoint.
+defaults:
+  - /dataset/sources@sources.hotpotqa_hard_neg_reasoning_modified: hotpotqa_hard_neg_reasoning_modified
+  - _self_
+
+name: "qa"
+seq_len: 512
+doc_chunk_seq_len: 256
+num_chunks_per_doc: 16
+batch_size: 16
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+split: train
+num_workers: 16
+distill: false
+shuffle_seed: 42

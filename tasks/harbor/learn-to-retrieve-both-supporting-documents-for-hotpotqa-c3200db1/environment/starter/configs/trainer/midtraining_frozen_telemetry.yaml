@@ -1,0 +1,25 @@
+# `midtraining_telemetry`, but with the MAIN MODEL FROZEN.
+#
+# For checkpoints from the grounding line (staged_ground: "2 stages, main frozen throughout"),
+# whose Qwen3-4B is pristine. Two reasons not to reuse midtraining_telemetry there:
+#
+#   1. It unfreezes main layers 13/14/15, chosen as the neighbourhood of the single memory layer
+#      at 14. A 4-layer model (mem_layers [9,14,20,27]) has no such neighbourhood — 13/14/15 is
+#      arbitrary, covering one memory layer and ignoring three.
+#   2. Those checkpoints never trained the main model at all, so unfreezing it mid-finetune
+#      changes the regime the model was built under rather than continuing it.
+#
+# Everything else matches midtraining_telemetry: one cosine stage, ce_weight 1.0,
+# doc_access_loss at 0.1, and the weight-0 read-channel telemetry block.
+defaults:
+  - midtraining_telemetry
+  - _self_
+
+training_stages:
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: cosine
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1

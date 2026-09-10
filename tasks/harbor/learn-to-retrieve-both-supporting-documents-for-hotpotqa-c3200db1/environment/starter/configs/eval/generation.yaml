@@ -1,0 +1,10 @@
+name: generation
+type: generation
+output_file: "generations.json"
+max_new_tokens: 64
+temperature: 0
+top_k: 20
+top_p: 0.8
+num_examples: 10
+input_mode: "chat" # ["chat", "raw"]
+prompt_template: null # Optional, e.g. "Complete this: {text}"

@@ -1,0 +1,31 @@
+# Shared subset scored only by Muon-managed 2D matrix parameters.
+# Official torch.optim.Muon updates eligible hidden 2D weights; official AdamW
+# handles embeddings, norms, heads, biases, and other unsupported parameters.
+# The local Muon implementation is used only if official Muon is unavailable or
+# incompatible.
+method: GlobalMuonMatrixSpectral
+finetuning: Full
+learning_rate: 1.00e-05
+selection_mode: topk
+use_second_order: false
+subset_mode: one_pass
+
+scoring:
+  method: reduced_ghost
+
+optimizer:
+  type: muon
+
+optimizer_aware:
+  target_mode: opta
+  matrix_geometry: auto
+  vector_geometry: adamw
+
+muon_surrogate:
+  include_adamw_scores: false
+  alpha: 1.0
+  rank: 32
+  full_svd_max_dim: 256
+  rtol: 1e-6
+  oversample: 8
+  power_iters: 2

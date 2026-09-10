@@ -1,0 +1,9 @@
+{
+  "schema_v3_valid": true,
+  "required_paths_exist": true,
+  "python_syntax_valid": true,
+  "authored_python_under_300_lines": true,
+  "public_closure_identical": true,
+  "frozen_starter_identical": true,
+  "final_code_matches_gpu_boundary_snapshot": true
+}

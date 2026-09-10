@@ -1,0 +1,33 @@
+# DEBUG ONLY — stage 3's settings applied from step 0.
+#
+# Why this exists: the stage-3 NaN only appears once main_model is trainable, which the real
+# `staged` recipe reaches at step 15000. Reproducing it by resuming and replaying to 15000 costs
+# ~2h, because `trainer.resume_from=<dir>/<step>` is a WARM START — it loads the weights but the
+# step counter restarts at 0, so get_current_stage_idx() puts you back in stage 0. (A full resume
+# that restores the step wants the model DIRECTORY with no step — and then also fast-forwards the
+# dataloader, which the runbook flags as untested under offline-parquet.)
+#
+# So instead: warm-start the pre/post-NaN weights and make step 0 ALREADY be stage 3. One stage,
+# copied verbatim from staged.yaml's stage 3 (index 3) — trainable set, ce_weight, cosine+warmup,
+# doc_access_loss weight. OmegaConf replaces the training_stages list wholesale, so this is the
+# only stage.
+#
+# Inherits staged_telemetry, so the weight-0 read-channel block + the disjoint
+# grad_norm_{main_core,main_mem,embed_core,embed_mem} telemetry come along — those are what
+# localize the NaN to a subsystem.
+#
+#   RESUME_FROM=gs://.../qwen3_mem_embed/16000 bash scripts/embed/debug_stage3_nan.sh
+defaults:
+  - staged_telemetry
+  - _self_
+
+training_stages:
+  # Verbatim staged.yaml stage 3 ("Fine-tune with cosine decay LR").
+  - trainable_params: [".*mem_.*", ".*embed_model.*", ".*main_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: cosine
+    warmup_frac: 0.1
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1

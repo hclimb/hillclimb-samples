@@ -1,0 +1,6 @@
+defaults:
+  - nll_novelhopqa_hop1
+  - _self_
+
+dataset:
+  split: hop_2

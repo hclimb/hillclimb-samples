@@ -1,0 +1,4 @@
+defaults:
+  - /eval/tasks@nll_science_qa_no_cot: nll_science_qa_no_cot
+  - /eval/tasks@gen_embed_science_qa_no_cot: gen_embed_science_qa_no_cot
+  - _self_

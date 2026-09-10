@@ -1,0 +1,91 @@
+{
+  "release_ready": false,
+  "status": "Standard pipeline compilation, 24 packaged Linux tests, GPU public/private boundary checks and two short independent solver trials passed. Published as the BERT-Tiny revision of the existing HotpotQA task; manual checkpoint prompts removed. Full one-hour and automated release qualification remain uncompleted.",
+  "current_reward_definition": "Valid: (candidate_ndcg-0.446)/(1-0.446), identical on public/private, without clipping or flooring. Invalid: 0. Measured baseline is diagnostic only; infrastructure failures propagate as errors.",
+  "historical_reward_definition": "The unchanged final_paired_public and final_paired_private records below predate human-2 and retain (1-B)/max(1-C,0.01). They are not recomputed fixed-anchor rewards.",
+  "checks": {
+    "schema_v3": "passed jsonschema validation against task/build-plan.schema.json",
+    "required_paths": "passed",
+    "asset_counts_hashes_and_joins": "passed for every packaged row",
+    "public_dependency_closure": "byte-identical to trusted helper sources and declared once via evaluator.public_tests_dir; duplicate overlay removed",
+    "cpu_self_tests": "22 passed in 6.710 seconds with no skips; evidence/attempt6-self-test.log. Exact self_test_command runs with python3 but no python on PATH. Includes generated-launcher isolation, numeric negative reward writing, infrastructure errors and fixed-anchor paired/candidate-only parity across baseline and candidate endpoints.",
+    "repair_static_checks": "evidence/attempt6-static-checks.json: schema, required paths, pinned repository boundary, syntax, 22-file public allowlist and identical public/trusted helpers pass. Staged compiled solver files match the updated draft. Attempt 4 structural acceptance remains; a fresh compiler invocation is unavailable locally.",
+    "repair_public_file_view": "evidence/1789015668: original compiled Dockerfile, copied generated solver tree updated only with declared draft changes. All four exact documented public commands plus help pass as UID 65534, which cannot read evaluator/reference paths. Public dependency closure is complete; no CPU proxy.",
+    "generated_launcher": "Actual /tests/test.sh executes private paired training/inference and numeric writing on Linux H200s. Its build-time adapter is idempotent and rejects unknown output. Host and Linux tests retain hostile startup modules, negative/invalid numeric reporting and infrastructure errors without reward.json.",
+    "compiled_linux_self_tests": "22 passed in 23.621 seconds without skips; evidence/1789015668/reports/self_test.log",
+    "public_smoke": "passed from the packaged solver-visible file view",
+    "public_weights_check": "passed from the packaged solver-visible file view",
+    "public_candidate_only": "Fresh starter nDCG 0.4473084751630653; fixed-anchor R 0.0023618685253886545",
+    "public_paired": "Fresh reference nDCG 0.5036661771241525; fixed-anchor R 0.10409057242626805",
+    "private_paired": "Fresh reference nDCG 0.5158677789913978; fixed-anchor R 0.126115124533209. No private-data tuning",
+    "private_label_permissions": "unprivileged training UID denied access",
+    "owned_sandboxes": "All six stopped. Attempt 6 first hit host CA verification failure before exec; retry uses installed Certifi via SSL_CERT_FILE without disabling TLS verification. See evidence/1789014600 and evidence/1789015668; charges.json tracks both."
+  },
+  "public_repeated_seeds": {
+    "evidence": "evidence/1789000716/measurements.json",
+    "seeds": [
+      1729,
+      2027,
+      4093
+    ],
+    "unadapted_control_ndcg": 0.1874132460052403,
+    "starter_ndcg": [
+      0.4473084751630653,
+      0.4462740254506628,
+      0.44528236500925805
+    ],
+    "reference_ndcg": [
+      0.5038652441449583,
+      0.5103525207687316,
+      0.5112121465745426
+    ],
+    "starter_mean": 0.4462882885409954,
+    "starter_sample_stdev": 0.0010131303793932973,
+    "reference_mean": 0.5084766371627442,
+    "reference_sample_stdev": 0.004016646400278158,
+    "mean_paired_gain": 0.06218834862174877,
+    "paired_gain_sample_stdev": 0.004964154723848926,
+    "all_paired_gains_positive": true,
+    "starter_mean_both_supports_at2": 0.09125434027777778,
+    "reference_mean_both_supports_at2": 0.12000868055555555
+  },
+  "final_paired_public": {
+    "valid": 1,
+    "baseline_ndcg": 0.4473084751630653,
+    "candidate_ndcg": 0.5042011673929192,
+    "reward": 1.1147495485834296
+  },
+  "final_paired_private": {
+    "evidence": "evidence/1789001595/boundary.json",
+    "valid": 1,
+    "baseline_ndcg": 0.4610020179916334,
+    "candidate_ndcg": 0.5152942739301896,
+    "reward": 1.112010758318825,
+    "baseline_both_supports_at2": 0.09993489583333333,
+    "candidate_both_supports_at2": 0.12076822916666667,
+    "baseline_training_seconds": 171.69845739,
+    "baseline_retrieval_seconds": 39.94387294599994,
+    "candidate_training_seconds": 172.87979491400006,
+    "candidate_retrieval_seconds": 38.78323876700006
+  },
+  "interpretation": "Training materially improves this fixed Tiny representation; self-mined negatives add gains well above observed seed variation. This does not establish success for independent one-hour solvers or prevent memorization. No old Qwen/E5/MiniLM results were used as Tiny evidence.",
+  "latest_packaged_evidence": "evidence/1789015668/summary.json contains fresh fixed-anchor scores, raw nDCG, both-supports@2, bridge/comparison slices, phase times, hardware and cleanup. Training took 120.59-124.20 seconds; retrieval 31.62-31.97 seconds. These are not historical rewards recomputed with a new formula.",
+  "remaining_gates": [
+    "Full one-hour research-depth and automated release qualification were not part of the requested short pathway checks."
+  ],
+  "repaired_failures": [
+    "Offline torchrun standalone rendezvous tried to resolve the sandbox hostname. Explicit static loopback rendezvous fixes startup.",
+    "Distributed buffer broadcasts between the document and query forwards mutated BERT position-ID buffers. Disabling broadcast_buffers preserves the shared encoder gradient graph.",
+    "Modal's retired sandbox file API could not download early logs. The build utility now archives and transfers reports before unconditional sandbox termination."
+  ],
+  "current_checkpoint_revision": {
+    "evidence": "internal/qualification/checkpoints-2026-09-10/summary.json",
+    "astra_private_ndcg": 0.5789564759666296,
+    "astra_private_reward": 0.23999363892893422,
+    "fable_private_ndcg": 0.4908809830541307,
+    "fable_private_reward": 0.08101260479084961,
+    "public_archives_restored": 8,
+    "exact_weight_hashes_verified": true,
+    "all_owned_sandboxes_terminated": true
+  }
+}

@@ -1,0 +1,41 @@
+# DEBUG ONLY — bisect probe for the stage-3 NaN.
+#
+# Everything about this is stage 3 EXCEPT trainable_params, which is the literal ["all"].
+# That matters because setup_optimizer_for_stage takes an EARLY RETURN on "all":
+#
+#     if "all" in trainable_patterns:
+#         return optax.chain(clip_by_global_norm, adamw), model, lr   # <- no freeze, no forward rebuild
+#
+# So ["all"] and stage 3 both make main_model trainable, but they differ in the two things that
+# are jit static_argnames (and therefore force a recompile of _train_step):
+#
+#                     main trainable | optax.freeze wrapper | model.forward rebuilt
+#   stage 3 [.*main.*]      yes      |   yes (all-False mask)|   yes (partial w/ new_cfg)
+#   ["all"]                 yes      |   no                  |   no
+#
+# By code reading, grads = f(weights, batch, forward) cannot depend on any of this — the NaN guard
+# reads RAW grads (optax.global_norm(grads)) before optimizer.update ever runs. But empirically
+# stage2 is clean and stage3 NaNs on identical weights AND identical batches (0/20 vs 7/20, at BOTH
+# ckpt 14000 and ckpt 16000). So one of those assumptions is false. This probe splits them:
+#
+#   ["all"] NaNs  => "main_model is trainable" is the trigger, independent of freeze/forward-rebuild.
+#   ["all"] clean => the freeze wrapper and/or the forward rebuild is the trigger — i.e. a recompile
+#                    with a different consumer graph changes the BACKWARD's numerics. Then bisect
+#                    those two apart next.
+#
+# Pair it with the stage2/stage3 arms at the same ckpt and LR:
+#   RESUME_FROM=gs://.../qwen3_mem_embed/16000 LR=1e-12 bash scripts/embed/debug_stage_control.sh
+defaults:
+  - staged_telemetry
+  - _self_
+
+training_stages:
+  # staged.yaml stage 3, with trainable_params replaced by the literal "all".
+  - trainable_params: ["all"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: cosine
+    warmup_frac: 0.1
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1

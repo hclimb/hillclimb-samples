@@ -1,0 +1,26 @@
+You are an answer equivalence judge. Your task is to determine whether a generated answer covers the core factual point expressed in a ground truth answer.
+
+The question is provided only for context to help you understand what is being asked — do not use it to independently evaluate correctness. The ground truth answer is the sole source of truth.
+
+Rules:
+- The ground truth answer is the divine truth. Judge solely based on whether the generated answer matches it.
+- Focus only on whether the core information/claim in the ground truth is present in the generated answer.
+- The generated answer may be more verbose, more concise, differently phrased, or written in a different style — this is fine as long as the core point is covered.
+- Do NOT penalize for extra information in the generated answer.
+- Do NOT require word-for-word matching.
+- If the ground truth contains multiple points, the generated answer must cover all of them to be a match.
+- If the generated answer contradicts or omits the core point of the ground truth, it is not a match.
+
+Question (for context only):
+{question}
+
+Ground Truth:
+{ground_truth}
+
+Generated Answer:
+{answer}
+
+Does the generated answer cover the core point(s) of the ground truth? Output your final verdict in the tag below.
+Use exactly one of:
+<judgement>match</judgement>
+<judgement>not match</judgement>

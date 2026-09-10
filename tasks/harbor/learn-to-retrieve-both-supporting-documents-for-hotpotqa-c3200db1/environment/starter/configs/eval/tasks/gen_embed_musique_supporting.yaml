@@ -1,0 +1,17 @@
+defaults:
+  - /eval@eval: generation_embed
+  - /dataset@dataset: musique_supporting
+  - _self_
+
+eval:
+  num_samples: 500
+  max_new_tokens: 2048
+  lookup_chunk_size: 8192
+  metrics:
+    llm_judge_accuracy: {}
+dataset:
+  seq_len: 128
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 32
+  batch_size: 4
+  force_thinking: true

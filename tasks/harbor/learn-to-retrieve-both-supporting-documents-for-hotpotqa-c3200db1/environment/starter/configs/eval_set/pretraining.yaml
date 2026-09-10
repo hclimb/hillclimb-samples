@@ -1,0 +1,15 @@
+defaults:
+  - /eval/tasks@nll_science_summarization: nll_science_summarization
+  - /eval/tasks@nll_science_qa: nll_science_qa
+  - /eval/tasks@nll_squad_qa: nll_squad_qa
+  - /eval/tasks@nll_science_doc_completion: nll_science_doc_completion
+  - /eval/tasks@nll_diverse_qa: nll_diverse_qa
+  - /eval/tasks@gen_embed_squad_qa: gen_embed_squad_qa
+  - /eval/tasks@gen_embed_science_summarization: gen_embed_science_summarization
+  - /eval/tasks@gen_embed_science_qa: gen_embed_science_qa
+  - /eval/tasks@gen_embed_science_doc_completion: gen_embed_science_doc_completion
+  - /eval/tasks@gen_embed_diverse_qa: gen_embed_diverse_qa
+  - /eval/tasks@nll_multihop_qa_sft: nll_multihop_qa_sft
+  - /eval/tasks@gen_embed_multihop_qa_sft: gen_embed_multihop_qa_sft
+  - /eval/tasks@swap_logit_delta: swap_logit_delta_combined_hard_neg_pool512
+  - _self_

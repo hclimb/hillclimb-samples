@@ -1,0 +1,2 @@
+array_task	campaign_id	optimizer	setting	train	task	method	seed	status	run_dir	result_file	detail
+8	dolci32k-qwen3_1_7b-s42	adamw	inst_if	instruction_32k	ifeval	LayerwiseOptA	42	already_evaluated	/home/nakyungl/drpt-next/Dr.Post-Training-Next/drpt_opus/SFT/runs/campaigns/dolci32k-qwen3_1_7b-s42/inst_if-LayerwiseOptA-adamw-p1.0-lr1e-5-b16-v64-s42-Qwen3-1.7B-Base	/home/nakyungl/drpt-next/Dr.Post-Training-Next/drpt_opus/SFT/runs/campaigns/dolci32k-qwen3_1_7b-s42/inst_if-LayerwiseOptA-adamw-p1.0-lr1e-5-b16-v64-s42-Qwen3-1.7B-Base/ifeval_results.json	valid result already present

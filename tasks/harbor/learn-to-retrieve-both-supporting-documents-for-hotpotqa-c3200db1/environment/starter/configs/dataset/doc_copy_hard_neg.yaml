@@ -1,0 +1,24 @@
+# Document-copy dataset (removable grounding experiment). Same hard-negative sources + memory
+# bank as qa_hard_neg_think_sft4b, but name=doc_copy -> DocCopyDataset makes the TARGET the positive
+# document (reproduce it from memory) instead of the answer. No CoT (force_thinking: false).
+defaults:
+  - /dataset/sources@sources.science_qa_hard_neg_think: science_qa_hard_neg_think
+  - /dataset/sources@sources.diverse_qa_hard_neg_think: diverse_qa_hard_neg_think
+  - /dataset/sources@sources.combined_hard_neg_sft4b: combined_hard_neg_sft4b
+  - /dataset/sources@sources.multihop_qa_sft: multihop_qa_sft
+  - _self_
+
+name: "doc_copy"
+seq_len: 512
+doc_chunk_seq_len: 256
+batch_size: 16
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+num_chunks_per_doc: 16
+split: train
+num_workers: 16
+distill: false
+force_thinking: false
+shuffle_seed: 42

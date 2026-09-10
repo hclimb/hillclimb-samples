@@ -1,0 +1,6 @@
+name: qwen3
+trainable_params: ["all"]
+
+main_model:
+  model_id: Qwen/Qwen3-0.6B
+  load_weights: true

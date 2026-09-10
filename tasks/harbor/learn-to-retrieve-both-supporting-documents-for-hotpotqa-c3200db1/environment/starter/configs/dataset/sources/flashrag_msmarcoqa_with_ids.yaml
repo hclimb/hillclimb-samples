@@ -1,0 +1,4 @@
+hf_name: "${oc.env:HF_USERNAME}/flashrag-msmarco-qa-with-ids-dev"
+normalizer_type: "flashrag"
+flashrag_context_key: "passages"
+prompt_path: null

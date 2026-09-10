@@ -1,0 +1,10 @@
+defaults:
+  - gen_embed_science_summarization
+  - override /dataset/sources@dataset: science_summarization_no_cot
+  - _self_
+
+eval:
+  temperature: 0.0
+
+dataset:
+  force_thinking: false

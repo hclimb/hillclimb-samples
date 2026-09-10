@@ -1,0 +1,15 @@
+# Grounding-experiments eval suite: the two reference channels on the 3 target datasets
+# (MS MARCO / HotpotQA / MuSiQue), per grounding_experiments_plan.md.
+#   corpus       — full retrieval into the memory layer (gen_large_mem_msa_*)
+#   oracle-memory — memory bank built from each question's gold pos_doc (gen_embed_msa_*_oracle)
+# Run with: python eval.py eval_set=ground_evals checkpoint_dir=gs://... tp_devices=1
+defaults:
+  # --- corpus (full retrieval) ---
+  - /eval/tasks@gen_large_mem_msa_msmarco_v1: gen_large_mem_msa_msmarco_v1
+  - /eval/tasks@gen_large_mem_msa_hotpotqa:   gen_large_mem_msa_hotpotqa
+  - /eval/tasks@gen_large_mem_msa_musique:    gen_large_mem_msa_musique
+  # --- oracle-memory (gold pos_doc only) ---
+  - /eval/tasks@gen_embed_msa_msmarco_oracle: gen_embed_msa_msmarco_oracle
+  - /eval/tasks@gen_embed_msa_hotpotqa_oracle: gen_embed_msa_hotpotqa_oracle
+  - /eval/tasks@gen_embed_msa_musique_oracle:  gen_embed_msa_musique_oracle
+  - _self_

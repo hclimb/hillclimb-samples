@@ -1,0 +1,8 @@
+# Minimal in-training eval set for the msmarco per-query-isolation rerun: ONLY the held-out
+# MS MARCO validation CE (nll on msa-msmarco-v1-qa answer tokens). Cheap, forward-only, so it
+# can run at a fine interval to catch the overfit onset live — the point where train CE keeps
+# falling but val CE turns up. LLM-judge oracle accuracy is NOT computed in-training (the
+# gen_embed evaluators only generate); it's judged offline per checkpoint on the eval box.
+defaults:
+  - /eval/tasks@nll_msa_msmarco_qa: nll_msa_msmarco_qa
+  - _self_

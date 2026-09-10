@@ -1,0 +1,36 @@
+defaults:
+  - /dataset/sources@sources.science_qa_hard_neg_think: science_qa_hard_neg_think
+  - /dataset/sources@sources.diverse_qa_hard_neg_think: diverse_qa_hard_neg_think
+  - /dataset/sources@sources.combined_hard_neg_sft4b: combined_hard_neg_sft4b
+  - /dataset/sources@sources.multihop_qa_sft: multihop_qa_sft
+  - _self_
+
+name: "qa"
+seq_len: 512
+doc_chunk_seq_len: 256
+batch_size: 16
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+num_chunks_per_doc: 16
+split: train
+num_workers: 16
+distill: false
+shuffle_seed: 42
+
+# --- Indexed random-access-by-index path (data_resume rework) ---
+# storage: streaming  -> current HF-IterableDataset+Grain wrapper (default).
+# storage: arrayrecord -> read pre-tokenized ArrayRecord shards via IndexSampler.
+#                         Requires a preprocessed dir at indexed_uri (run
+#                         data/preprocess_arrayrecord.py first). Gives O(1)
+#                         resume and pool-uniform sample ordering.
+storage: streaming
+indexed_uri: ""  # e.g. gs://memory-layers-training/indexed/<config-hash>
+
+# num_epochs is the SAMPLER's upper bound on how many times it can wrap around
+# the sample pool. It is NOT the number of epochs to train — training length is
+# set by trainer.steps. Set generously (10) because IndexSampler pins num_epochs
+# into its checkpoint-validation signature; increasing it mid-run breaks resume.
+# Do not "optimize" this down to match a specific epoch count.
+num_epochs: 10

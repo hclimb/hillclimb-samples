@@ -1,0 +1,4 @@
+name: swap_logit_delta
+type: swap_logit_delta
+output_file: swap_logit_delta_results.json
+eval_steps: null

@@ -1,0 +1,50 @@
+# Doc-copy grounding experiment: Stage-2 architecture (separate KEY/VALUE models, zero-init
+# mem_o_proj, 4 memory layers) but mem_top_k = 4 to force a SHARP read (s2 ran at 128 and the read
+# stayed diffuse: ~32 effective token-slots). Pairs with dataset=doc_copy_hard_neg. Removable
+# experiment — delete with data/doc_copy.py and the other doc_copy configs/scripts.
+name: qwen3_mem_embed
+trainable_params: [".*mem_.*", ".*embed_model.*", ".*value_model.*"]
+
+main_model:
+  model_id: Qwen/Qwen3-4B
+  load_weights: true
+
+memory:
+  mem_layers: [9, 14, 20, 27]
+  mem_size: 16384
+  mem_num_heads: 4
+  mem_k_dim: 1024
+  mem_v_dim: 1024
+  mem_top_k: 4                    # <-- sharp read (vs 128 in s2). Small top_k caps effective_slots.
+  mem_use_product_keys: false
+  mem_placement: "after_attention"
+  mem_use_gating: false
+  mem_lookup_chunk_size: null
+  two_pass_topk: false
+  mem_collect_full_scores: true
+  mem_o_proj_zero_init: true
+  span_window: 0                 # follows s2 (no span). Copy may benefit from span>=1 (next-token
+                                 # neighbor); left at 0 to match s2 exactly per request.
+
+embed_model:
+  model_id: Qwen/Qwen3-Embedding-0.6B
+  load_weights: true
+  lora:
+    enabled: false
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]
+    rank: 256
+    alpha: 256
+  mask_type: 'bidirectional'
+  embed_conv: true
+  embed_conv_kernel_size: 1
+  embed_conv_stride: 1
+
+value_model:
+  model_id: Qwen/Qwen3-0.6B-Base
+  load_weights: true
+  lora:
+    enabled: false
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]
+    rank: 256
+    alpha: 256
+  mask_type: 'bidirectional'

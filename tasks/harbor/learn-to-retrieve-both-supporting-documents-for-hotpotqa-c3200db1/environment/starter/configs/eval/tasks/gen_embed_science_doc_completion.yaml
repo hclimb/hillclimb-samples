@@ -1,0 +1,19 @@
+defaults:
+  - /eval@eval: generation_embed
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: science_doc_completion
+  - _self_
+
+eval:
+  num_samples: 32
+  max_new_tokens: 1024
+  metrics:
+    llm_judge_accuracy: {}
+  temperature: 0.0
+dataset:
+  split: validation
+  seq_len: 1024
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 4
+  num_workers: 0
+  force_thinking: false

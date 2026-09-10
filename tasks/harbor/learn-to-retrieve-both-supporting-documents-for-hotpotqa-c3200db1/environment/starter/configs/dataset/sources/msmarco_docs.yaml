@@ -1,0 +1,3 @@
+hf_name: "${oc.env:HF_USERNAME}/msmarco-qa-positive-passages-dev"
+split: train
+column: text

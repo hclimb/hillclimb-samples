@@ -1,0 +1,39 @@
+defaults:
+  - /eval@eval: generation_large_mem
+  - /dataset@dataset: musique_supporting
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: musique_docs
+  - _self_
+
+eval:
+  num_samples: 100
+  max_new_tokens: 2048
+  metrics:
+    llm_judge_accuracy: {}
+  doc_dataset:
+    max_docs: null
+    max_chunks_per_doc: null
+    chunk_size: 256
+
+# hf_name points to the augmented QA dataset that carries pos_doc_ids, enabling
+# ID-based doc_access_acc without requiring provide_docs=true.
+dataset:
+  hf_name: "${oc.env:HF_USERNAME}/musique-supporting-with-ids-validation"
+  split: train
+  seq_len: 128
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 32
+  batch_size: 16
+  force_thinking: true
+  provide_docs: false
+
+rag:
+  doc_dataset: mihir-1999/musique-docs-validation
+  query_dataset: mihir-1999/musique-supporting
+  query_column: question
+  query_gt_column: answer
+  num_queries: 64
+  gen_model: Qwen/Qwen3-4B
+  gen_tensor_parallel_size: 4
+  judge_model: Qwen/Qwen3-4B
+  judge_tensor_parallel_size: 4

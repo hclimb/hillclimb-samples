@@ -1,0 +1,232 @@
+--- a/native_paged_sparse_prefill/upstreams/FlashMLA/csrc/api/sparse_decode.h
++++ b/native_paged_sparse_prefill/upstreams/FlashMLA/csrc/api/sparse_decode.h
+@@ -381,6 +381,18 @@
+     }
+ 
+     DecodeImplMeta impl_meta = impl->get_meta(h_q, s_q);
++    const bool direct_schedule = arch.is_sm100f() && model_type == ModelType::MODEL1 &&
++        ((!have_topk_length && !have_extra_topk_length) || b >= impl_meta.num_sm_parts);
++    int direct_splits = 1;
++    if (direct_schedule) {
++        if (!have_topk_length && !have_extra_topk_length) {
++            const int tiles = (topk + 63) / 64 + (extra_topk + 63) / 64;
++            direct_splits = std::max(1, std::min((tiles + 3) / 4,
++                (impl_meta.num_sm_parts + b - 1) / b));
++        }
++        impl_meta.num_sm_parts = b * direct_splits;
++    }
++    const bool needs_combine = !direct_schedule || direct_splits > 1;
+ 
+     SparseAttnDecodeParams params = {
+         b, s_q, h_q, h_kv, d_qk, d_v,
+@@ -416,7 +428,7 @@
+ 
+     // Get MLA metadata if necessary
+     at::Tensor o_accum, lse_accum;
+-    if (!tile_scheduler_metadata.has_value()) {
++    if (!direct_schedule && !tile_scheduler_metadata.has_value()) {
+         tile_scheduler_metadata = torch::empty({impl_meta.num_sm_parts, sizeof(DecodingSchedMeta)/4}, opts.dtype(torch::kInt32));
+         num_splits = torch::empty({b+1}, opts.dtype(torch::kInt32));
+         KU_CHECK_CONTIGUOUS(tile_scheduler_metadata);
+@@ -439,6 +451,7 @@
+         smxx::decode::run_get_decoding_sched_meta_kernel(get_sched_meta_params);
+     }
+     // Stick the metadata pointers to `params`
++    if (!direct_schedule) {
+     KU_CHECK_DEVICE(tile_scheduler_metadata);
+     KU_CHECK_DEVICE(num_splits);
+     KU_CHECK_DTYPE(tile_scheduler_metadata, torch::kInt32);
+@@ -449,21 +462,25 @@
+     KU_CHECK_SHAPE(num_splits, b+1);
+     params.tile_scheduler_metadata_ptr = (DecodingSchedMeta*)tile_scheduler_metadata->data_ptr();
+     params.num_splits_ptr = num_splits->data_ptr<int>();
++    } else {
++        params.tile_scheduler_metadata_ptr = nullptr;
++        params.num_splits_ptr = nullptr;
++    }
+     params.num_sm_parts = impl_meta.num_sm_parts;
+ 
+     // Allocate intermediate buffers for split-KV
+-    const int total_num_splits = b + impl_meta.num_sm_parts;
+-    lse_accum = torch::empty({total_num_splits, s_q, h_q}, opts.dtype(at::kFloat));
+-    o_accum = torch::empty({total_num_splits, s_q, h_q, d_v}, opts.dtype(at::kFloat));
+-    KU_CHECK_CONTIGUOUS(lse_accum);
+-    KU_CHECK_CONTIGUOUS(o_accum);
+-    params.lse_accum = lse_accum.data_ptr<float>();
+-    params.o_accum = o_accum.data_ptr<float>();
+-    params.stride_lse_accum_split = int64_stride_to_int(lse_accum.stride(0));
+-    params.stride_lse_accum_s_q = int64_stride_to_int(lse_accum.stride(1));
+-    params.stride_o_accum_split = int64_stride_to_int(o_accum.stride(0));
+-    params.stride_o_accum_s_q = int64_stride_to_int(o_accum.stride(1));
+-    params.stride_o_accum_h_q = int64_stride_to_int(o_accum.stride(2));
++    if (needs_combine) {
++        const int total_num_splits = b + impl_meta.num_sm_parts;
++        lse_accum = torch::empty({total_num_splits, s_q, h_q}, opts.dtype(at::kFloat));
++        o_accum = torch::empty({total_num_splits, s_q, h_q, d_v}, opts.dtype(at::kFloat));
++        params.lse_accum = lse_accum.data_ptr<float>();
++        params.o_accum = o_accum.data_ptr<float>();
++        params.stride_lse_accum_split = int64_stride_to_int(lse_accum.stride(0));
++        params.stride_lse_accum_s_q = int64_stride_to_int(lse_accum.stride(1));
++        params.stride_o_accum_split = int64_stride_to_int(o_accum.stride(0));
++        params.stride_o_accum_s_q = int64_stride_to_int(o_accum.stride(1));
++        params.stride_o_accum_h_q = int64_stride_to_int(o_accum.stride(2));
++    }
+ 
+     impl->run(params, features);
+     
+@@ -487,7 +504,7 @@
+         ku::get_optional_tensor_ptr<float>(attn_sink),
+         at::cuda::getCurrentCUDAStream().stream()
+     };
+-    smxx::decode::run_flash_mla_combine_kernel<bf16>(combine_params);
++    if (needs_combine) smxx::decode::run_flash_mla_combine_kernel<bf16>(combine_params);
+ 
+     delete impl;
+ 
+--- a/native_paged_sparse_prefill/upstreams/FlashMLA/csrc/sm100/direct_schedule.cuh
++++ b/native_paged_sparse_prefill/upstreams/FlashMLA/csrc/sm100/direct_schedule.cuh
+@@ -0,0 +1,38 @@
++#pragma once
++
++#include "params.h"
++#include <kerutils/kerutils.cuh>
++
++namespace sm100 {
++
++__device__ __forceinline__ DecodingSchedMeta load_sparse_schedule(
++    const SparseAttnDecodeParams& params, int partition
++) {
++    DecodingSchedMeta metadata{};
++    if (params.tile_scheduler_metadata_ptr) {
++        KU_LDG_256(params.tile_scheduler_metadata_ptr + partition, &metadata,
++                   ".nc", "no_allocate", "evict_normal", "256B");
++        return metadata;
++    }
++    const int splits = params.num_sm_parts / params.b;
++    const int request = partition / splits;
++    const int split = partition % splits;
++    const int primary = params.topk_length ? __ldg(params.topk_length + request) : params.topk;
++    const int extra = params.extra_topk_length ? __ldg(params.extra_topk_length + request) : params.extra_topk;
++    const int blocks = max((primary + 63) / 64, 1) + (extra + 63) / 64;
++    metadata.begin_req_idx = metadata.end_req_idx = request;
++    metadata.begin_block_idx = blocks * split / splits;
++    metadata.end_block_idx = blocks * (split + 1) / splits;
++    metadata.begin_split_idx = split;
++    metadata.is_first_req_splitted = metadata.is_last_req_splitted = splits > 1;
++    return metadata;
++}
++
++__device__ __forceinline__ int sparse_split_offset(
++    const SparseAttnDecodeParams& params, int request
++) {
++    return params.num_splits_ptr ? __ldg(params.num_splits_ptr + request) :
++        request * (params.num_sm_parts / params.b);
++}
++
++}
+--- a/native_paged_sparse_prefill/upstreams/FlashMLA/csrc/sm100/decode/head64/kernel.cuh
++++ b/native_paged_sparse_prefill/upstreams/FlashMLA/csrc/sm100/decode/head64/kernel.cuh
+@@ -13,6 +13,7 @@
+ #include "sm100/helpers.h"
+ 
+ #include "config.h"
++#include "sm100/direct_schedule.cuh"
+ 
+ namespace sm100::decode::head64 {
+ 
+@@ -77,15 +78,7 @@
+     auto run_main_loop = [&](auto f) {
+         // NOTE Putting the following code outside the warpgroup specialization switch results in register spilling.
+         // [[maybe_unused]] int begin_req_idx, end_req_idx, sched_begin_block_idx, sched_end_block_idx, begin_n_split_idx, is_first_req_splitted, is_last_req_splitted;
+-        DecodingSchedMeta sched_meta;
+-        KU_LDG_256(
+-            params.tile_scheduler_metadata_ptr + partition_idx,
+-            &sched_meta,
+-            ".nc",
+-            "no_allocate",
+-            "evict_normal",
+-            "256B"
+-        );
++        DecodingSchedMeta sched_meta = sm100::load_sparse_schedule(params, partition_idx);
+ 
+         if (sched_meta.begin_req_idx >= params.b) {
+             return;
+@@ -101,7 +94,7 @@
+             int start_block_idx = batch_idx == sched_meta.begin_req_idx ? sched_meta.begin_block_idx : 0;
+             int end_block_idx = batch_idx == sched_meta.end_req_idx ? sched_meta.end_block_idx : total_topk_padded / B_TOPK;
+             bool is_split = batch_idx == sched_meta.begin_req_idx ? sched_meta.is_first_req_splitted : (batch_idx == sched_meta.end_req_idx ? sched_meta.is_last_req_splitted : false);
+-            int n_split_idx = batch_idx == sched_meta.begin_req_idx ? (__ldg(params.num_splits_ptr+batch_idx) + sched_meta.begin_split_idx) : __ldg(params.num_splits_ptr+batch_idx);
++            int n_split_idx = batch_idx == sched_meta.begin_req_idx ? (sm100::sparse_split_offset(params, batch_idx) + sched_meta.begin_split_idx) : sm100::sparse_split_offset(params, batch_idx);
+ 
+             MainLoopArgs args = {
+                 batch_idx, start_block_idx, end_block_idx,
+--- a/native_paged_sparse_prefill/upstreams/FlashMLA/csrc/sm100/prefill/sparse/fwd_for_small_topk/head128/phase1.cuh
++++ b/native_paged_sparse_prefill/upstreams/FlashMLA/csrc/sm100/prefill/sparse/fwd_for_small_topk/head128/phase1.cuh
+@@ -13,6 +13,7 @@
+ #include "sm100/helpers.h"
+ 
+ #include "config.h"
++#include "sm100/direct_schedule.cuh"
+ 
+ namespace sm100::fwd_for_small_topk::head128 {
+ 
+@@ -102,15 +103,7 @@
+         int outer_loop_phase = false;
+         if constexpr (FWD_MODE == FwdMode::DecodeWithSplitKV) {
+             int s_q_idx = blockIdx.x / 2;
+-            DecodingSchedMeta sched_meta;
+-            KU_LDG_256(
+-                params.tile_scheduler_metadata_ptr + blockIdx.y,
+-                &sched_meta,
+-                ".nc",
+-                "no_allocate",
+-                "evict_normal",
+-                "256B"
+-            );
++            DecodingSchedMeta sched_meta = sm100::load_sparse_schedule(params, blockIdx.y);
+             if (sched_meta.begin_req_idx >= params.b) {
+                 return 0;
+             }
+@@ -124,7 +117,7 @@
+                 int start_block_idx = batch_idx == sched_meta.begin_req_idx ? sched_meta.begin_block_idx : 0;
+                 int end_block_idx = batch_idx == sched_meta.end_req_idx ? sched_meta.end_block_idx : total_topk_padded / B_TOPK;
+                 bool is_split = batch_idx == sched_meta.begin_req_idx ? sched_meta.is_first_req_splitted : (batch_idx == sched_meta.end_req_idx ? sched_meta.is_last_req_splitted : false);
+-                int n_split_idx = batch_idx == sched_meta.begin_req_idx ? (__ldg(params.num_splits_ptr+batch_idx) + sched_meta.begin_split_idx) : __ldg(params.num_splits_ptr+batch_idx);
++                int n_split_idx = batch_idx == sched_meta.begin_req_idx ? (sm100::sparse_split_offset(params, batch_idx) + sched_meta.begin_split_idx) : sm100::sparse_split_offset(params, batch_idx);
+ 
+                     // start_block_idx = 0;
+                     // end_block_idx = total_topk_padded / B_TOPK;
+@@ -1045,7 +1038,7 @@
+ 
+     CUtensorMap tensor_map_o_accum = {};
+     if constexpr (FWD_MODE == FwdMode::DecodeWithSplitKV) {
+-        tensor_map_o_accum = ku::make_tensor_map(
++        if (params.o_accum) tensor_map_o_accum = ku::make_tensor_map(
+             {32, H_Q, D_V/32, (unsigned long)params.s_q, (unsigned long)params.num_sm_parts + params.b},
+             ku::make_stride_helper<int>({params.stride_o_accum_h_q, 32, params.stride_o_accum_s_q, params.stride_o_accum_split}, sizeof(float)),
+             {32, H_Q/2, B_EPI_SPLITKV/32, 1, 1},
+--- a/native_paged_sparse_prefill/upstreams/FlashMLA/csrc/smxx/decode/combine/combine.cu
++++ b/native_paged_sparse_prefill/upstreams/FlashMLA/csrc/smxx/decode/combine/combine.cu
+@@ -33,8 +33,10 @@
+         return;
+     }
+ 
+-    const int start_split_idx = __ldg(params.num_splits_ptr + batch_idx);
+-    const int end_split_idx = __ldg(params.num_splits_ptr + batch_idx + 1);
++    const int start_split_idx = params.num_splits_ptr ? __ldg(params.num_splits_ptr + batch_idx) :
++        batch_idx * (params.num_sm_parts / params.b);
++    const int end_split_idx = params.num_splits_ptr ? __ldg(params.num_splits_ptr + batch_idx + 1) :
++        (batch_idx + 1) * (params.num_sm_parts / params.b);
+     const int my_num_splits = end_split_idx - start_split_idx;
+     if (my_num_splits == 1) {
+         return;
+@@ -189,7 +191,8 @@
+ void run_flash_mla_combine_kernel(CombineParams &params) {
+     static constexpr int HEAD_DIM_V = 512;  // Since only this head dimension is supported by Flash MLA
+     FLASH_ASSERT(params.d_v == HEAD_DIM_V);
+-    MLA_NUM_SPLITS_SWITCH(params.num_sm_parts, NUM_SPLITS, [&] {
++    const int max_splits = params.num_splits_ptr ? params.num_sm_parts : params.num_sm_parts / params.b;
++    MLA_NUM_SPLITS_SWITCH(max_splits, NUM_SPLITS, [&] {
+         constexpr int BLOCK_SIZE_M = 8;
+         constexpr int NUM_THREADS = BLOCK_SIZE_M*32;
+         constexpr size_t smem_size = BLOCK_SIZE_M*(NUM_SPLITS+1)*sizeof(float);

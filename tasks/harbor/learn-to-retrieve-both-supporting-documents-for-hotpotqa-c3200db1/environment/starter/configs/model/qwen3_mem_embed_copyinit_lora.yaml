@@ -1,0 +1,56 @@
+# Copy-init QA with a SMALL LoRA on the MAIN model's MLP weights (gate/up/down_proj), to test
+# whether giving the frozen main model a little capacity to USE the memory-injected residual reduces
+# parametric dependence. Stage-2 arch (K/V split, zero-init o_proj, 4 mem layers), top_k=4 (matches
+# the copy pretrain's sharp read; A/Bs against box1 = ground_s2_copyinit_topk4 WITHOUT LoRA).
+# LoRA B is zero-init -> starts as a no-op; only the *_a_proj/*_b_proj adapters train (see launch
+# script's stage trainable_params). Main base 4B stays frozen.
+name: qwen3_mem_embed
+trainable_params: [".*mem_.*", ".*embed_model.*", ".*value_model.*", ".*main_model.*_a_proj", ".*main_model.*_b_proj"]
+
+main_model:
+  model_id: Qwen/Qwen3-4B
+  load_weights: true
+  lora:
+    enabled: true
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]   # MLP only (not attention)
+    rank: 16
+    alpha: 32
+
+memory:
+  mem_layers: [9, 14, 20, 27]
+  mem_size: 16384
+  mem_num_heads: 4
+  mem_k_dim: 1024
+  mem_v_dim: 1024
+  mem_top_k: 4
+  mem_use_product_keys: false
+  mem_placement: "after_attention"
+  mem_use_gating: false
+  mem_lookup_chunk_size: null
+  two_pass_topk: false
+  mem_collect_full_scores: true
+  mem_o_proj_zero_init: true
+  span_window: 0
+
+embed_model:
+  model_id: Qwen/Qwen3-Embedding-0.6B
+  load_weights: true
+  lora:
+    enabled: false
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]
+    rank: 256
+    alpha: 256
+  mask_type: 'bidirectional'
+  embed_conv: true
+  embed_conv_kernel_size: 1
+  embed_conv_stride: 1
+
+value_model:
+  model_id: Qwen/Qwen3-0.6B-Base
+  load_weights: true
+  lora:
+    enabled: false
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]
+    rank: 256
+    alpha: 256
+  mask_type: 'bidirectional'

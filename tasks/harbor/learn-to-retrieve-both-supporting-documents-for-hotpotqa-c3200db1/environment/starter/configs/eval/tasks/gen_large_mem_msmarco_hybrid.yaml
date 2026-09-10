@@ -1,0 +1,52 @@
+# MS-MARCO RAG->memory HYBRID eval. Same protocol as gen_large_mem_musique_hybrid (corpus via
+# inject_query_gold: keep every gold, fill to target_docs with distractors; per-query bank
+# restricted to the RAG top-k docs' slots), on the msa_msmarco_v1 corpus/QA pair from
+# gen_large_mem_msmarco_c512. Corpus size is a knob: override eval.doc_dataset.target_docs
+# (default 10000 = 2.56M slots, under the evaluator's 4M replicated-bank guard; the source
+# corpus has ~75.6k docs). MS-MARCO is single-hop (~1 gold/query), so rag_all_golds@k should
+# track rag_any_gold@k — the multi-hop recall collapse that cost the MuSiQue hybrid at c2048
+# shouldn't apply here. max_new_tokens 512 (not 1280): decode has no EOS early-stop, so every
+# query pays the full budget, and MS-MARCO answers are short. batch_size 8 = the data-parallel
+# mode (per-example [B, M] mem_mask, one distinct query per mesh data row — ~8x query
+# throughput since decode is bandwidth-bound); must be 1 or a multiple of the mesh data-axis
+# size. batch_size 1 falls back to the legacy tiled mode with its row_divergence check.
+defaults:
+  - /eval@eval: generation_large_mem_rag_hybrid
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: msa_msmarco_v1_qa
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: msa_msmarco_v1_docs
+  - _self_
+
+eval:
+  num_samples: 128
+  output_file: outputs/msmarco_hybrid.json
+  max_new_tokens: 512
+  inject_query_gold: true
+  prompt_pad_len: 512
+  metrics:
+    llm_judge_accuracy: {}
+    lexical_grounding: {}
+  # Per-query small banks (2026-07-21): retrieval-equivalent to the full-bank mask the
+  # k=50/k=10 arms used, ~free memory-layer scan, and doc_hit_rate/mem_pos_weight_mass
+  # come back (the full-bank aux forward OOMs at c10000).
+  gather_bank: true
+  rag:
+    query_dataset: "${oc.env:HF_USERNAME}/msa-msmarco-v1-qa-with-ids"
+    top_k: 50
+  doc_dataset:
+    max_docs: null
+    target_docs: 10000
+    max_chunks_per_doc: 1
+    chunk_size: 256
+
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 1
+  num_workers: 0
+  force_thinking: true
+  provide_docs: true
+  batch_size: 8
+  shuffle: false

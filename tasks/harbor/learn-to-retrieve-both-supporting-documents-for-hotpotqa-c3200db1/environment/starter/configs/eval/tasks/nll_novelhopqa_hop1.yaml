@@ -1,0 +1,14 @@
+defaults:
+  - /eval@eval: nll
+  - /dataset@dataset: novelhopqa
+  - _self_
+
+eval:
+  eval_steps: 50
+  lookup_chunk_size: 8192
+dataset:
+  split: hop_1
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 4096
+  batch_size: 1

@@ -1,0 +1,7 @@
+defaults:
+  - nll_science_summarization
+  - override /dataset/sources@dataset: science_summarization_no_cot
+  - _self_
+
+eval:
+  eval_steps: 20

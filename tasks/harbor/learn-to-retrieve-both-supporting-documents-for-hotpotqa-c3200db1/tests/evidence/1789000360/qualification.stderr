@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/qualification.py", line 56, in <module>
+    main()
+  File "/qualification.py", line 41, in main
+    raise RuntimeError('Public command failed; inspect logs before continuing')
+RuntimeError: Public command failed; inspect logs before continuing

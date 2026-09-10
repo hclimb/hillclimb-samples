@@ -1,0 +1,16 @@
+{
+  "schema_v3": true,
+  "required_paths": true,
+  "repository_boundary": true,
+  "syntax": true,
+  "public_private_helper_parity": true,
+  "frozen_starter_parity": true,
+  "compiled_public_files_unchanged": 22,
+  "compiled_overlay_unchanged": true,
+  "declared_entrypoint": "verifiers/verify.py",
+  "taskforge_loader": "No module named 'taskforge'",
+  "compiler_rerun": false,
+  "compiled_startup": "Blocked: generated wrapper lacks -I; packaged launch.sh preserves isolation",
+  "model_calls": 0,
+  "gpu_sandboxes": 0
+}

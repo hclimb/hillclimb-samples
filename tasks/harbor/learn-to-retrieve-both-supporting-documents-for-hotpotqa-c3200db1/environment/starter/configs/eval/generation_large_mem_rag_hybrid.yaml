@@ -1,0 +1,57 @@
+# RAG->memory hybrid eval type: dense-retrieve top-k docs per query (same encoder + settings
+# as the classic-RAG baseline), then restrict the memory bank to those docs' slots via a
+# per-query mem_mask. See evals/gen_large_mem_rag_hybrid.py for the design.
+# Approx top-k stays ON per policy (wiki/architecture/retrieval-modes.md); the evaluator's
+# row_divergence_rate metric monitors within-run determinism.
+name: generation_large_mem_rag_hybrid
+type: generation_large_mem_rag_hybrid
+output_file: gen_large_mem_rag_hybrid_results.json
+max_new_tokens: 64
+temperature: 0.0
+top_k: 20
+top_p: 0.8
+num_samples: null
+embed_batch_size: 2048
+max_docs: null
+# 2048, not the large-mem default 8192: the full-sequence aux telemetry forward's chunk-scan
+# buffers scale with S x chunk (it OOM'd at a 524k bank with 8192); decode is unaffected.
+lookup_chunk_size: 2048
+# All prompts are left-padded to this fixed length so the run compiles ONCE (per-query max
+# lengths would re-JIT the generation loop on every query). Raising it costs one compile.
+prompt_pad_len: 512
+# gather_bank: keep the full bank in HOST numpy and ship each batch only its rows' top-k
+# docs' slots (one fixed-size block per row). Retrieval-equivalent to masking the full bank
+# (masking applies pre-top-k), but the per-token scan covers B*k docs instead of the whole
+# corpus, the replicated-bank HBM guard no longer applies (corpus size becomes host-RAM
+# bound), and the aux telemetry forward fits again at large corpora. false = legacy
+# full-bank replication + mask (how every pre-2026-07-21 number was measured).
+gather_bank: false
+# multi_sample (2026-08-24, GRPO-readiness diagnostic): with dataset.batch_size=1 (tiled mode)
+# and temperature > 0, keep every tiled replica's completion as an independent sample of the
+# SAME query (group_id/sample_idx on each result) instead of collapsing to one representative
+# row. See wiki/evaluation/evaluator-types.md's "multi_sample: true" section.
+multi_sample: false
+rag:
+  # HF repo with the query text + pos_doc_ids columns; REQUIRED (set by the task config —
+  # must be the same repo, split and order the eval dataset reads, shuffle: false).
+  query_dataset: null
+  query_split: train
+  query_column: question
+  # How many retrieved docs stay in the bank per query.
+  top_k: 50
+  # auto-K (2026-07-22): when auto_k_threshold is set (e.g. 0.96), top_k is REPLACED by the
+  # smallest auto_k_candidates entry whose mean rag_all_golds coverage clears the threshold
+  # (largest candidate = hard cap when none does). Chosen from the pre-pass ranking, no
+  # extra cost; the chosen value is recorded as metrics.rag_top_k.
+  auto_k_threshold: null
+  auto_k_candidates: [5, 10, 25, 50, 100, 150, 200]
+  # Retrieval encoder — parity with scripts/misc/rag_only.py's RAG baseline.
+  encoder: Qwen/Qwen3-Embedding-0.6B
+  hf_ckpt_dir: ~/weights/huggingface
+  max_doc_length: 256
+  max_query_length: 128
+  encode_batch_size: 512
+  # oracle: skip retrieval, mask = the query's own pos_doc_ids (+ distractor fill to
+  # oracle_fill_to in corpus order; 0 = golds only). The perfect-retrieval ceiling.
+  oracle: false
+  oracle_fill_to: 0

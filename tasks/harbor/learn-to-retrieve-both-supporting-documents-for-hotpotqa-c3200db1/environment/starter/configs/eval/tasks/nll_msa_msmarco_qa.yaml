@@ -1,0 +1,23 @@
+# Validation CE on MS MARCO QA the triplets-SFT training set did NOT include verbatim
+# (msa-msmarco-v1-qa-with-ids, vs training's msmarco-triplets-hard-neg-SFT-4B). Measures
+# NLL on the answer tokens with the question's own gold doc in memory (same oracle setup as
+# gen_embed_msa_msmarco_oracle). Compare this val CE to the ~0.05 TRAIN CE to test the
+# overfitting hypothesis: low train CE from many epochs vs a much higher held-out CE.
+defaults:
+  - /eval@eval: nll
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: msa_msmarco_v1_qa
+  - _self_
+
+eval:
+  eval_steps: 50
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 16
+  provide_docs: true
+  mask_prefix: true
+  num_workers: 0
+  batch_size: 16
+  shuffle: false

@@ -1,0 +1,21 @@
+defaults:
+  - /eval@eval: generation_embed
+  - /dataset@dataset: novelhopqa
+  - _self_
+
+tp_devices: 1
+
+eval:
+  num_samples: 64
+  max_new_tokens: 512
+  lookup_chunk_size: 8192
+  metrics:
+    llm_judge_accuracy:
+      use_document: false
+dataset:
+  split: hop_1
+  seq_len: 128
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 4096
+  batch_size: 1
+  force_thinking: true

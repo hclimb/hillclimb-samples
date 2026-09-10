@@ -1,0 +1,174 @@
+{
+  "profile_name": "dolci32k",
+  "profile_version": 2,
+  "seed": 42,
+  "candidate_seed": 314159,
+  "max_seq_len": 4096,
+  "tokenizer_use_fast": true,
+  "truncation_warning_threshold": 0.05,
+  "candidate_traversal": {
+    "candidate_batch_size": 16,
+    "selected_subset_size": 8,
+    "formal_steps": 2000
+  },
+  "decontamination": {
+    "word_ngram_size": 8,
+    "near_duplicate_threshold": 0.8,
+    "short_prompt_policy": "exact-only"
+  },
+  "dataset": {
+    "repo": "allenai/Dolci-Instruct-SFT",
+    "revision": "bd3c8f3a9b2cc5a9682e44b96ddd0bb2ff027221",
+    "split": "train"
+  },
+  "sources": {
+    "ifeval": {
+      "repo": "google/IFEval",
+      "revision": "966cd89545d6b6acfd7638bc708b98261ca58e84",
+      "split": "train"
+    },
+    "ifbench": {
+      "repo": "allenai/IFBench_test",
+      "revision": "2e8a48de45ff3bf41242f927254ca81b59ca3ae2",
+      "split": "train"
+    },
+    "math500": {
+      "repo": "HuggingFaceH4/MATH-500",
+      "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+      "split": "test"
+    },
+    "math_train": {
+      "repo": "DigitalLearningGmbH/MATH-lighteval",
+      "revision": "0530c78699ea5e8eb5530600900e1f328b48acad",
+      "split": "train",
+      "config": "default"
+    },
+    "mbpp": {
+      "repo": "google-research-datasets/mbpp",
+      "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+      "split": "train",
+      "config": "full"
+    }
+  },
+  "sizes": {
+    "train_pool": 32000,
+    "val_pool": 512,
+    "target_grad": 64,
+    "target_val": 128
+  },
+  "instruction": {
+    "exclude_domains": [
+      "Math",
+      "Coding",
+      "Science",
+      "Tool Use"
+    ],
+    "exclude_structural_tool_use": true,
+    "allocation": "capped_equal_waterfill"
+  },
+  "reasoning": {
+    "Math": {
+      "Tulu 3 Persona MATH": {
+        "train": 3000,
+        "val": 48
+      },
+      "OpenMathInstruct 2": {
+        "train": 3000,
+        "val": 48
+      },
+      "Tulu 3 Persona GSM": {
+        "train": 3000,
+        "val": 48
+      },
+      "Tulu 3 Persona Algebra": {
+        "train": 3000,
+        "val": 48
+      }
+    },
+    "Coding": {
+      "Dolci Instruct Python Algorithms": {
+        "train": 4000,
+        "val": 64
+      },
+      "Evol CodeAlpaca": {
+        "train": 4000,
+        "val": 64
+      },
+      "Tulu 3 Persona Python": {
+        "train": 4000,
+        "val": 64
+      }
+    },
+    "Science/Logic/Verifiable": {
+      "Verifiable Reasoning": {
+        "train": 2000,
+        "val": 32
+      },
+      "Logic Puzzles": {
+        "train": 2000,
+        "val": 32
+      },
+      "Dolci Instruct OpenThoughts3+ Science": {
+        "train": 2000,
+        "val": 32
+      },
+      "SciRiff": {
+        "train": 2000,
+        "val": 32
+      }
+    }
+  },
+  "mixed": {
+    "train": {
+      "instruction": 16000,
+      "reasoning": 16000
+    },
+    "val": {
+      "instruction": 256,
+      "reasoning": 256
+    }
+  },
+  "targets": {
+    "precise_if_source": "Dolci Instruct Precise IF",
+    "precise_if_size": 64,
+    "math_size": 64,
+    "mbpp_size": 64
+  },
+  "evaluators": {
+    "ifeval_git": "e6890f85757dd84e27ca6df2dd30651dafad28e0",
+    "ifbench_repo": "https://github.com/allenai/IFBench",
+    "ifbench_git": "1091c4c3de6c1f6ed12c012ed68f11ea450b0117",
+    "evalplus_package": "evalplus",
+    "evalplus_version": "0.3.1",
+    "evalplus_dataset_version": "v0.2.0",
+    "evalplus_git": "v0.3.1",
+    "evalplus_image": "docker://ganler/evalplus@sha256:26b118098bef281fe8dfe999bf05f1d5b45374b4e6c00161ec0f30592aef4740",
+    "math_verify_version": "0.9.0"
+  },
+  "tokenizer_profiles": {
+    "olmo3_7b": {
+      "model_repo": "allenai/Olmo-3-1025-7B",
+      "model_revision": "a81bae42db3975be1671e27b9c9a56da1a9f980f",
+      "tokenizer_repo": "allenai/olmo-3-tokenizer-instruct-release",
+      "tokenizer_revision": "134a8a9166b45a96f21cf1e66b928fe6e6c0b9b1"
+    },
+    "qwen3_1_7b": {
+      "model_repo": "Qwen/Qwen3-1.7B-Base",
+      "model_revision": "ea980cb0a6c2ae4b936e82123acc929f1cec04c1",
+      "tokenizer_repo": "Qwen/Qwen3-1.7B-Base",
+      "tokenizer_revision": "ea980cb0a6c2ae4b936e82123acc929f1cec04c1"
+    },
+    "qwen3_4b": {
+      "model_repo": "Qwen/Qwen3-4B-Base",
+      "model_revision": "906bfd4b4dc7f14ee4320094d8b41684abff8539",
+      "tokenizer_repo": "Qwen/Qwen3-4B-Base",
+      "tokenizer_revision": "906bfd4b4dc7f14ee4320094d8b41684abff8539"
+    },
+    "qwen3_8b": {
+      "model_repo": "Qwen/Qwen3-8B-Base",
+      "model_revision": "49e3418fbbbca6ecbdf9608b4d22e5a407081db4",
+      "tokenizer_repo": "Qwen/Qwen3-8B-Base",
+      "tokenizer_revision": "49e3418fbbbca6ecbdf9608b4d22e5a407081db4"
+    }
+  }
+}

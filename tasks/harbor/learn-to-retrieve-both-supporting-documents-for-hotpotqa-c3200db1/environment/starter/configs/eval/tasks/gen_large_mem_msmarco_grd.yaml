@@ -1,0 +1,34 @@
+# Grounding-only corpus eval for the MEM_EMBED model on msmarco (llm_judge omitted for the sweep).
+# Corpus sizing via target_docs (with max_docs=null so inject_query_gold scans the FULL corpus and
+# includes ALL query golds, then trims to target_docs = golds + distractors). Reports
+# lexical_grounding + native doc_access_acc/doc_hit_rate/doc_token_hit_rate.
+defaults:
+  - /eval@eval: generation_large_mem
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: msa_msmarco_v1_qa
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: msa_msmarco_v1_docs
+  - _self_
+eval:
+  num_samples: 64
+  output_file: outputs/msmarco_grd.json
+  max_new_tokens: 512
+  doc_access_acc: true
+  inject_query_gold: true
+  metrics:
+    lexical_grounding: {}
+  doc_dataset:
+    max_docs: null
+    target_docs: null
+    max_chunks_per_doc: 1
+    chunk_size: 256
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 1
+  num_workers: 0
+  force_thinking: true
+  provide_docs: true
+  batch_size: 8
+  shuffle: false

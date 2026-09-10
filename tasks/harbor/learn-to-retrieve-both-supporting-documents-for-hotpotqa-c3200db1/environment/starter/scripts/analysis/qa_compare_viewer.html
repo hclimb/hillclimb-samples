@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grounded QA Comparison Viewer</title>
+<style>
+  :root {
+    --bg: #f7f7f8;
+    --panel: #ffffff;
+    --border: #d9d9e0;
+    --text: #1a1a1f;
+    --muted: #6b6b76;
+    --accent: #4457c2;
+    --good-bg: #d9efdc; --good-fg: #1a6b2a;
+    --bad-bg: #f7dcda;  --bad-fg: #a03026;
+    --mid-bg: #f3e8cf;  --mid-fg: #8a6410;
+    --na-bg: #e8e8ec;   --na-fg: #6b6b76;
+    --hl: #fff3bf;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17171c;
+      --panel: #1f1f26;
+      --border: #35353f;
+      --text: #e8e8ec;
+      --muted: #9a9aa6;
+      --accent: #8b9bf0;
+      --good-bg: #1d3a24; --good-fg: #7fd48f;
+      --bad-bg: #452221;  --bad-fg: #f09a92;
+      --mid-bg: #3f351a;  --mid-fg: #e0b74e;
+      --na-bg: #2b2b33;   --na-fg: #9a9aa6;
+      --hl: #4a4020;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  header {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    background: var(--panel); display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  header .hint { color: var(--muted); font-size: 12px; }
+  main { padding: 16px 20px 80px; max-width: 1600px; margin: 0 auto; }
+  button, input[type="text"], select {
+    font: inherit; color: var(--text); background: var(--panel);
+    border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px;
+  }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* drop zone */
+  #dropzone {
+    border: 2px dashed var(--border); border-radius: 10px; padding: 40px;
+    text-align: center; color: var(--muted); margin-bottom: 16px; cursor: pointer;
+  }
+  #dropzone.dragover { border-color: var(--accent); color: var(--accent); }
+  #dropzone.compact { padding: 10px; font-size: 12px; }
+
+  /* model summary cards */
+  #models { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .model-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; min-width: 200px; position: relative;
+  }
+  .model-card .name-input {
+    font-weight: 600; border: none; background: transparent; width: 100%;
+    padding: 0 0 2px; border-bottom: 1px dashed transparent;
+  }
+  .model-card .name-input:hover, .model-card .name-input:focus {
+    border-bottom-color: var(--border); outline: none;
+  }
+  .model-card .file { color: var(--muted); font-size: 11px; word-break: break-all; }
+  .model-card .acc { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .model-card .sub { color: var(--muted); font-size: 11px; }
+  .model-card .remove {
+    position: absolute; top: 6px; right: 8px; border: none; background: none;
+    color: var(--muted); font-size: 14px; padding: 2px 4px;
+  }
+  .model-card .remove:hover { color: var(--bad-fg); }
+
+  /* controls */
+  #controls {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  #controls input[type="text"] { width: 280px; }
+  #count { color: var(--muted); font-size: 12px; }
+
+  /* sample table */
+  table { width: 100%; border-collapse: collapse; background: var(--panel);
+          border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  thead th {
+    text-align: left; padding: 8px 10px; font-size: 12px; color: var(--muted);
+    border-bottom: 1px solid var(--border); background: var(--panel);
+    cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  thead th:hover { color: var(--accent); }
+  tbody td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover td { background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
+  tbody tr.open td { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+  .q-cell { max-width: 600px; }
+  .badge {
+    display: inline-block; border-radius: 5px; padding: 1px 8px; font-size: 12px;
+    font-weight: 600; min-width: 34px; text-align: center;
+  }
+  .badge.good { background: var(--good-bg); color: var(--good-fg); }
+  .badge.bad  { background: var(--bad-bg);  color: var(--bad-fg); }
+  .badge.mid  { background: var(--mid-bg);  color: var(--mid-fg); }
+  .badge.na   { background: var(--na-bg);   color: var(--na-fg); }
+
+  /* detail row */
+  tr.detail > td { background: var(--bg) !important; padding: 14px; cursor: default; }
+  .shared-block { margin-bottom: 12px; }
+  .shared-block h4 { margin: 0 0 4px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .shared-block .text {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 10px; white-space: pre-wrap; word-break: break-word;
+  }
+  .answers { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .answer-col { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+  .answer-col h4 { margin: 0 0 6px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .answer-col .ans { white-space: pre-wrap; word-break: break-word; }
+  .answer-col .missing { color: var(--muted); font-style: italic; }
+  details { margin-top: 8px; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 12px; user-select: none; }
+  details .text {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 10px; margin-top: 6px; white-space: pre-wrap; word-break: break-word;
+    font-size: 12.5px; max-height: 320px; overflow-y: auto;
+  }
+  mark { background: var(--hl); color: inherit; border-radius: 2px; }
+  #empty { color: var(--muted); text-align: center; padding: 40px; }
+
+  /* grounding */
+  .gchip {
+    display: inline-block; border-radius: 5px; padding: 1px 5px; font-size: 11px;
+    font-weight: 600; margin-left: 4px; font-variant-numeric: tabular-nums;
+  }
+  .gchip.good { background: var(--good-bg); color: var(--good-fg); }
+  .gchip.mid  { background: var(--mid-bg);  color: var(--mid-fg); }
+  .gchip.bad  { background: var(--bad-bg);  color: var(--bad-fg); }
+  .gchip.na   { background: var(--na-bg);   color: var(--na-fg); }
+  .g-yes {
+    background: color-mix(in srgb, var(--good-fg) 14%, transparent);
+    border-bottom: 2px solid var(--good-fg); border-radius: 2px;
+  }
+  .ans .g-yes[data-doc] { cursor: pointer; }
+  .ans .g-yes[data-doc]:hover, .g-yes.g-active {
+    background: color-mix(in srgb, var(--good-fg) 32%, transparent);
+  }
+  .doc-text .dhl {
+    background: color-mix(in srgb, var(--good-fg) 32%, transparent);
+    border-bottom: 2px solid var(--good-fg); border-radius: 2px;
+  }
+  .g-no {
+    border-bottom: 2px dotted var(--bad-fg);
+    color: var(--bad-fg);
+  }
+  .g-legend { color: var(--muted); font-size: 11px; margin-bottom: 8px; }
+  .g-legend .g-yes, .g-legend .g-no { padding: 0 3px; }
+
+  /* retrieved docs (rag_docs) */
+  .rag-list { max-height: 480px; overflow-y: auto; margin-top: 6px; }
+  .rag-doc { border: 1px solid var(--border); border-radius: 6px; margin-top: 6px; background: var(--bg); }
+  .rag-doc .rag-head {
+    display: flex; gap: 8px; align-items: center; padding: 3px 8px;
+    font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border);
+  }
+  .rag-doc .rag-head .badge { min-width: 0; padding: 0 6px; font-size: 11px; }
+  .rag-doc .rag-body {
+    padding: 6px 8px; white-space: pre-wrap; word-break: break-word;
+    font-size: 12.5px; max-height: 180px; overflow-y: auto;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Grounded QA Comparison Viewer</h1>
+  <button class="primary" id="add-btn">Add eval JSON(s)</button>
+  <input type="file" id="file-input" accept=".json" multiple hidden>
+  <span class="hint">Each file = one model/run. Samples aligned across files by question.</span>
+</header>
+<main>
+  <div id="dropzone">Drop eval JSON files here (or click) — e.g. <code>msa_msmarco_oracle 10.json</code></div>
+  <div id="models"></div>
+  <div id="controls" hidden>
+    <input type="text" id="search" placeholder="Search question / answers / doc…">
+    <select id="filter">
+      <option value="all">All samples</option>
+      <option value="disagree">Disagreements (models differ)</option>
+      <option value="all-wrong">All models wrong</option>
+      <option value="all-right">All models right</option>
+      <option value="any-wrong">Any model wrong</option>
+      <option value="low-ground">Low grounding (any model &lt; 60%)</option>
+    </select>
+    <select id="sort-metric" title="Metric used when sorting model columns">
+      <option value="acc">Sort cols by: judge acc</option>
+      <option value="ground">Sort cols by: grounding %</option>
+    </select>
+    <select id="model-filter" hidden></select>
+    <button id="expand-all">Expand all</button>
+    <button id="collapse-all">Collapse all</button>
+    <span id="count"></span>
+  </div>
+  <div id="table-wrap"></div>
+  <div id="empty" hidden>No samples match the current filter.</div>
+</main>
+
+<script>
+'use strict';
+
+/** models: [{id, name, file, samples: Map(qkey -> sample), reportedAcc, meanAcc}] */
+let models = [];
+let nextId = 1;
+let sortKey = null;   // 'question' | model id | 'spread'
+let sortDir = 1;
+const openRows = new Set();
+
+// ---------- grounding (lexical overlap answer vs doc) ----------
+
+const STOPWORDS = new Set(('a,an,the,is,are,was,were,be,been,being,of,to,in,on,for,and,or,' +
+  'as,at,by,with,from,that,this,these,those,it,its,he,she,they,them,his,her,their,you,' +
+  'your,i,we,us,our,not,no,do,does,did,have,has,had,will,would,can,could,should,may,' +
+  'might,must,shall,than,then,so,if,but,about,into,over,after,before,between,under,' +
+  'also,such,which,who,whom,what,when,where,why,how,all,any,both,each,few,more,most,' +
+  'other,some,only,own,same,too,very,just,there,here,up,down,out,off,again,once,s,t').split(','));
+
+function tokenize(text) {
+  const toks = [];
+  const re = /[A-Za-z0-9]+(?:'[A-Za-z]+)?/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    toks.push({ w: m[0].toLowerCase().replace(/'/g, ''), start: m.index, end: m.index + m[0].length });
+  }
+  return toks;
+}
+
+/**
+ * Greedy longest-span match of answer tokens against doc tokens.
+ * A token is "grounded" if part of a >=2-token span copied from the doc,
+ * or a single non-stopword that appears in the doc.
+ * score = grounded content words / total content words (stopwords excluded).
+ */
+function groundAnswer(answer, doc) {
+  const aToks = tokenize(answer);
+  const dWords = tokenize(doc).map(t => t.w);
+  const pos = new Map();
+  dWords.forEach((w, i) => { (pos.get(w) ?? pos.set(w, []).get(w)).push(i); });
+
+  const matched = new Array(aToks.length).fill(false);
+  const spans = []; // {a0, a1: answer token range, ranges: [[docStart, docEnd], ...]}
+  let i = 0;
+  while (i < aToks.length) {
+    let best = 0, bestPs = [];
+    for (const p of pos.get(aToks[i].w) ?? []) {
+      let len = 0;
+      while (i + len < aToks.length && p + len < dWords.length &&
+             aToks[i + len].w === dWords[p + len]) len++;
+      if (len > best) { best = len; bestPs = [p]; }
+      else if (len === best && len > 0) bestPs.push(p);
+    }
+    if (best >= 2 || (best === 1 && !STOPWORDS.has(aToks[i].w))) {
+      for (let k = 0; k < best; k++) matched[i + k] = true;
+      spans.push({ a0: i, a1: i + best, ranges: bestPs.map(p => [p, p + best]) });
+      i += best;
+    } else {
+      i++;
+    }
+  }
+
+  let num = 0, den = 0;
+  aToks.forEach((t, j) => {
+    if (!STOPWORDS.has(t.w)) { den++; if (matched[j]) num++; }
+  });
+  return { toks: aToks, matched, spans, score: den ? num / den : null };
+}
+
+/** Render answer text with grounded spans marked. Escapes HTML itself.
+ *  Green spans carry data-doc="s-e,s-e" doc-token ranges for hover linking. */
+function groundedHtml(answer, doc) {
+  const { toks, spans } = groundAnswer(answer, doc);
+  if (!toks.length) return esc(answer);
+  let out = '', cursor = 0, j = 0, si = 0;
+  while (j < toks.length) {
+    out += esc(answer.slice(cursor, toks[j].start));
+    if (si < spans.length && spans[si].a0 === j) {
+      const sp = spans[si];
+      const ranges = sp.ranges.map(([s, e]) => `${s}-${e}`).join(',');
+      out += `<span class="g-yes" data-doc="${ranges}">` +
+        `${esc(answer.slice(toks[j].start, toks[sp.a1 - 1].end))}</span>`;
+      cursor = toks[sp.a1 - 1].end; j = sp.a1; si++;
+    } else {
+      const cls = STOPWORDS.has(toks[j].w) ? '' : ' class="g-no"';
+      out += `<span${cls}>${esc(answer.slice(toks[j].start, toks[j].end))}</span>`;
+      cursor = toks[j].end; j++;
+    }
+  }
+  return out + esc(answer.slice(cursor));
+}
+
+/** Render doc with each token wrapped in an indexed span, for hover targeting. */
+function docHtml(doc) {
+  const toks = tokenize(doc);
+  let out = '', cursor = 0;
+  toks.forEach((t, i) => {
+    out += esc(doc.slice(cursor, t.start));
+    out += `<span data-dt="${i}">${esc(doc.slice(t.start, t.end))}</span>`;
+    cursor = t.end;
+  });
+  return out + esc(doc.slice(cursor));
+}
+
+function gchip(score) {
+  if (score === null || score === undefined) return '<span class="gchip na">—</span>';
+  const cls = score >= 0.8 ? 'good' : score >= 0.5 ? 'mid' : 'bad';
+  return `<span class="gchip ${cls}" title="grounding: ${(100 * score).toFixed(1)}% of answer content words matched in doc">${Math.round(100 * score)}%</span>`;
+}
+
+// ---------- parsing ----------
+
+function extractQuestion(prompt) {
+  // Qwen chat template: <|im_start|>user\n ... <|im_end|>
+  const m = prompt.match(/<\|im_start\|>user\n([\s\S]*?)<\|im_end\|>/);
+  if (m) return m[1].trim();
+  return prompt.trim();
+}
+
+function qkey(question) {
+  return question.toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function parseEvalJson(name, obj) {
+  if (!obj || !Array.isArray(obj.samples)) {
+    throw new Error(`${name}: expected {metrics, samples: [...]}`);
+  }
+  const samples = new Map();
+  let accSum = 0, accN = 0, gSum = 0, gN = 0;
+  for (const s of obj.samples) {
+    const question = extractQuestion(s.prompt ?? '');
+    const acc = typeof s.llm_judge_accuracy === 'number' ? s.llm_judge_accuracy : null;
+    if (acc !== null) { accSum += acc; accN++; }
+    const answer = s.generated_answer ?? '';
+    const doc = s.doc ?? '';
+    const gscore = (answer && doc) ? groundAnswer(answer, doc).score : null;
+    if (gscore !== null) { gSum += gscore; gN++; }
+    samples.set(qkey(question), {
+      question,
+      answer,
+      thinking: (s.thinking ?? '').trim(),
+      generated: s.generated ?? '',
+      groundTruth: s.ground_truth ?? '',
+      doc,
+      acc,
+      gscore,
+      judgeOutput: s.llm_judge_accuracy_output ?? '',
+      ragDocs: Array.isArray(s.rag_docs) ? s.rag_docs : [],
+      ragDocIds: Array.isArray(s.rag_doc_ids) ? s.rag_doc_ids : [],
+      allCovered: s.rag_all_golds_covered ?? null,
+    });
+  }
+  return {
+    id: nextId++,
+    name: name.replace(/\.json$/i, ''),
+    file: name,
+    samples,
+    reportedAcc: obj.metrics?.llm_judge_accuracy ?? null,
+    meanAcc: accN ? accSum / accN : null,
+    meanGround: gN ? gSum / gN : null,
+    n: samples.size,
+  };
+}
+
+// ---------- data assembly ----------
+
+function unionRows() {
+  const keys = new Map(); // qkey -> question (first seen)
+  for (const m of models) {
+    for (const [k, s] of m.samples) if (!keys.has(k)) keys.set(k, s.question);
+  }
+  const rows = [];
+  for (const [k, question] of keys) {
+    const per = models.map(m => m.samples.get(k) ?? null);
+    const accs = per.filter(s => s && s.acc !== null).map(s => s.acc);
+    rows.push({
+      key: k, question, per,
+      min: accs.length ? Math.min(...accs) : null,
+      max: accs.length ? Math.max(...accs) : null,
+    });
+  }
+  return rows;
+}
+
+function applyFilter(rows) {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const mode = document.getElementById('filter').value;
+  const mf = document.getElementById('model-filter');
+  const modelIdx = mf.hidden ? -1 : Number(mf.value);
+
+  return rows.filter(r => {
+    if (q) {
+      const hay = [
+        r.question,
+        ...r.per.filter(Boolean).flatMap(s => [s.answer, s.groundTruth, s.doc, ...(s.ragDocs ?? [])]),
+      ].join('\n').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    const accs = r.per.filter(s => s && s.acc !== null).map(s => s.acc);
+    switch (mode) {
+      case 'disagree':  return accs.length > 1 && r.min !== r.max;
+      case 'all-wrong': return accs.length > 0 && r.max === 0;
+      case 'all-right': return accs.length > 0 && r.min === 1;
+      case 'low-ground':
+        return r.per.some(s => s && s.gscore !== null && s.gscore < 0.6);
+      case 'any-wrong':
+        if (modelIdx >= 0) {
+          const s = r.per[modelIdx];
+          return s && s.acc !== null && s.acc < 1;
+        }
+        return accs.some(a => a < 1);
+      default: return true;
+    }
+  });
+}
+
+function applySort(rows) {
+  if (sortKey === null) return rows;
+  const cmp = (a, b) => {
+    let va, vb;
+    if (sortKey === 'question') { va = a.question; vb = b.question; }
+    else if (sortKey === 'spread') {
+      va = (a.max ?? 0) - (a.min ?? 0); vb = (b.max ?? 0) - (b.min ?? 0);
+    } else {
+      const i = models.findIndex(m => m.id === sortKey);
+      const metric = document.getElementById('sort-metric').value;
+      va = (metric === 'ground' ? a.per[i]?.gscore : a.per[i]?.acc) ?? -1;
+      vb = (metric === 'ground' ? b.per[i]?.gscore : b.per[i]?.acc) ?? -1;
+    }
+    if (va < vb) return -sortDir;
+    if (va > vb) return sortDir;
+    return 0;
+  };
+  return [...rows].sort(cmp);
+}
+
+// ---------- rendering ----------
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function highlight(s) {
+  const q = document.getElementById('search').value.trim();
+  const escaped = esc(s);
+  if (!q) return escaped;
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  return escaped.replace(re, m => `<mark>${m}</mark>`);
+}
+
+function badge(acc) {
+  if (acc === null || acc === undefined) return '<span class="badge na">—</span>';
+  const cls = acc >= 1 ? 'good' : acc <= 0 ? 'bad' : 'mid';
+  const label = acc >= 1 ? '✓' : acc <= 0 ? '✗' : acc.toFixed(2);
+  return `<span class="badge ${cls}" title="llm_judge_accuracy = ${acc}">${label}</span>`;
+}
+
+function fmtPct(x) { return x === null ? '—' : (100 * x).toFixed(1) + '%'; }
+
+function renderModels() {
+  const el = document.getElementById('models');
+  el.innerHTML = models.map(m => `
+    <div class="model-card" data-id="${m.id}">
+      <button class="remove" title="Remove">✕</button>
+      <input class="name-input" value="${esc(m.name)}" title="Click to rename">
+      <div class="file">${esc(m.file)} · ${m.n} samples</div>
+      <div class="acc">${fmtPct(m.meanAcc)} ${gchip(m.meanGround)}</div>
+      <div class="sub">mean judge acc · mean grounding${m.reportedAcc !== null
+        ? ` · metrics field: ${fmtPct(m.reportedAcc)}` : ''}</div>
+    </div>`).join('');
+
+  el.querySelectorAll('.model-card').forEach(card => {
+    const id = Number(card.dataset.id);
+    card.querySelector('.remove').onclick = () => {
+      models = models.filter(m => m.id !== id);
+      if (sortKey === id) sortKey = null;
+      render();
+    };
+    card.querySelector('.name-input').onchange = e => {
+      const m = models.find(m => m.id === id);
+      if (m) m.name = e.target.value;
+      render();
+    };
+  });
+
+  // per-model "any-wrong" filter options
+  const mf = document.getElementById('model-filter');
+  const mode = document.getElementById('filter').value;
+  mf.hidden = !(mode === 'any-wrong' && models.length > 1);
+  if (!mf.hidden) {
+    const prev = mf.value;
+    mf.innerHTML = '<option value="-1">any model</option>' +
+      models.map((m, i) => `<option value="${i}">${esc(m.name)} wrong</option>`).join('');
+    if ([...mf.options].some(o => o.value === prev)) mf.value = prev;
+  }
+}
+
+function detailHtml(row) {
+  const withData = row.per.map((s, i) => ({ s, m: models[i] })).filter(x => x.s);
+  const shared = withData[0]?.s;
+  const sameGt = withData.every(x => x.s.groundTruth === shared.groundTruth);
+  const sameDoc = withData.every(x => x.s.doc === shared.doc);
+
+  let html = '';
+  if (shared && sameDoc) html += `
+    <div class="shared-block"><h4>Doc (grounding)</h4>
+    <div class="text doc-text">${docHtml(shared.doc)}</div></div>`;
+  if (shared && sameGt) html += `
+    <div class="shared-block"><h4>Ground truth</h4>
+    <div class="text">${highlight(shared.groundTruth)}</div></div>`;
+
+  html += `<div class="g-legend">grounding vs doc:
+    <span class="g-yes">matched span</span> ·
+    <span class="g-no">content word not in doc</span> ·
+    stopwords unmarked</div>`;
+  html += '<div class="answers">';
+  for (let i = 0; i < models.length; i++) {
+    const m = models[i], s = row.per[i];
+    if (!s) {
+      html += `<div class="answer-col"><h4>${esc(m.name)}</h4>
+        <div class="missing">sample not present in this file</div></div>`;
+      continue;
+    }
+    html += `<div class="answer-col">
+      <h4>${esc(m.name)} ${badge(s.acc)}${gchip(s.gscore)}</h4>
+      <div class="ans">${s.doc ? groundedHtml(s.answer, s.doc) : highlight(s.answer)}</div>`;
+    if (!sameGt) html += `<details><summary>Ground truth (differs across files)</summary>
+      <div class="text">${highlight(s.groundTruth)}</div></details>`;
+    if (!sameDoc) html += `<details open><summary>Doc (differs across files)</summary>
+      <div class="text doc-text">${docHtml(s.doc)}</div></details>`;
+    if (s.ragDocs.length) {
+      const goldSet = new Set((s.doc ?? '').split(' || ').map(t => t.trim()).filter(Boolean));
+      const nGold = s.ragDocs.filter(d => goldSet.has(d.trim())).length;
+      const covNote = s.allCovered === null ? ''
+        : s.allCovered ? ' · all golds in bank' : ' · GOLD MISSING';
+      html += `<details><summary>Retrieved docs (${s.ragDocs.length}` +
+        `${nGold ? ` · ${nGold} gold` : ''}${covNote})</summary><div class="rag-list">`;
+      s.ragDocs.forEach((d, k) => {
+        const gold = goldSet.has(d.trim());
+        html += `<div class="rag-doc"><div class="rag-head">
+          <span>#${k + 1}</span><span>id ${s.ragDocIds[k] ?? '?'}</span>
+          ${gold ? '<span class="badge good">GOLD</span>' : ''}</div>
+          <div class="rag-body">${highlight(d)}</div></div>`;
+      });
+      html += '</div></details>';
+    }
+    if (s.thinking) html += `<details><summary>Thinking (${s.thinking.length} chars)</summary>
+      <div class="text">${esc(s.thinking)}</div></details>`;
+    if (s.judgeOutput) html += `<details><summary>Judge output</summary>
+      <div class="text">${esc(s.judgeOutput)}</div></details>`;
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderTable() {
+  const wrap = document.getElementById('table-wrap');
+  const empty = document.getElementById('empty');
+  if (!models.length) { wrap.innerHTML = ''; empty.hidden = true; return; }
+
+  const rows = applySort(applyFilter(unionRows()));
+  document.getElementById('count').textContent =
+    `${rows.length} / ${unionRows().length} samples`;
+  empty.hidden = rows.length > 0;
+  if (!rows.length) { wrap.innerHTML = ''; return; }
+
+  const arrow = k => sortKey === k ? (sortDir > 0 ? ' ↑' : ' ↓') : '';
+  let html = `<table><thead><tr>
+    <th data-sort="question">Question${arrow('question')}</th>
+    ${models.map(m => `<th data-sort="${m.id}">${esc(m.name)}${arrow(m.id)}</th>`).join('')}
+    ${models.length > 1 ? `<th data-sort="spread">Δ${arrow('spread')}</th>` : ''}
+  </tr></thead><tbody>`;
+
+  for (const r of rows) {
+    const spread = (r.min !== null && r.max !== r.min)
+      ? `<span class="badge mid">${(r.max - r.min).toFixed(1)}</span>` : '';
+    html += `<tr data-key="${esc(r.key)}" class="${openRows.has(r.key) ? 'open' : ''}">
+      <td class="q-cell">${highlight(r.question)}</td>
+      ${r.per.map(s => `<td>${badge(s ? s.acc : null)}${gchip(s ? s.gscore : null)}</td>`).join('')}
+      ${models.length > 1 ? `<td>${spread}</td>` : ''}
+    </tr>`;
+    if (openRows.has(r.key)) {
+      html += `<tr class="detail"><td colspan="${models.length + (models.length > 1 ? 2 : 1)}">
+        ${detailHtml(r)}</td></tr>`;
+    }
+  }
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('thead th').forEach(th => {
+    th.onclick = () => {
+      const k = th.dataset.sort === 'question' || th.dataset.sort === 'spread'
+        ? th.dataset.sort : Number(th.dataset.sort);
+      if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = 1; }
+      renderTable();
+    };
+  });
+  wrap.querySelectorAll('tbody tr:not(.detail)').forEach(tr => {
+    tr.onclick = () => {
+      const k = tr.dataset.key;
+      if (openRows.has(k)) openRows.delete(k); else openRows.add(k);
+      renderTable();
+    };
+  });
+
+  // hover a green answer span -> highlight its matching span(s) in the doc
+  wrap.onmouseover = e => {
+    const g = e.target.closest('.ans .g-yes');
+    if (!g || !g.dataset.doc) return;
+    const docEl = g.closest('.answer-col')?.querySelector('.doc-text')
+               ?? g.closest('td')?.querySelector('.doc-text');
+    if (!docEl) return;
+    for (const r of g.dataset.doc.split(',')) {
+      const [s, end] = r.split('-').map(Number);
+      for (let i = s; i < end; i++) {
+        docEl.querySelector(`[data-dt="${i}"]`)?.classList.add('dhl');
+      }
+    }
+  };
+  wrap.onmouseout = e => {
+    const g = e.target.closest('.ans .g-yes');
+    if (!g) return;
+    g.closest('tr')?.querySelectorAll('.dhl').forEach(el => el.classList.remove('dhl'));
+  };
+}
+
+function render() {
+  document.getElementById('controls').hidden = !models.length;
+  document.getElementById('dropzone').classList.toggle('compact', models.length > 0);
+  renderModels();
+  renderTable();
+}
+
+// ---------- file loading ----------
+
+async function loadFiles(fileList) {
+  const errors = [];
+  for (const f of fileList) {
+    try {
+      const obj = JSON.parse(await f.text());
+      models.push(parseEvalJson(f.name, obj));
+    } catch (e) {
+      errors.push(`${f.name}: ${e.message}`);
+    }
+  }
+  render();
+  if (errors.length) alert('Failed to load:\n' + errors.join('\n'));
+}
+
+const dz = document.getElementById('dropzone');
+const fi = document.getElementById('file-input');
+dz.onclick = () => fi.click();
+document.getElementById('add-btn').onclick = () => fi.click();
+fi.onchange = () => { loadFiles([...fi.files]); fi.value = ''; };
+dz.ondragover = e => { e.preventDefault(); dz.classList.add('dragover'); };
+dz.ondragleave = () => dz.classList.remove('dragover');
+dz.ondrop = e => {
+  e.preventDefault(); dz.classList.remove('dragover');
+  loadFiles([...e.dataTransfer.files].filter(f => f.name.endsWith('.json')));
+};
+
+document.getElementById('search').oninput = renderTable;
+document.getElementById('filter').onchange = () => { renderModels(); renderTable(); };
+document.getElementById('model-filter').onchange = renderTable;
+document.getElementById('sort-metric').onchange = renderTable;
+document.getElementById('expand-all').onclick = () => {
+  applyFilter(unionRows()).forEach(r => openRows.add(r.key));
+  renderTable();
+};
+document.getElementById('collapse-all').onclick = () => { openRows.clear(); renderTable(); };
+</script>
+</body>
+</html>

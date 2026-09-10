@@ -1,0 +1,20 @@
+{
+  "schema_v3": true,
+  "required_paths": true,
+  "repository_boundary": true,
+  "syntax": true,
+  "public_private_helper_parity": true,
+  "frozen_starter_parity": true,
+  "compiled_public_files_unchanged": 22,
+  "compiled_overlay_unchanged": true,
+  "declared_entrypoint": "verifiers/verify.py",
+  "compiler_loader_available": false,
+  "standard_compiler_rerun": false,
+  "accepted_compile": "Attempt 4 structural validation remains accepted",
+  "generated_launcher_adaptation": "Declared self_test_command passed on a copy of the actual compiled tree",
+  "generated_launcher_before_sha256": "94bc06c1ec07d125f2b5e61895bf8a2b6e85c9a90155b9b1f008d2da854c196c",
+  "generated_launcher_after_sha256": "f686240ea47f79c357780a16bb51e9d9493e646229d7a4ab05c5be1dfcbf94d3",
+  "integration_scope": "Actual generated shell launcher and substantive verifier; host paths relocated, expensive runner stubbed, root UID shim on non-root macOS only",
+  "model_calls": 0,
+  "gpu_sandboxes": 0
+}

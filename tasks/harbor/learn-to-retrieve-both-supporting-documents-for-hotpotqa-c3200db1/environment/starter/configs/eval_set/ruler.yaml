@@ -1,0 +1,3 @@
+defaults:
+  - /eval/tasks@ruler: ruler
+  - _self_

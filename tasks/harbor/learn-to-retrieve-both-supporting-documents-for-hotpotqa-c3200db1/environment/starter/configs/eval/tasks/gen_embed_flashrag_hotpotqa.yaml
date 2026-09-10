@@ -1,0 +1,18 @@
+defaults:
+  - /eval@eval: generation_embed
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: flashrag_hotpotqa
+  - _self_
+
+eval:
+  num_samples: 500
+  max_new_tokens: 512
+  metrics:
+    llm_judge_accuracy: {}
+dataset:
+  split: dev
+  seq_len: 1024
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 16
+  num_workers: 0
+  force_thinking: true

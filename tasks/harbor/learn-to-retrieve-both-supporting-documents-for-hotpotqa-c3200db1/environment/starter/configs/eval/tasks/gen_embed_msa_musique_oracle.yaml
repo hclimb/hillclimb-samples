@@ -1,0 +1,28 @@
+# Oracle-memory MuSiQue eval: generation_embed builds the memory bank from each
+# question's OWN gold pos_doc (msa qa-with-ids carries pos_doc text, no negatives),
+# so the model reads from the correct document only. Isolates reading/grounding from
+# retrieval (compare vs gen_large_mem_msa_musique corpus retrieval).
+defaults:
+  - /eval@eval: generation_embed
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: msa_musique_qa
+  - _self_
+
+eval:
+  type: generation_embed
+  num_samples: 128
+  max_new_tokens: 512
+  output_file: outputs/msa_musique_oracle.json
+  answer_slot_diag: true   # attach per-example positive-slot weight mass for the judge-verdict split
+  metrics:
+    llm_judge_accuracy: {}
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 16
+  num_workers: 0
+  force_thinking: true
+  provide_docs: true
+  batch_size: 16
+  shuffle: false

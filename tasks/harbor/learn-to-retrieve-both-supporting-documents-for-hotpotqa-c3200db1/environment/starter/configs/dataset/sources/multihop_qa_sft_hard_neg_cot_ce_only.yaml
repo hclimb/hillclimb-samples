@@ -1,0 +1,17 @@
+# Third arm alongside multihop_qa_sft_hard_neg (no CoT at all) and multihop_qa_sft_hard_neg_cot
+# (CoT in both the memory bank AND the CE target): this one sets ONLY think_field, not
+# cot_field. Same joined dataset (ragrawal36/multihop_qa_sft-hard-neg-cot), so `think` is
+# present on every row, but data/qa.py::qa_transform_item never sees a `cot_doc` key (that key
+# only gets set when cot_field is configured -- see data/utils.py::_docid_normalize) --
+# the memory bank is untouched, only the answer gets the <think>...</think> prefix.
+#
+# Isolates whether CoT-augmented generation targets alone (no retrieval shortcut) change
+# anything, as the middle point between "no CoT" and "CoT in both memory + CE". See the
+# "Ablation" section of wiki/experiments/2026-08-13-doc-access-per-query-loss-investigation.md.
+hf_name: "ragrawal36/multihop_qa_sft-hard-neg-cot"
+normalizer_type: "docid"
+corpus_path: "${oc.env:MULTIHOP_CORPUS,'~/hf_parquet/multihop_doc_corpus.arrow'}"
+max_neg_docs: null
+min_neg_docs: 2
+prompt_path: null
+think_field: "think"

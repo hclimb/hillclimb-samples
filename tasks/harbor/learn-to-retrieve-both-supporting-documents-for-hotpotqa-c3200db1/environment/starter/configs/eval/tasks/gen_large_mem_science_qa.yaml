@@ -1,0 +1,35 @@
+defaults:
+  - /eval@eval: generation_large_mem
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: science_qa_synthetic_cot
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: science_docs
+  - _self_
+
+eval:
+  num_samples: 64
+  max_new_tokens: 512
+  metrics:
+    llm_judge_accuracy: {}
+  doc_dataset:
+    max_docs: 5000
+dataset:
+  split: validation
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 4
+  num_workers: 0
+  force_thinking: false
+  batch_size: 8
+
+rag:
+  doc_dataset: vm2825/nemotron-cc-v21-Parsed-QA4-filtered-1.7B-evensplit-RQ-8B-val-docs
+  doc_column: pos_doc
+  query_dataset: ragrawal36/nemotron-cc-v21-Parsed-QA4-filtered-1.7B-evensplit-RQ-8B-CoT-8B1-parts-0-23
+  query_column: synthetic_question
+  query_gt_column: original_answer
+  num_queries: 64
+  gen_model: Qwen/Qwen3-4B
+  gen_tensor_parallel_size: 4
+  judge_model: Qwen/Qwen3-4B
+  judge_tensor_parallel_size: 4

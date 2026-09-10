@@ -1,0 +1,7 @@
+defaults:
+  - nll_science_qa
+  - override /dataset/sources@dataset: science_qa_no_cot
+  - _self_
+
+eval:
+  eval_steps: 20

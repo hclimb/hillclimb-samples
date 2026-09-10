@@ -1,0 +1,2 @@
+array_task	campaign_id	optimizer	setting	train	task	method	seed	status	run_dir	result_file	detail
+19	baseline9-layerwise-s43-20260721	adamw	triviaqa_nq	triviaqa	nq_open	LayerwiseOptA	43	evaluated	/data/users/leena/Dr.Post-Training/SFT/runs/campaigns/baseline9-layerwise-s43-20260721/triviaqa_nq_open-LayerwiseOptA-adamw-p0.05-lr1.00e-05-b8-v16-s43-Llama-3.2-1B	/data/users/leena/Dr.Post-Training/SFT/runs/campaigns/baseline9-layerwise-s43-20260721/triviaqa_nq_open-LayerwiseOptA-adamw-p0.05-lr1.00e-05-b8-v16-s43-Llama-3.2-1B/nq_open_results.json	evaluation completed and validated

@@ -1,0 +1,32 @@
+{
+  "native.tar.gz": {
+    "sha256": "ccfa809476977f0ca2ead8d60e8c70a04822d2d292b93ba748b95388e2e36da2",
+    "revision": "d302d1e622c27b5202efa20ed5d94fc77e862e9f",
+    "license": "MIT",
+    "source": "provided reconstructed SparsePrefillKernel/FlashMLA"
+  },
+  "cutlass.tar.gz": {
+    "sha256": "5a27f9415bc7fba596c28bfc2f2f61c7ecf94b58871319445ad6b14d6fd97379",
+    "upstream_sha256": "9f6c53320a85b4a570975e557918cde65168cd311f081920446c238437347dc6",
+    "source": "https://codeload.github.com/NVIDIA/cutlass/tar.gz/147f5673d0c1c3dcf66f78d677fd647e4a020219",
+    "revision": "147f5673d0c1c3dcf66f78d677fd647e4a020219",
+    "license": "BSD-3-Clause",
+    "selection": "include/, tools/util/include/, LICENSE.txt, README.md",
+    "file_count": 876
+  },
+  "container": {
+    "tag": "pytorch/pytorch:2.11.0-cuda13.0-cudnn9-devel",
+    "digest": "sha256:6e8a7a6dedf900096f90190f66f988e7e658cda4f1e6cbc7c17e3a38980a4f89"
+  },
+  "torch": {
+    "version": "2.11.0+cu130",
+    "source": "Bundled in the digest-pinned PyTorch image; observed in utils/incumbent/build.json, not a standalone PyPI wheel download",
+    "cuda": "13.0"
+  },
+  "incumbent": {
+    "record": "incumbent/build.json",
+    "sha256": "50c67a55f928077c181d0e0d196813bbab0507773c5f7bf7ed6e993aeeacc3a7",
+    "nvcc": "13.0.88",
+    "qualification": "Compiled unchanged source. Retained B200 execution passes all 22 cases and eight same-storage repeats; attempt-04/05 also provide corrected-clock paired runs. This artifact is only the immutable timing incumbent. Current construction/reference status is in adaptation_manifest.json."
+  }
+}

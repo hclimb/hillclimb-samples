@@ -1,0 +1,22 @@
+# Third arm: CoT feeds the CE target only, not the memory bank. See
+# configs/dataset/sources/multihop_qa_sft_hard_neg_cot_ce_only.yaml and the "Ablation" section
+# of wiki/experiments/2026-08-13-doc-access-per-query-loss-investigation.md. Literal copy of
+# multihop_hard_neg_full.yaml/multihop_hard_neg_full_cot_ablation.yaml with only the source
+# swapped, for the same "nothing about the base setup can drift silently" reason.
+defaults:
+  - /dataset/sources@sources.multihop_qa_sft_hard_neg_cot_ce_only: multihop_qa_sft_hard_neg_cot_ce_only
+  - _self_
+
+name: "qa"
+seq_len: 512
+doc_chunk_seq_len: 256
+num_chunks_per_doc: 256   # overridden to 224 at launch time for the main_model-unfrozen recipe (HBM) -- see the launch script
+batch_size: 8             # must be a multiple of device count (8 chips)
+shuffle: true
+chat_template: true
+provide_docs: true
+mask_prefix: true
+split: train
+num_workers: 16
+distill: false
+shuffle_seed: 42

@@ -1,0 +1,4 @@
+hf_name: vm2825/nemotron-cc-v21-Parsed-QA4-filtered-1.7B-evensplit-RQ-8B-val-docs
+#hf_name: vm2825/nemotron-cc-v21-Parsed-QA4-filtered-1.7B-evensplit-RQ-8B-val-docs
+split: train
+column: pos_doc

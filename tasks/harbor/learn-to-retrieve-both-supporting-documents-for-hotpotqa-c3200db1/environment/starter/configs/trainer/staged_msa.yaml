@@ -1,0 +1,57 @@
+defaults:
+  - standard
+  - _self_
+
+# Paper §3.3.1 two-phase optimization schedule.
+learning_rate: 1e-4
+steps: 20000
+ce_weight: 0.1
+
+aux_losses:
+  msa_route_loss:
+    enabled: true
+    weight: 1.0
+    temperature: 0.1
+  msa_route_acc:
+    enabled: true
+    weight: 0.0
+  # disable the qwen3_mem_embed losses inherited from standard.yaml
+  doc_access_loss:
+    enabled: false
+    weight: 0.0
+  doc_access_acc:
+    enabled: false
+    weight: 0.0
+  distillation_loss:
+    enabled: false
+    weight: 0.0
+  mem_uniform_kl:
+    enabled: false
+    weight: 0.0
+
+training_stages:
+  # Phase 1 — warm-up: L = 0.1·L_LLM + 1.0·L_aux, lr 1e-4 (warmup+constant).
+  - trainable_params: [".*"]
+    max_step: 4000
+    ce_weight: 0.1
+    warmup_frac: 0.1
+    aux_losses:
+      msa_route_loss:
+        weight: 1.0
+        temperature: 0.1
+      msa_route_acc:
+        weight: 0.0
+
+  # Phase 2 — main: L = 1.0·L_LLM + 0.1·L_aux, lr cosine 1e-4 → 6e-6.
+  - trainable_params: [".*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: cosine
+    warmup_frac: 0.05
+    min_lr: 6e-6
+    aux_losses:
+      msa_route_loss:
+        weight: 0.1
+        temperature: 0.1
+      msa_route_acc:
+        weight: 0.0

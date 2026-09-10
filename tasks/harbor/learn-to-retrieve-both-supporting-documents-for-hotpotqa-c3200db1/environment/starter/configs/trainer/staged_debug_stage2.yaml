@@ -1,0 +1,40 @@
+# DEBUG ONLY — the CONTROL for staged_debug_stage3.
+#
+# Identical to staged_debug_stage3 in every respect EXCEPT trainable_params, which is stage 2's
+# (main_model frozen). Warm-start the same checkpoint and it sees the same weights and the same
+# batches, so the ONLY variable is the trainable set.
+#
+# Why this matters: trainable_params should NOT be able to change the gradient — it only builds
+# optax's freeze mask, applied inside optimizer.update(), long after
+# grad_norm = optax.global_norm(grads) is taken from value_and_grad. (setup_optimizer_for_stage
+# also rebuilds model.forward with a new cfg, but the only field it changes is `use_lora`, which
+# no model code reads any more; and trainer.stop_grad_frozen — the one path that DOES put
+# trainable_params in the backward — is false in the runs under test, verified in their saved
+# .hydra/config.yaml.)
+#
+# CONFOUND — READ BEFORE TRUSTING A RESULT FROM THIS PAIR. These arms differ in TWO ways, not one:
+# main_model becomes trainable AND main_model therefore starts getting UPDATED. With
+# trainer.steps=20, warmup_frac=0.1 => warmup_steps=2, so stage 3 reaches the 1e-4 peak LR in 2
+# steps — while the real run NaN'd at LR=1e-8 with Adam count=0, i.e. before any update landed.
+# So a stage3-only NaN here does NOT establish that trainable_params reaches the backward; it is
+# equally consistent with "updating the 4B at 1e-4 diverges within a few steps" — a different bug
+# from the one under investigation. Observed: stage2 0/20 NaN, stage3 7/20 NaN — confounded.
+# To decouple, pin the LR so the weights cannot move (LR=1e-8 => ~1e-7 total drift over 20 steps):
+#   RESUME_FROM=... LR=1e-8 TRAINER=staged_debug_stage3 bash scripts/embed/debug_stage3_nan.sh
+#   NaN at step 0 under LR=1e-8 => the backward at W_ckpt is stage-dependent => that is the bug.
+#   clean 20/20 under LR=1e-8   => the 7/20 above was divergence, and the real run's first-step
+#                                  NaN at LR=1e-8 still needs an explanation elsewhere.
+defaults:
+  - staged_telemetry
+  - _self_
+
+training_stages:
+  # staged.yaml stage 2, verbatim, except max_step (this is a short debug run).
+  - trainable_params: [".*mem_.*", ".*embed_model.*"]
+    max_step: ${trainer.steps}
+    ce_weight: 1.0
+    lr_schedule: cosine
+    warmup_frac: 0.1
+    aux_losses:
+      doc_access_loss:
+        weight: 0.1

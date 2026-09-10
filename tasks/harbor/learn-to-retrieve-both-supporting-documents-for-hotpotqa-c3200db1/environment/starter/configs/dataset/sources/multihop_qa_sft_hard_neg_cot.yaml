@@ -1,0 +1,30 @@
+# Ablation variant of multihop_qa_sft_hard_neg: same mined hard-negative rows, but each row's
+# question|answer|pos_doc_ids|neg_doc_ids is additionally joined against ragrawal36/
+# multihop_qa_sft's `think` field by exact question-text match (datagen/join_multihop_cot.py --
+# 100.00% match rate, 1,341,045/1,341,045 rows; ~5.5% of questions had duplicate/conflicting
+# think text in the source, first occurrence kept -- see the ablation section of
+# wiki/experiments/2026-08-13-doc-access-per-query-loss-investigation.md).
+#
+# Two independent knobs, both enabled here (rohunagrawal: 2026-08-13, wants CoT feeding CE too,
+# not just retrieval):
+#   - cot_field enables data/qa.py::qa_transform_item's CoT-as-positive-doc injection: `think`
+#     text appended as an EXTRA positive document in the memory bank.
+#   - think_field (data/utils.py::_docid_normalize's pre-existing mechanism) prepends the same
+#     `think` text into the answer as `<think>...</think>`, which IS part of the CE/generation
+#     target (mask_prefix only zeroes the prompt, not the think+answer span).
+# With both set, this is no longer a single-variable ablation against multihop_qa_sft_hard_neg
+# -- retrieval AND CE both see the CoT now. See the "Ablation" section of
+# wiki/experiments/2026-08-13-doc-access-per-query-loss-investigation.md for the up-to-date
+# framing.
+#
+# Stage first: python datagen/download_multihop_hardneg.py (corpus + doc-id resolution, shared
+# with multihop_qa_sft_hard_neg) then python datagen/download_multihop_hardneg_cot.py (this
+# source's rows table).
+hf_name: "ragrawal36/multihop_qa_sft-hard-neg-cot"
+normalizer_type: "docid"
+corpus_path: "${oc.env:MULTIHOP_CORPUS,'~/hf_parquet/multihop_doc_corpus.arrow'}"
+max_neg_docs: null
+min_neg_docs: 2
+prompt_path: null
+cot_field: "think"
+think_field: "think"

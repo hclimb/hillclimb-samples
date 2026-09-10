@@ -1,0 +1,3 @@
+Recall the passage from your memory that is most similar to the following text, and write out that passage.
+
+{question}

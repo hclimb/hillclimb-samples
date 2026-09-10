@@ -1,0 +1,102 @@
+defaults:
+  - /eval/tasks@gen_embed_msmarco_32k:   gen_embed_flashrag_msmarcoqa
+  - /eval/tasks@gen_embed_msmarco_64k:   gen_embed_flashrag_msmarcoqa
+  - /eval/tasks@gen_embed_msmarco_128k:  gen_embed_flashrag_msmarcoqa
+  - /eval/tasks@gen_embed_msmarco_256k:  gen_embed_flashrag_msmarcoqa
+  - /eval/tasks@gen_embed_msmarco_512k:  gen_embed_flashrag_msmarcoqa
+  - /eval/tasks@gen_embed_msmarco_1M:    gen_embed_flashrag_msmarcoqa
+  - /eval/tasks@gen_embed_hotpotqa_32k:  gen_embed_flashrag_hotpotqa
+  - /eval/tasks@gen_embed_hotpotqa_64k:  gen_embed_flashrag_hotpotqa
+  - /eval/tasks@gen_embed_hotpotqa_128k: gen_embed_flashrag_hotpotqa
+  - /eval/tasks@gen_embed_hotpotqa_256k: gen_embed_flashrag_hotpotqa
+  - /eval/tasks@gen_embed_hotpotqa_512k: gen_embed_flashrag_hotpotqa
+  - /eval/tasks@gen_embed_hotpotqa_1M:   gen_embed_flashrag_hotpotqa
+  - _self_
+
+# MS MARCO: num_chunks_per_doc=4, doc_chunk_seq_len=256 → 1024 tokens/example
+# batch_size × 1024 = total memory tokens
+gen_embed_msmarco_32k:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 32    #   32k mem tokens
+
+gen_embed_msmarco_64k:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 64    #   64k mem tokens
+
+gen_embed_msmarco_128k:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 128   #  128k mem tokens
+
+gen_embed_msmarco_256k:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 256   #  256k mem tokens
+
+gen_embed_msmarco_512k:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 512   #  512k mem tokens
+
+gen_embed_msmarco_1M:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 1024  # 1048k mem tokens
+
+# HotpotQA: num_chunks_per_doc=16, doc_chunk_seq_len=256 → 4096 tokens/example
+# batch_size × 4096 = total memory tokens
+gen_embed_hotpotqa_32k:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 8     #   32k mem tokens
+
+gen_embed_hotpotqa_64k:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 16    #   64k mem tokens
+
+gen_embed_hotpotqa_128k:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 32    #  128k mem tokens
+
+gen_embed_hotpotqa_256k:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 64    #  256k mem tokens
+
+gen_embed_hotpotqa_512k:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 128   #  512k mem tokens
+
+gen_embed_hotpotqa_1M:
+  eval:
+    num_samples: 256
+    lookup_chunk_size: 8192
+  dataset:
+    batch_size: 256   # 1048k mem tokens

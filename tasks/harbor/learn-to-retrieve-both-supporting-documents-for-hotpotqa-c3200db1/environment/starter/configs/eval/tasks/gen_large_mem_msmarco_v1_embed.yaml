@@ -1,0 +1,38 @@
+# Corpus-size sweep eval for MEM_EMBED models (e.g. qwen3_mem_embed) on MS MARCO v1.
+# Same data as the oracle eval (msa_msmarco_v1_qa queries + msa_msmarco_v1_docs corpus) so
+# results are comparable to the batch oracle bs=N runs — but uses the generation_large_mem
+# evaluator (builds ONE memory bank from a corpus of `eval.doc_dataset.max_docs` docs, then all
+# queries retrieve from it). Sweep corpus size via +eval.doc_dataset.max_docs=<N>. Reports
+# llm_judge_accuracy + lexical_grounding + doc_access_acc. n via eval.num_samples.
+defaults:
+  - /eval@eval: generation_large_mem
+  - /dataset@dataset: qa
+  - /dataset/sources@dataset: msa_msmarco_v1_qa
+  - /dataset@eval.doc_dataset: documents
+  - /dataset/sources@eval.doc_dataset: msa_msmarco_v1_docs
+  - _self_
+
+eval:
+  num_samples: 128
+  output_file: outputs/msmarco_v1_embed.json
+  max_new_tokens: 512
+  doc_access_acc: true
+  inject_query_gold: true
+  metrics:
+    llm_judge_accuracy: {}
+    lexical_grounding: {}
+  doc_dataset:
+    max_docs: null
+    max_chunks_per_doc: 1
+    chunk_size: 256
+
+dataset:
+  split: train
+  seq_len: 512
+  doc_chunk_seq_len: 256
+  num_chunks_per_doc: 1
+  num_workers: 0
+  force_thinking: true
+  provide_docs: true
+  batch_size: 16
+  shuffle: false

@@ -1,0 +1,52 @@
+# Grounding Stage 2: separate KEY / VALUE models (stacks on Stage 1 arch).
+# embed_model = KEY model (contrastive trunk, topical routing keys).
+# value_model = base-LM VALUE model, trainable — base-LM per-token hiddens carry surface
+# form (dates/names) that the contrastive trunk homogenizes away. See grounding plan Stage 2.
+name: qwen3_mem_embed
+trainable_params: [".*mem_.*", ".*embed_model.*", ".*value_model.*"]
+
+main_model:
+  model_id: Qwen/Qwen3-4B
+  load_weights: true
+
+memory:
+  mem_layers: [9, 14, 20, 27]   # Stage 1 multi-layer, carried forward
+  mem_size: 16384
+  mem_num_heads: 4
+  mem_k_dim: 1024
+  mem_v_dim: 1024
+  mem_top_k: 128
+  mem_use_product_keys: false
+  mem_placement: "after_attention"
+  mem_use_gating: false
+  mem_lookup_chunk_size: null
+  two_pass_topk: false
+  mem_collect_full_scores: true
+  mem_o_proj_zero_init: true     # Stage 1 zero-init, carried forward
+  span_window: 0                 # Stage 3 turns this on; 0 = no span readout here
+
+# KEY model (contrastive embedding trunk, bidirectional)
+embed_model:
+  model_id: Qwen/Qwen3-Embedding-0.6B
+  load_weights: true
+  lora:
+    enabled: false
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]
+    rank: 256
+    alpha: 256
+  mask_type: 'bidirectional'
+  embed_conv: true
+  embed_conv_kernel_size: 1
+  embed_conv_stride: 1
+
+# VALUE model (base LM, bidirectional so a value at the cue can carry a following date).
+# No conv on the value path (value_forward reads last_hidden directly). Trainable in Stage B.
+value_model:
+  model_id: Qwen/Qwen3-0.6B-Base
+  load_weights: true
+  lora:
+    enabled: false
+    params: [".*gate_proj", ".*up_proj", ".*down_proj"]
+    rank: 256
+    alpha: 256
+  mask_type: 'bidirectional'

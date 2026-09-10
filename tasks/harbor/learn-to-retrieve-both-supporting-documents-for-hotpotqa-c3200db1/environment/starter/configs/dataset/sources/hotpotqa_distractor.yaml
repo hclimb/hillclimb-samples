@@ -1,0 +1,4 @@
+hf_name: "hotpotqa/hotpot_qa"
+hf_config: "distractor"
+normalizer_type: "hotpotqa"
+prompt_path: null
