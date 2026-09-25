@@ -1,5 +1,0 @@
-model_profile: qwen3_4b
-model: Qwen/Qwen3-4B-Base
-model_revision: 906bfd4b4dc7f14ee4320094d8b41684abff8539
-tokenizer: Qwen/Qwen3-4B-Base
-tokenizer_revision: 906bfd4b4dc7f14ee4320094d8b41684abff8539

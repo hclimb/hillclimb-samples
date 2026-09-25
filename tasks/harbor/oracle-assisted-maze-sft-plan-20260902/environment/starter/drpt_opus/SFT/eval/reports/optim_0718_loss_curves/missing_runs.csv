@@ -1,5 +1,0 @@
-setting,optimizer,optimizer_display,method,status,reason,run_dir
-alpaca_samsum,hybrid,Muon (hybrid),GlobalSoft,incomplete,missing training completion marker or model.safetensors,/data/users/leena/Dr.Post-Training/SFT/runs/alpaca_samsum-GlobalSoft-hybrid-p0.4-lr1.00e-05-b8-v16-s42-Llama-3.2-1B
-less_squad,hybrid,Muon (hybrid),GlobalSoft,incomplete,missing training completion marker or model.safetensors,/data/users/leena/Dr.Post-Training/SFT/runs/less_squad-GlobalSoft-hybrid-p0.005-lr1.00e-05-b8-v16-s42-Llama-3.2-1B
-less_tydiqa,hybrid,Muon (hybrid),GlobalSoft,incomplete,missing training completion marker or model.safetensors,/data/users/leena/Dr.Post-Training/SFT/runs/less_tydiqa-GlobalSoft-hybrid-p0.005-lr1.00e-05-b8-v16-s42-Llama-3.2-1B
-triviaqa_nq,hybrid,Muon (hybrid),GlobalSoft,incomplete,missing training completion marker or model.safetensors,/data/users/leena/Dr.Post-Training/SFT/runs/triviaqa_nq_open-GlobalSoft-hybrid-p0.05-lr1.00e-05-b8-v16-s42-Llama-3.2-1B

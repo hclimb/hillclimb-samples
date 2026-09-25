@@ -1,2 +1,0 @@
-campaign_id	family	seed	training_dependency	dependency_mode	report_job_id	profile	status	git_revision
-loss52-capped-k4-tf32-s42-20260720	adamw	42	83200	afterany	83257	loss52-adamw	submitted	cf8d8fd

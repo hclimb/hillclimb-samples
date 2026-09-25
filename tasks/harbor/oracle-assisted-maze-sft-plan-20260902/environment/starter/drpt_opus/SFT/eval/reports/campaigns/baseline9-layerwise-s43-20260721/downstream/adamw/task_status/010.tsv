@@ -1,2 +1,0 @@
-array_task	campaign_id	optimizer	setting	train	task	method	seed	status	run_dir	result_file	detail
-10	baseline9-layerwise-s43-20260721	adamw	less_tydiqa	less	tydiqa	FullTraining	43	evaluated	/data/users/leena/Dr.Post-Training/SFT/runs/campaigns/baseline9-layerwise-s43-20260721/less_tydiqa-FullTraining-adamw-p0.005-lr1.00e-05-b8-v16-s43-Llama-3.2-1B	/data/users/leena/Dr.Post-Training/SFT/runs/campaigns/baseline9-layerwise-s43-20260721/less_tydiqa-FullTraining-adamw-p0.005-lr1.00e-05-b8-v16-s43-Llama-3.2-1B/tydiqa_results.json	evaluation completed and validated

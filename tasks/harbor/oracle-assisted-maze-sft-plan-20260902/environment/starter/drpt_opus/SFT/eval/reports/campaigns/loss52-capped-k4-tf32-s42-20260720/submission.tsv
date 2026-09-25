@@ -1,2 +1,0 @@
-campaign_id	seed	array	training_job_id	report_job_id	soft_constraint	tf32	partition	time_limit	max_steps	status	git_revision
-loss52-capped-k4-tf32-s42-20260720	42	0-51%5	83200	83201	capped_simplex_k4	True	gpu02	3-00:00:00	full	submitted	37b231d040aafc2369aea88c0d6458afd1985543

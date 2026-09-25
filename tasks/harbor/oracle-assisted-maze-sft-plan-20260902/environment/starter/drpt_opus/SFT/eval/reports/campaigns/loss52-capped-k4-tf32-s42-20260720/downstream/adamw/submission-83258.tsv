@@ -1,2 +1,0 @@
-campaign_id	optimizer	seed	array	training_dependency	dependency_mode	evaluation_job_id	collector_job_id	n_test	batch_size	max_new_tokens	force	git_revision
-loss52-capped-k4-tf32-s42-20260720	adamw	42	0-27%4	83200	afterany	83258	83259	500	64	128	false	cf8d8fddbc08300aab56e5e6172a1724f0a1930c

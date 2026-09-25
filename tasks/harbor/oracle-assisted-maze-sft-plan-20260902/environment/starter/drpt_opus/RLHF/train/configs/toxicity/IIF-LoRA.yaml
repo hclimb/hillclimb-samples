@@ -1,4 +1,0 @@
-# IIF: offline pre-filtering of rollout before PPO epochs
-method: IIF
-finetuning: LoRA
-

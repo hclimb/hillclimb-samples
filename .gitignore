@@ -1,0 +1,7 @@
+/writeup.md
+/writeup_images/
+briefings/
+.env
+*.pyc
+/jobs/
+/tasks/werm/

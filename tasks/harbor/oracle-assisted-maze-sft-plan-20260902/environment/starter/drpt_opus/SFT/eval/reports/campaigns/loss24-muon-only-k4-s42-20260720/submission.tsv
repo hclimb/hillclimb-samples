@@ -1,2 +1,0 @@
-campaign_id	family	seed	array	training_job_id	report_job_id	methods	runtime_optimizer	soft_constraint	tf32	partition	time_limit	max_steps	status	git_revision
-loss24-muon-only-k4-s42-20260720	muon	42	0-23%5	83250	83251	6	muon_hybrid_runtime_matrix_scoring	capped_simplex_k4	True	gpu02	3-00:00:00	full	submitted	cf8d8fddbc08300aab56e5e6172a1724f0a1930c

@@ -1,2 +1,0 @@
-array_task	campaign_id	optimizer	setting	train	task	method	seed	status	run_dir	result_file	detail
-7	loss24-muon-only-k4-s42-20260720	muon	less_squad	less	squad	GlobalRaw	42	evaluated	/data/users/leena/Dr.Post-Training/SFT/runs/campaigns/loss24-muon-only-k4-s42-20260720/less_squad-GlobalRaw-muon-p0.005-lr1.00e-05-b8-v16-s42-Llama-3.2-1B	/data/users/leena/Dr.Post-Training/SFT/runs/campaigns/loss24-muon-only-k4-s42-20260720/less_squad-GlobalRaw-muon-p0.005-lr1.00e-05-b8-v16-s42-Llama-3.2-1B/squad_results.json	evaluation completed and validated

@@ -1,2 +1,0 @@
-campaign_id	profile	model_profile	optimizer	seed	array	training_dependency	dependency_mode	evaluation_job_id	collector_job_id	n_test	batch_size	max_new_tokens	force	artifact_build_id	git_revision
-dolci32k-qwen3_4b-s42	dolci32k	qwen3_4b	muon	42	0-55%4	6823:6824	afterany	6830	6831	-1	1	task-policy	false	68215f282c0954521df63ca2bbe2fbf626817e14e4041c773c205d87bab5f9ae	5642b2b5815248b5f9340aa2b7dcac8cad61a012

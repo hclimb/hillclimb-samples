@@ -1,3 +1,0 @@
-campaign_id	profile	family	seed	array	training_job_id	report_job_id	methods	runtime_optimizer	soft_constraint	tf32	partition	time_limit	max_steps	status	git_revision
-baseline9-layerwise-s43-20260721	baseline9	adamw	43	0-19%4	83322	83323	5	adamw	capped_and_probability_simplex	True	gpu01	3-00:00:00	full	submitted	9ff4d3cf3e4a2648d0e6923e781da2eb2f5457b9
-baseline9-layerwise-s43-20260721	baseline9	muon	43	0-31%4	83324	83325	8	muon_hybrid_runtime_matrix_scoring	capped_and_probability_simplex	True	gpu01	3-00:00:00	full	submitted	9ff4d3cf3e4a2648d0e6923e781da2eb2f5457b9
