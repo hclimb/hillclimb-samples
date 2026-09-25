@@ -1,16 +1,16 @@
 {
-  "version": 4,
+  "version": 5,
   "profile_seed": 20260904,
   "scale": 0.032352028870043036,
-  "metric": "estimated_dense_bf16_roofline",
+  "metric": "paired_throughput_ratio",
   "roofline_model": {
     "name": "estimated_dense_bf16_roofline",
     "dense_bf16_flops_per_second": 2250000000000000.0,
     "hbm_bytes_per_second": 8000000000000.0
   },
   "reward_normalization": {
-    "starter_efficiency": 0.2938167337239794,
-    "ideal_efficiency": 1
+    "formula": "candidate_rate / baseline_rate",
+    "baseline": "remeasured frozen incumbent on the same GPU"
   },
   "warmup_calls": 32,
   "timed_calls": 128,

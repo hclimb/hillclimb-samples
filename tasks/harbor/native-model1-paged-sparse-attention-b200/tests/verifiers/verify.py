@@ -1,4 +1,4 @@
-"""Run candidate-only verification against the declared roofline estimate."""
+"""Measure candidate and frozen baseline throughput on the same GPU."""
 
 import secrets
 from pathlib import Path

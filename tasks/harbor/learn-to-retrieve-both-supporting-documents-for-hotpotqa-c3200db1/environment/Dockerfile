@@ -9,4 +9,6 @@ RUN apt-get update && \
 RUN python -m pip install --no-cache-dir pytest torch==2.9.1 transformers==4.57.6 tokenizers==0.22.2 numpy==2.2.6 safetensors==0.7.0 huggingface_hub==0.36.0
 COPY checkpoint.sh /usr/local/bin/checkpoint.sh
 RUN chmod 0555 /usr/local/bin/checkpoint.sh
+COPY stop_agent_processes.sh /usr/local/libexec/stop_agent_processes.sh
+RUN chmod 0555 /usr/local/libexec/stop_agent_processes.sh
 COPY starter/ /environment/starter/

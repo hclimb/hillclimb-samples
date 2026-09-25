@@ -1,0 +1,37 @@
+{
+  "description": "MuSiQue accuracy x throughput Pareto, v2 (2026-07-21): adds the RAG->memory hybrid, oracle-50, and SnapKV context-stuffing baselines to the 2026-07-19 systems. Judge Qwen3-4B, n=128, same corpora (inject_query_gold). Throughput: RAG/mem values from the 07-19 measured primitives; SnapKV measured directly (median wall-clock incl. per-query corpus re-streaming). SnapKV c2048 accuracy pending (run in flight).",
+  "systems": {
+    "rag_top5": {
+      "acc": {"512": 0.3906, "2048": 0.3281},
+      "qps": {"512": 0.579, "2048": 0.579},
+      "source": "2026-07-19 pareto page"
+    },
+    "mem_full_bank_hardneg750": {
+      "acc": {"512": 0.2810, "2048": 0.3125},
+      "qps": {"512": 0.505, "2048": 0.478},
+      "source": "2026-07-19 pareto page (best-ladder throughput at matched bank)"
+    },
+    "hybrid_rag50_mem_hardneg750": {
+      "acc": {"512": 0.3984, "2048": 0.2734},
+      "qps": {"512": 0.505, "2048": 0.505},
+      "note": "throughput ~= mem decode floor at <=131k-slot scan + negligible retrieval; not separately measured",
+      "source": "gs://memory-layers-training/musique_sft_midtrain_...-17-35-52/eval/step_750/musique_c{512,2048}_hybrid_k50.json"
+    },
+    "hybrid_rag50_mem_ground4layer1500": {
+      "acc": {"512": 0.3984},
+      "source": "gs://memory-layers-training/musique_ground4layer_...-00-52-42/eval/step_1500/musique_c512_hybrid_k50.json"
+    },
+    "oracle50_mem_hardneg750": {
+      "acc": {"512": 0.4844, "2048": 0.4531},
+      "note": "perfect-retrieval ceiling, not a deployable system point",
+      "source": "gs://.../musique_c{512,2048}_hybrid_oracle_fill50.json"
+    },
+    "snapkv_qwen3_4b": {
+      "acc": {"512": 0.5312},
+      "qps": {"512": 0.0134},
+      "comp": {"512": 4, "2048": 16},
+      "note": "faithful question-conditioned streaming SnapKV; per-query corpus re-stream; c2048 stopped at 71/128 queries (unjudged partial preserved)",
+      "source": "gs://memory-layers-training/pareto/snapkv/snapkv_musique_c512_comp4.json"
+    }
+  }
+}

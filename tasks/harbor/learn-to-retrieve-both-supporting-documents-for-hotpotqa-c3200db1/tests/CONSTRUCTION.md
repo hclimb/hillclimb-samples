@@ -1,3 +1,7 @@
+> Historical construction record: scoring claims below describe earlier revisions.
+> The current bounded linear score and fresh controls are documented in
+> `../README.md` and `calibration/timing.json`.
+
 # Candidate status
 
 This is a separate BERT-Tiny candidate, not an update to the released task.
@@ -70,7 +74,7 @@ tests the exact public command from its solver file view, compares control and t
 training seeds per recipe, records hardware/logs, and terminates its sandbox in `finally`.
 The qualification reference directory is root-only and is not part of the solver overlay.
 Check `evidence` for actual observations; do not infer runtime or quality from this design.
-The three standard six-hour solver trials require the external solver harness; they
+The three standard one-hour solver trials require the external solver harness; they
 are not replaceable by three random seeds or builder-authored experiments.
 Use `--mode boundary --compiled-task PATH` to build from the actual generated
 Dockerfile and solver tree and execute its adapted `tests/test.sh`. Public commands
@@ -80,7 +84,7 @@ run as an unprivileged user with no access to the evaluator or reference solutio
 
 Do not mark this candidate released until the real OptimizationBuildPlan loader,
 compiled public command, Linux boundary tests, repeated-seed reference improvement,
-private paired execution and three six-hour solver trials have all completed.
+private paired execution and three one-hour solver trials have all completed.
 The Taskforge schema loader/compiler is not importable in the construction Python.
 The Werm CLI and historical generated task are available, but the standard solver-job
 configuration is not supplied. Its dotenv auto-discovery also needs disabling in this

@@ -17,7 +17,7 @@ artifacts = [
 
 [task]
 name = "hillclimb/native-model1-paged-sparse-attention-b200"
-description = "Optimize fixed-workload native MODEL1 attention on one B200: batch128, query length3, heads128, 128+1024 selected entries, 32k positions per cache region. Reward anchors warmed estimated dense-BF16 roofline efficiency at zero for the calibrated starter and one for the estimated roofline. All original settings remain correctness gates."
+description = "Optimize fixed-workload native MODEL1 attention on one B200: batch128, query length3, heads128, 128+1024 selected entries, 32k positions per cache region. Reward is bounded linear progress from the paired starter throughput to the best observed throughput ratio. All original settings remain correctness gates."
 keywords = ["cuda", "blackwell", "sparse-attention", "fp8", "batched-throughput"]
 
 [[task.authors]]
@@ -28,18 +28,23 @@ email = "enterprise@hillclimb.com"
 difficulty = "hard"
 category = "coding"
 tags = ["optifine", "optimization", "cuda", "blackwell", "sparse-attention", "fp8", "batched-throughput"]
-description = """Optimize fixed-workload native MODEL1 attention on one B200: batch128, query length3, heads128, 128+1024 selected entries, 32k positions per cache region. Reward anchors warmed estimated dense-BF16 roofline efficiency at zero for the calibrated starter and one for the estimated roofline. All original settings remain correctness gates."""
-estimated_time_minutes = 360
-primary_metric = "estimated_dense_bf16_roofline"
+description = """Optimize fixed-workload native MODEL1 attention on one B200: batch128, query length3, heads128, 128+1024 selected entries, 32k positions per cache region. Reward is bounded linear progress from the paired starter throughput to the best observed throughput ratio. All original settings remain correctness gates."""
+estimated_time_minutes = 60
+primary_metric = "paired_throughput_ratio"
 package_id = "approved-plan"
 
 [verifier]
-timeout_sec = 3600.0
+timeout_sec = 5400.0
 environment_mode = "separate"
 network_mode = "no-network"
 
+# Stop processes the agent left running before the workspace is collected.
+[[verifier.collect]]
+command = "bash /usr/local/libexec/stop_agent_processes.sh"
+timeout_sec = 60
+
 [agent]
-timeout_sec = 21600.0
+timeout_sec = 3600.0
 network_mode = "no-network"
 
 [environment]

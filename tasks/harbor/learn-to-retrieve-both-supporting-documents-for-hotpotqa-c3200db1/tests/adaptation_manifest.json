@@ -32,5 +32,12 @@
   "inference": {"shared_weights": true, "query_tokens": 64, "document_tokens": 256, "pooling": "attention-mask mean including special tokens; float32; L2-normalized", "precision": "bfloat16 forward autocast, float32 cosine", "ranking": "single-pass cosine descending; ties by ascending corpus row ID", "returned_documents": 10, "second_hop": false, "gpu_usage": "One GPU for trusted inference, two available; starter uses both for training"},
   "budgets": {"training_seconds": 900, "retrieval_seconds": 600, "paired_total_phase_limit": 3000, "verifier_limit": 3600, "warmups": 0, "candidate_preparation": "Source snapshot is charged to training; data parsing, tokenization and negative mining are also timed. Weight transfer/loading, corpus encoding and sorting are charged to retrieval."},
   "qualification_policy": "Compare control and repeated starter/reference public seeds, then three independent one-hour solver trials. Never tune on private results. Do not release if meaningful gains or capacity cannot be demonstrated.",
-  "source_license": "The reconstructed memory-layers source license was not established in the provided plan. Do not invent a license."
+  "source_license": "The reconstructed memory-layers source license was not established in the provided plan. Do not invent a license.",
+  "reward_ratio_revision": {
+    "date": "2026-09-21",
+    "formula": "valid ? ndcg_at10 / 0.446 : 0",
+    "baseline": "fixed calibrated nDCG 0.446; paired measured baseline remains diagnostic",
+    "history": "Earlier measurements retain their recorded reward scales.",
+    "validation": "validation/reward-ratios/README.md"
+  }
 }

@@ -1,0 +1,64 @@
+{
+  "previous_calibration": {},
+  "linear_best_score": {
+    "formula": "For a valid submission, progress = (C - B) / (0.715285038072705 - B), where C is candidate mean nDCG@10 and B is the frozen starter remeasured on the same panel. Reward = clip((progress - 0.01) / 0.98, 0, 1). The 1% margin is a fraction of the starter-to-best gap at each end: progress up to 0.01 scores 0 and progress from 0.99 scores 1. Invalid submissions score 0. Every non-smoke quality run measures the starter; --paired remains accepted.",
+    "source_record": "/data/pranav-work/experiments/reward-ratio-rollouts-20260922-r2/jobs/reward-ratios-fable-3h-20260922T023932Z/learn-to-retrieve-both-supportin__gLoDw6S/waypoints/verification/139f07c6508c8664c007a12e2f81a2bbd29eb32dccdef9b434bb88cc215622e6/record.json",
+    "recorded_best": {
+      "valid": 1,
+      "reward": 1.6037781122706392,
+      "baseline_ndcg": 0.4610020179916334,
+      "ndcg_at10": 0.715285038072705
+    },
+    "validation_status": "fresh margin controls passed",
+    "margin": {
+      "fraction": 0.01,
+      "units": "starter-to-best gap",
+      "formula": "clip((linear_progress - 0.01) / 0.98, 0, 1)",
+      "validation_status": "fresh controls passed"
+    },
+    "previous_controls_without_margin": {
+      "baseline": {
+        "rewards": {
+          "valid": 1,
+          "reward": 0.0,
+          "baseline_ndcg": 0.4610020179916334,
+          "ndcg_at10": 0.4610020179916334
+        },
+        "result": "/data/pranav-work/experiments/linear-best-score-20260924/jobs/starter-and-best-controls/learn-to-retrieve-both-supportin__dLn8qkp/result.json",
+        "task_checksum": "cb2d9ff4a62cc8eeebf6bd201a9a132c7494ef0e0e2bc4393f678e0d46bcebff"
+      },
+      "solution": {
+        "rewards": {
+          "valid": 1,
+          "reward": 0.9947897319400609,
+          "baseline_ndcg": 0.4610020179916334,
+          "ndcg_at10": 0.7139601553749918
+        },
+        "result": "/data/pranav-work/experiments/linear-best-score-20260924/jobs/starter-and-best-controls/learn-to-retrieve-both-supportin__xCXco8V/result.json",
+        "task_checksum": "cb2d9ff4a62cc8eeebf6bd201a9a132c7494ef0e0e2bc4393f678e0d46bcebff"
+      }
+    },
+    "controls": {
+      "nop": {
+        "rewards": {
+          "valid": 1,
+          "reward": 0.0,
+          "baseline_ndcg": 0.4610020179916334,
+          "ndcg_at10": 0.4610020179916334
+        },
+        "result": "/data/pranav-work/experiments/linear-best-score-20260924/jobs/starter-and-best-margin-controls/learn-to-retrieve-both-supportin__dTymfnU/result.json",
+        "task_checksum": "6d2e92b8878a10e3b207457dd0b140b799f8786235372326fc0ff3b92df75b21"
+      },
+      "oracle": {
+        "rewards": {
+          "valid": 1,
+          "reward": 1.0,
+          "baseline_ndcg": 0.4610020179916334,
+          "ndcg_at10": 0.7139390405917426
+        },
+        "result": "/data/pranav-work/experiments/linear-best-score-20260924/jobs/starter-and-best-margin-controls/learn-to-retrieve-both-supportin__v2htXHr/result.json",
+        "task_checksum": "6d2e92b8878a10e3b207457dd0b140b799f8786235372326fc0ff3b92df75b21"
+      }
+    }
+  }
+}

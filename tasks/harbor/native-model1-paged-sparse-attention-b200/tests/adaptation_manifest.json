@@ -162,5 +162,14 @@
     "preflight_evidence": "/Users/prdev/Desktop/side_projects/taskforge/output/checkpoint-pathways-20260910/flash-probe",
     "probe_sandbox_terminated": true,
     "evidence": "internal/qualification/checkpoints-2026-09-10/summary.json"
+  },
+  "reward_ratio_revision": {
+    "date": "2026-09-21",
+    "formula": "valid ? candidate_rate / baseline_rate : 0",
+    "baseline": "packaged frozen incumbent, remeasured on the same allocated GPU every evaluation",
+    "measurement": "Nine matching seeds, alternating baseline/candidate and candidate/baseline; ratio of median-derived rates. Workloads, correctness gates and per-worker timing unchanged.",
+    "failures": "Baseline or infrastructure failures produce no reward; invalid candidates score zero.",
+    "history": "Earlier measurements retain their recorded reward scales.",
+    "validation": "validation/reward-ratios/README.md"
   }
 }

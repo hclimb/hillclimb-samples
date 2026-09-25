@@ -51,7 +51,7 @@ difficulty = "hard"
 category = "coding"
 tags = ["optifine", "optimization", "HotpotQA", "BERT-Tiny", "retrieval", "training", "multi-hop"]
 description = """Train one plain pretrained BERT-Tiny to rank both supporting documents in real HotpotQA shared corpora, within a fixed training budget."""
-estimated_time_minutes = 360
+estimated_time_minutes = 60
 primary_metric = "ndcg_at10"
 
 [verifier]
@@ -59,8 +59,13 @@ timeout_sec = 3600.0
 environment_mode = "separate"
 network_mode = "no-network"
 
+# Stop processes the agent left running before the workspace is collected.
+[[verifier.collect]]
+command = "bash /usr/local/libexec/stop_agent_processes.sh"
+timeout_sec = 60
+
 [agent]
-timeout_sec = 21600.0
+timeout_sec = 3600.0
 network_mode = "no-network"
 
 [environment]

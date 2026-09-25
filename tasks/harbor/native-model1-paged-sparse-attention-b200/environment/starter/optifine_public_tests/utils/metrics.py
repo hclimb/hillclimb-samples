@@ -1,7 +1,7 @@
 import math
 import statistics
 
-from utils.protocol import REPETITIONS, STARTER_EFFICIENCY, TIMED_CALLS, TIMED_OUTPUT_CHECKS, WARMUP_CALLS
+from utils.protocol import REPETITIONS, TIMED_CALLS, TIMED_OUTPUT_CHECKS, WARMUP_CALLS
 from utils.roofline import estimate
 
 
@@ -10,16 +10,16 @@ def require_numerical(report):
         raise ValueError('Missing or failed output/LSE correctness evidence')
 
 
-def aggregate(candidate, cases, diagnostic_only=False):
+def measure(reports, cases, diagnostic_only=False):
     names = {case['name'] for case in cases}
     if not names or len(names) != len(cases):
         raise ValueError('Expected nonempty, unique correctness cases')
-    if len(candidate) != REPETITIONS:
-        raise ValueError(f'Expected {REPETITIONS} successful candidate runs')
+    if len(reports) != REPETITIONS:
+        raise ValueError(f'Expected {REPETITIONS} successful runs')
     scored = [case for case in cases if case['throughput_weight'] > 0]
     if len(scored) != 1 and not (diagnostic_only and not scored):
         raise ValueError('Expected one fixed scored workload')
-    for run in candidate:
+    for run in reports:
         if set(run['cases']) != names:
             raise ValueError('Every run must cover every requested correctness case')
         for case in cases:
@@ -27,9 +27,9 @@ def aggregate(candidate, cases, diagnostic_only=False):
             require_numerical(item['numerical'])
             require_numerical(item['same_storage'])
     if not scored:
-        return dict(valid=0, reward=0), dict(correctness_passed=True, diagnostic_only=True)
+        return dict(correctness_passed=True, diagnostic_only=True)
     case = scored[0]
-    measurements = [run['cases'][case['name']] for run in candidate]
+    measurements = [run['cases'][case['name']] for run in reports]
     for item in measurements:
         if (item.get('timed_calls') != TIMED_CALLS or item.get('warmup_calls') != WARMUP_CALLS or
                 item.get('distinct_queries') != TIMED_CALLS or item.get('snapshot_copies') != TIMED_OUTPUT_CHECKS):
@@ -49,13 +49,10 @@ def aggregate(candidate, cases, diagnostic_only=False):
     seconds = statistics.median(item['seconds'] for item in measurements)
     roofline = estimate(case)
     rate = case['batch'] * case['queries'] / seconds
+    if not math.isfinite(rate) or rate <= 0:
+        raise ValueError('Expected positive finite throughput')
     efficiency = roofline['ideal_seconds'] / seconds
-    normalized = (efficiency - STARTER_EFFICIENCY) / (1 - STARTER_EFFICIENCY)
-    reward = dict(valid=int(not diagnostic_only), reward=normalized if not diagnostic_only else 0,
-                  candidate_rate=rate, theoretical_rate=roofline['query_tokens_per_second'])
-    return reward, dict(metric=roofline['name'], scored_case=case['name'],
-                        median_seconds=seconds, candidate_rate=rate, roofline=roofline,
-                        estimated_roofline_efficiency=efficiency,
-                        starter_efficiency_anchor=STARTER_EFFICIENCY,
-                        exceeds_estimated_roofline=efficiency > 1,
-                        correctness_passed=True, diagnostic_only=diagnostic_only)
+    return dict(median_seconds=seconds, rate=rate, scored_case=case['name'],
+                roofline=roofline, estimated_roofline_efficiency=efficiency,
+                exceeds_estimated_roofline=efficiency > 1,
+                correctness_passed=True, diagnostic_only=diagnostic_only)

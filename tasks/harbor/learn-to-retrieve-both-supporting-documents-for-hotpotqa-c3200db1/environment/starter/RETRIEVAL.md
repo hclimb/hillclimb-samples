@@ -20,11 +20,11 @@ python /environment/starter/optifine_public_tests/run.py --check-weights /enviro
 python /environment/starter/optifine_public_tests/run.py --submission /environment/starter/train_retriever.sh --output /environment/starter/runs/paired --paired
 ```
 
-The first command runs only your current recipe on the complete public panel.
+The first command freshly trains the frozen starter and your current recipe on the complete public panel.
 The smoke command passes `--steps 2` and gives training 60 seconds, then checks
 tensor loading and a CPU forward pass. Support this optional flag in your script,
 or use the weights check on a checkpoint you trained manually. These checks report
-no quality score. `--paired` freshly trains the reproducible starter and your recipe.
+no quality score. Every full quality run is paired; `--paired` remains accepted.
 The full paths give each recipe 900 seconds for training and 600 for retrieval,
 including preparation, tokenization, loading and sorting. Two H200 GPUs are available;
 the starter trains with distributed data parallelism (synchronized gradient updates).
@@ -80,13 +80,8 @@ Binary nDCG@10 (normalized discounted cumulative gain) discounts a support at ra
 `r` by `1/log2(r+1)` and divides total gain by `1 + 1/log2(3)`.
 Both supports at ranks one and two give exactly 1. The tool reports mean nDCG,
 both-supports@2, bridge/comparison slices, per-question ranks and actual phase times.
-The improvement statistic is `(C-0.446)/(1-0.446)`, where C is your mean nDCG.
-The fixed anchor is exactly 0.446 for every full run, including candidate-only runs.
-There is no clipping or flooring: nDCG 0.446 maps to zero, 1 maps to one, and
-values below 0.446 give negative statistics. Invalid submissions receive zero;
-infrastructure failures abort without a score. The freshly trained starter is a
-paired diagnostic, not the denominator, and its statistic may be above or below
-zero. The untouched pretrained encoder is a separate no-training control.
+For a valid submission, progress = (C - B) / (0.715285038072705 - B), where C is candidate mean nDCG@10 and B is the frozen starter remeasured on the same panel. Reward = clip((progress - 0.01) / 0.98, 0, 1). The 1% margin is a fraction of the starter-to-best gap at each end: progress up to 0.01 scores 0 and progress from 0.99 scores 1. Invalid submissions score 0. Every non-smoke quality run measures the starter; --paired remains accepted.
+Raw nDCG remains available. Infrastructure failures abort without a score. The untouched pretrained encoder remains a separate no-training control.
 
 The starter uses multi-positive contrastive loss: both supports are encouraged,
 with context negatives plus other questions' documents as negatives. Improve its

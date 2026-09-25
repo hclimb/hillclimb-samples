@@ -1,0 +1,46 @@
+{
+  "_comment": [
+    "Retrieval telemetry behind results/musique_pareto_acc.json, same runs and same 128 queries.",
+    "",
+    "WITHIN a model, as the corpus grows: doc_hit_rate (is the gold document's slot in the top-k at",
+    "all?) stays high while mem_pos_weight_mass (fraction of softmax mass over retrieved slots that",
+    "lands on the gold document) collapses. The model keeps FINDING the gold document and",
+    "progressively stops ATTENDING to it. That much is solid.",
+    "",
+    "ACROSS models it does NOT transfer, and an earlier version of this file claimed it did.",
+    "ground4layer at c8192 has mem_pos_weight_mass 0.0275 -- far BELOW hard-neg's 0.113 at the same",
+    "corpus -- yet scores 0.281 vs 0.211. With 4 layers x top-k 128 and ~54 effective slots it",
+    "gathers enough total evidence despite thin per-slot mass. Low weight-mass therefore does not by",
+    "itself predict low accuracy; it is a within-model diagnostic, not a cross-architecture one.",
+    "",
+    "The two memory architectures do not order consistently either: ground4layer minus hard-neg is",
+    "+0.047, -0.008, +0.070, -0.024 at 512/2048/8192/11656. Against a ~0.008 noise floor that is a",
+    "mixed result, not evidence that more memory layers help or hurt."
+  ],
+  "memory layer (hard-neg @750, 1 mem layer, top-k 64)": {
+    "512":   {"llm_judge_accuracy": 0.281,  "doc_hit_rate": 0.984, "mem_pos_weight_mass": 0.340},
+    "2048":  {"llm_judge_accuracy": 0.3125, "doc_hit_rate": 0.984, "mem_pos_weight_mass": 0.160},
+    "8192":  {"llm_judge_accuracy": 0.2109, "doc_hit_rate": 0.945, "mem_pos_weight_mass": 0.113},
+    "11656": {"llm_judge_accuracy": 0.2344, "doc_hit_rate": 0.940, "mem_pos_weight_mass": 0.084}
+  },
+  "memory layer (ground4layer @1500, 4 mem layers, top-k 128)": {
+    "2048":  {"llm_judge_accuracy": 0.3047, "doc_hit_rate": 0.9922,
+              "mem_pos_weight_mass": 0.0796, "doc_token_hit_rate": 0.3934,
+              "doc_access_acc": 0.0161},
+    "8192":  {"llm_judge_accuracy": 0.28125, "doc_hit_rate": 0.984375,
+              "mem_pos_weight_mass": 0.02748, "doc_token_hit_rate": 0.2503,
+              "doc_access_acc": 0.00567, "mem_effective_slots": 54.44,
+              "mem_top1_weight": 0.0877, "mem_topk_entropy": 4.325},
+    "11656": {"llm_judge_accuracy": 0.2109, "doc_hit_rate": 0.9766,
+              "mem_pos_weight_mass": 0.02269, "doc_token_hit_rate": 0.2388,
+              "doc_access_acc": 0.00534, "mem_effective_slots": 58.37,
+              "mem_top1_weight": 0.0795, "mem_topk_entropy": 4.379}
+  },
+  "RAG (top-5 docs in prompt)": {
+    "512":   {"llm_judge_accuracy": 0.3906, "recall_at_5": 0.609},
+    "2048":  {"llm_judge_accuracy": 0.3281, "recall_at_5": 0.469},
+    "8192":  {"llm_judge_accuracy": 0.2891, "recall_at_5": 0.406},
+    "11656": {"llm_judge_accuracy": 0.2656, "recall_at_5": 0.391}
+  },
+  "_noise_floor": "RAG c512 repeat: 0.3984 vs 0.3906 -> ~0.008 on n=128. Differences below ~0.02 are not resolvable. The c8192 RAG-vs-ground4layer gap (+0.0078) is AT this floor and is a tie, not a win."
+}

@@ -10,9 +10,9 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from utils.profiles import make_manifest
-from utils.protocol import PUBLIC_SEEDS, REPETITIONS, STARTER_EFFICIENCY
-from utils.roofline import estimate
-from verifiers.benchmark import evaluate
+from utils.protocol import PUBLIC_SEEDS, REPETITIONS
+from utils.process import ROOT
+from verifiers.benchmark import TARGET_RATIO, evaluate
 from verifiers.test_metrics import passing_reports
 
 
@@ -26,7 +26,9 @@ class BenchmarkTests(unittest.TestCase):
         (self.output / 'reward.json').write_text('{"valid": 1, "reward": 2}')
         self.events = []
         self.failure = None
-        self.bad_timing = False
+        self.bad_timing = None
+        self.baseline_scale = 2
+        self.candidate_scale = 1
         self.manifest = make_manifest()
         self.enterContext(contextlib.redirect_stdout(io.StringIO()))
         self.enterContext(contextlib.redirect_stderr(io.StringIO()))
@@ -34,16 +36,19 @@ class BenchmarkTests(unittest.TestCase):
         self.build = self.enterContext(patch('verifiers.benchmark.execute', side_effect=self.run_build))
 
     def run_worker(self, implementation, seeds, case, reports):
-        self.assertEqual(implementation, self.directory / '.flashmla-build/site')
+        role = 'baseline' if implementation == ROOT / 'utils/incumbent/site' else 'candidate'
+        if role == 'candidate':
+            self.assertEqual(implementation, self.directory / '.flashmla-build/site')
         self.assertEqual(len(seeds), 1)
         occurrence = len(reports)
         seed = seeds[0]
-        self.events.append(('candidate', seed, case))
-        if self.failure and self.failure[:2] == ('candidate', occurrence):
+        self.events.append((role, seed, case))
+        if self.failure and self.failure[:2] == (role, occurrence):
             raise self.failure[2]
         seconds = (PUBLIC_SEEDS.index(seed) + 1) * 0.001
+        seconds *= self.baseline_scale if role == 'baseline' else self.candidate_scale
         cases = [item for item in self.manifest['cases'] if case is None or item['name'] == case]
-        report = passing_reports(cases, 0 if self.bad_timing else seconds)[0]
+        report = passing_reports(cases, 0 if self.bad_timing == role else seconds)[0]
         reports.append(dict(report, seed=seed))
 
     def run_build(self, command, checkout, timeout):
@@ -59,24 +64,59 @@ class BenchmarkTests(unittest.TestCase):
     def diagnostics(self):
         return json.loads((self.output / 'diagnostics.json').read_text())
 
-    def test_candidate_only_build_and_complete_accounting_without_incumbent(self):
+    def test_paired_build_and_complete_accounting(self):
         for build in [False, True]:
             with self.subTest(build=build):
                 self.events.clear()
                 reward = self.evaluate(build=build)
                 expected = [('build', None, None)] if build else []
-                expected += [('candidate', seed, None) for seed in PUBLIC_SEEDS]
+                for index, seed in enumerate(PUBLIC_SEEDS):
+                    order = ('baseline', 'candidate') if index % 2 == 0 else ('candidate', 'baseline')
+                    expected.extend((role, seed, None) for role in order)
                 self.assertEqual(self.events, expected)
                 diagnostics = self.diagnostics()
-                self.assertNotIn('baseline', diagnostics)
-                self.assertEqual(len(diagnostics['candidate']), REPETITIONS)
-                self.assertTrue(all(len(report['cases']) == 23 for report in diagnostics['candidate']))
-                self.assertEqual(diagnostics['metric'], 'estimated_dense_bf16_roofline')
-                self.assertAlmostEqual(reward['reward'],
-                                       (estimate(self.manifest['cases'][-1])['ideal_seconds'] / 0.005 -
-                                        STARTER_EFFICIENCY) / (1 - STARTER_EFFICIENCY))
+                for role in ('baseline', 'candidate'):
+                    self.assertEqual(len(diagnostics[role]), REPETITIONS)
+                    self.assertTrue(all(len(report['cases']) == 23 for report in diagnostics[role]))
+                self.assertEqual(diagnostics['metric'], 'paired_throughput_ratio')
+                self.assertEqual(reward['reward'], 1)
+                self.assertAlmostEqual(reward['throughput_ratio'], 2)
+                self.assertAlmostEqual(reward['candidate_rate'], 384 / 0.005)
+                self.assertAlmostEqual(reward['baseline_rate'], 384 / 0.010)
                 self.assertEqual(diagnostics['phase'], 'complete')
                 self.assertEqual(diagnostics['run_index'], REPETITIONS - 1)
+
+    def test_speedup_tracks_measured_baseline_and_common_gpu_slowdown(self):
+        for baseline, candidate, expected in [(1, 1, 1), (2, 1, 2), (1, 2, 0.5), (20, 10, 2)]:
+            with self.subTest(baseline=baseline, candidate=candidate):
+                self.baseline_scale, self.candidate_scale = baseline, candidate
+                result = self.evaluate()
+                self.assertAlmostEqual(result['throughput_ratio'], expected)
+                self.assertAlmostEqual(result['reward'], min(1, max(0, ((expected - 1) / (TARGET_RATIO - 1) - .01) / .98)))
+
+    def test_one_percent_endpoint_margins(self):
+        for progress, expected in ((.005, 0), (.01, 0), (.255, .25), (.5, .5), (.99, 1), (.995, 1)):
+            with self.subTest(progress=progress):
+                self.baseline_scale = 1 + progress * (TARGET_RATIO - 1)
+                self.candidate_scale = 1
+                self.assertAlmostEqual(self.evaluate()["reward"], expected)
+
+    def test_baseline_failures_are_infrastructure_errors_even_after_candidate_runs(self):
+        for occurrence in [0, 1, REPETITIONS - 1]:
+            with self.subTest(occurrence=occurrence):
+                self.failure = ('baseline', occurrence, RuntimeError('baseline failure'))
+                with self.assertRaisesRegex(RuntimeError, 'infrastructure'):
+                    self.evaluate()
+                self.assertFalse((self.output / 'reward.json').exists())
+                self.assertTrue(self.diagnostics()['evaluator_failure'])
+                self.assertEqual(self.diagnostics()['phase'], 'baseline')
+
+    def test_invalid_baseline_statistic_is_an_evaluator_error(self):
+        self.bad_timing = 'baseline'
+        with self.assertRaisesRegex(RuntimeError, 'infrastructure'):
+            self.evaluate()
+        self.assertFalse((self.output / 'reward.json').exists())
+        self.assertEqual(self.diagnostics()['phase'], 'baseline')
 
     def test_candidate_build_and_numerical_failures_are_zero(self):
         for phase, occurrence in [('build', 0), ('candidate', 0), ('candidate', REPETITIONS - 1)]:
@@ -100,7 +140,7 @@ class BenchmarkTests(unittest.TestCase):
         self.assertEqual(len(self.diagnostics()['candidate']), 1)
 
     def test_invalid_candidate_statistic_is_zero(self):
-        self.bad_timing = True
+        self.bad_timing = 'candidate'
         self.assertEqual(self.evaluate(), dict(valid=0, reward=0))
         self.assertFalse(self.diagnostics()['evaluator_failure'])
 

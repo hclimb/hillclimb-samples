@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 from pathlib import Path
 
-from utils.oracle import reward, score
+from utils.oracle import TARGET_NDCG, reward, score
 from utils.process import PhaseFailure, phase
 from verifiers.runner import isolated_command, run, snapshot
 
@@ -51,15 +51,21 @@ class MetricTests(unittest.TestCase):
             self.calculate(self.results * 2)
 
     def test_reward(self):
-        self.assertEqual(reward(0.446), 0)
-        self.assertEqual(reward(1), 1)
-        self.assertAlmostEqual(reward(0), -0.446 / 0.554)
-        self.assertLess(reward(0.445), 0)
-        self.assertGreater(reward(0.447), 0)
-        self.assertGreater(reward(0.7), reward(0.6))
+        baseline = 0.4610020179916334
+        self.assertEqual(reward(baseline, baseline), 0)
+        self.assertEqual(reward(TARGET_NDCG, baseline), 1)
+        self.assertAlmostEqual(reward((baseline + TARGET_NDCG) / 2, baseline), 0.5)
+        for progress, expected in ((.005, 0), (.01, 0), (.255, .25), (.99, 1), (.995, 1)):
+            candidate = baseline + progress * (TARGET_NDCG - baseline)
+            self.assertAlmostEqual(reward(candidate, baseline), expected)
+        self.assertEqual(reward(0, baseline), 0)
+        self.assertEqual(reward(1, baseline), 1)
         for invalid in (float('nan'), float('inf'), -0.1, 1.1):
             with self.assertRaises(ValueError):
-                reward(invalid)
+                reward(invalid, baseline)
+        for invalid in (float('nan'), float('inf'), -0.1, TARGET_NDCG, 1):
+            with self.assertRaises(ValueError):
+                reward(0.7, invalid)
 
     def test_query_association_and_slices(self):
         self.queries.append(dict(id='two', question='Another?'))
@@ -76,13 +82,13 @@ class MetricTests(unittest.TestCase):
 
 
 class ProcessTests(unittest.TestCase):
-    def test_fixed_anchor_in_candidate_only_and_paired_runs(self):
+    def test_measured_starter_anchor_in_all_quality_runs(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             for name in ('candidate', 'trusted/incumbent'):
                 (root / name).mkdir(parents=True)
                 (root / name / 'train_retriever.sh').write_text('exit 0')
-            for baseline in (None, 0, 0.446, 0.8, 1):
+            for baseline in (0, 0.446, 0.461, 0.6):
                 for candidate in (0, 0.446, 0.7, 1):
                     records = [dict(valid=1, ndcg_at10=candidate)]
                     if baseline is not None:
@@ -91,8 +97,8 @@ class ProcessTests(unittest.TestCase):
                             patch('verifiers.runner.check_environment'), \
                             patch('verifiers.runner.run_one', side_effect=records):
                         result = run(root / 'candidate', root / 'candidate/train_retriever.sh', root, root,
-                                     root / 'output', root / 'trusted', paired=baseline is not None)
-                        self.assertEqual(result['R'], (candidate - 0.446) / (1 - 0.446))
+                                     root / 'output', root / 'trusted', paired=False)
+                        self.assertEqual(result['R'], reward(candidate, baseline))
                         self.assertEqual(result['valid'], 1)
 
     def test_paired_validity_gate(self):

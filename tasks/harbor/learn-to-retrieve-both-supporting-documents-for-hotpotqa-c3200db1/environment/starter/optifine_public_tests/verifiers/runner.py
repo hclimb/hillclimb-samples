@@ -126,6 +126,7 @@ def run_one(tree, entry, assets, panel, output, trusted, seed=1729, smoke=False,
 
 def run(workspace, entry, assets, panel, output, trusted, paired=False, seed=1729, smoke=False,
         public_checkpoint=None):
+    paired = paired or not smoke  # Quality scores always compare against the measured starter.
     output.mkdir(parents=True, exist_ok=True)
     for filename in ('score.json', 'reward.json', 'diagnostics.json'):
         (output / filename).unlink(missing_ok=True)
@@ -163,7 +164,7 @@ def run(workspace, entry, assets, panel, output, trusted, paired=False, seed=172
     result = dict(valid=candidate['valid'], diagnostic_only=int(smoke))
     if not smoke:
         result['C'] = candidate.get('ndcg_at10', 0.0)
-        result['R'] = reward(result['C']) if candidate['valid'] else 0.0
+        result['R'] = reward(result['C'], baseline['ndcg_at10']) if candidate['valid'] else 0.0
     if paired:
         result['B'] = baseline['ndcg_at10']
     (output / 'score.json').write_text(json.dumps(result, indent=2, allow_nan=False))

@@ -1,4 +1,4 @@
-# Fixed-workload MODEL1 attention roofline efficiency
+# Fixed-workload MODEL1 attention speedup
 
 Use one exclusive NVIDIA B200 and the supplied CUDA development image. No model
 weights, text dataset, network connection or server is needed.
@@ -11,8 +11,8 @@ python /environment/starter/optifine_public_tests/verifiers/benchmark.py --check
 ```
 
 Build finishes before measurement. The public and private evaluators run the same
-candidate-only algorithm, workload and numerical tolerances; only seeds differ.
-There is no baseline timing in the reward.
+paired algorithm, workload and numerical tolerances; only seeds differ. Each
+evaluation remeasures the frozen baseline on its allocated GPU.
 
 ## Fixed scored workload
 
@@ -29,37 +29,29 @@ setting, but maintain correct behavior across every supported setting, including
 sinks, empty rows and unusual page sizes. Their cold times are diagnostics, not reward.
 The exact profiles are published in `utils/manifest.json`.
 
-## Reward: starter at zero, estimated roofline at one
+## Reward: linear progress from starter to best observed throughput
 
-For the fixed workload, B=128, Q=3, H=128, K=1152 and D=512.
-The two attention matrix products require nominal work F=4*B*Q*H*K*D.
-The declared dense-BF16 B200 peak is 2.25e15 FLOP/s and HBM bandwidth is 8e12 byte/s.
+`baseline_rate = 384 / median(baseline_seconds_per_call)`
 
-`ideal_seconds = max(F / peak_flops, modeled_bytes_per_call / hbm_bytes_per_second)`
+`candidate_rate = 384 / median(candidate_seconds_per_call)`
 
-`theoretical_query_tokens_per_second = (B * Q) / ideal_seconds`
+`ratio = candidate_rate / baseline_rate`
 
-`efficiency = candidate_query_tokens_per_second / theoretical_query_tokens_per_second`
+`progress = (ratio - 1) / (1.3515515495176977 - 1)`
 
-`anchor = 0.2938167337239794`
+`reward = clip((progress - 0.01) / 0.98, 0, 1)`
 
-`reward = (efficiency - anchor) / (1 - anchor)`
+The baseline is the packaged frozen native FlashMLA implementation in
+`utils/incumbent/site`. Each evaluation runs nine baseline/candidate pairs with
+identical seeds on the same GPU, alternating which implementation runs first.
+Each implementation's rate uses its median amortized call time over those nine
+workers. The baseline is remeasured; the fixed upper ratio is the best observed
+submission. The roofline does not determine reward.
 
-Efficiency is ideal_seconds divided by the median of nine measured amortized call
-times. The fixed anchor is the untouched starter's nine-seed public B200 measurement
-from September 10, 2026. That measurement maps to zero; fresh starter runs fluctuate
-around zero. The estimated roofline maps to one. Valid slower submissions receive
-negative rewards; invalid submissions receive zero with valid=0. No baseline is
-remeasured for normalization, and neither panel recalibrates the anchor.
-
-This is a fixed, estimated dense-BF16 roofline, not a proven attainable maximum.
-The memory model assumes optimistic reuse across heads and calls; detailed counts
-and hardware-source links are in `utils/roofline.py`. Dequantization, softmax,
-launch overhead and imperfect memory access make the model optimistic. Faster
-internal arithmetic remains permitted if correctness passes. Rewards are not
-clipped at one; exceeding the estimate is reported for investigation, not treated
-as a correctness failure. Neither the ceiling nor its traffic counts are fitted
-to candidate or baseline timings.
+Progress = (candidate_rate / baseline_rate - 1) / (1.3515515495176977 - 1). Reward = clip((progress - 0.01) / 0.98, 0, 1). The 1% margin is a fraction of the starter-to-best gap at each end: progress up to 0.01 scores 0 and progress from 0.99 scores 1. The frozen starter is remeasured on the same GPU with matching workloads and seeds. Invalid submissions score 0; baseline or infrastructure failures remain evaluator errors.
+Raw throughput ratios remain available. Fresh runs can vary slightly.
+The estimated roofline is retained only as a diagnostic, not an attainable target
+or a reward endpoint. Its calculation remains in `utils/roofline.py`.
 
 ## Warmup, distinct inputs and timing
 
@@ -86,15 +78,15 @@ The independent oracle decodes preserved packed bytes and computes float32 atten
 
 Worker limits remain 30 seconds for initial warmup, 120 seconds for workload and
 180 seconds for the whole process. Candidate build timeout is 1,800 seconds.
+The private verifier allows 5,400 seconds overall for the build and 18 workers.
 Missing cases, samples or numerical checks cannot be silently dropped.
 Candidate build/runtime/numerical failures receive zero; recognized infrastructure
 failures retain diagnostics without being scored as candidate invalidity.
 
 Default output is `attention-results`; use `--output PATH` to change it.
 `--case NAME` is a subset diagnostic, not a full qualifying score.
-Reports retain raw times, validity checks, throughput, the roofline calculation
-and the anchored reward. A frozen original wheel remains available in
-`utils/incumbent` for optional experiments; it is not required by the scorer.
+Reports retain both sets of raw timings and correctness results, measured baseline
+and candidate rates, the throughput ratio, and per-implementation roofline diagnostics.
 
 The auxiliary-stream timing diagnostic remains:
 `python optifine_public_tests/verifiers/check_timing.py --output timing.json`.

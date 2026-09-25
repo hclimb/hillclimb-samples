@@ -7,9 +7,12 @@ import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from utils.metrics import aggregate
+from utils.metrics import measure
 from utils.process import ROOT, execute, repetitions
 from utils.protocol import PUBLIC_SEEDS, REPETITIONS
+
+TARGET_RATIO = 1.3515515495176977
+SCORE_MARGIN = 0.01
 from utils.public_checkpoint import PublicRun
 
 
@@ -17,7 +20,7 @@ def evaluate(checkout, seeds, output, build_candidate=False, case=None, implemen
     output.mkdir(parents=True, exist_ok=True)
     reward_path = output / 'reward.json'
     reward_path.unlink(missing_ok=True)
-    diagnostics = dict(candidate=[], phase='setup')
+    diagnostics = dict(baseline=[], candidate=[], phase='setup')
     reward = dict(valid=0, reward=0)
     try:
         manifest = json.loads((ROOT / 'utils/manifest.json').read_text())
@@ -29,12 +32,27 @@ def evaluate(checkout, seeds, output, build_candidate=False, case=None, implemen
         if build_candidate:
             diagnostics['phase'] = 'build'
             diagnostics['build_output'] = execute(['bash', 'solve.sh'], checkout, 1800)
+        implementations = dict(baseline=ROOT / 'utils/incumbent/site',
+                               candidate=implementation or checkout / '.flashmla-build/site')
         for run_index, seed in enumerate(seeds):
             diagnostics['run_index'] = run_index
-            diagnostics['phase'] = 'candidate'
-            repetitions(implementation or checkout / '.flashmla-build/site', [seed], case, diagnostics['candidate'])
-        reward, metrics = aggregate(diagnostics['candidate'], cases, diagnostic_only=case is not None)
-        diagnostics.update(metrics)
+            order = ('baseline', 'candidate') if run_index % 2 == 0 else ('candidate', 'baseline')
+            for role in order:
+                diagnostics['phase'] = role
+                repetitions(implementations[role], [seed], case, diagnostics[role])
+        for role in ('baseline', 'candidate'):
+            diagnostics['phase'] = role
+            diagnostics[role + '_metrics'] = measure(diagnostics[role], cases, diagnostic_only=case is not None)
+        diagnostics.update(metric='paired_throughput_ratio', correctness_passed=True,
+                           diagnostic_only=case is not None)
+        if case is None:
+            baseline_rate = diagnostics['baseline_metrics']['rate']
+            candidate_rate = diagnostics['candidate_metrics']['rate']
+            ratio = candidate_rate / baseline_rate
+            progress = (ratio - 1) / (TARGET_RATIO - 1)
+            reward = dict(valid=1, reward=min(1.0, max(0.0, (progress - SCORE_MARGIN) / (1 - 2 * SCORE_MARGIN))),
+                          throughput_ratio=ratio,
+                          baseline_rate=baseline_rate, candidate_rate=candidate_rate)
         diagnostics['subset_diagnostic_only'] = case is not None
         diagnostics['phase'] = 'complete'
     except Exception as exception:

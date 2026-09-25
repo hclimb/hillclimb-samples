@@ -3,7 +3,6 @@ import random
 
 from utils.protocol import REPETITIONS, TIMED_CALLS, WARMUP_CALLS
 from utils.roofline import MODEL
-from utils.protocol import STARTER_EFFICIENCY
 
 
 def fixed_score_case():
@@ -82,9 +81,10 @@ def make_manifest():
         # Preserve the original profiles as correctness gates, not reward weights.
         case['throughput_weight'] = 0
     cases.append(fixed_score_case())
-    return dict(version=4, profile_seed=20260904, scale=512 ** -0.55,
-                metric=MODEL['name'], roofline_model=MODEL,
-                reward_normalization=dict(starter_efficiency=STARTER_EFFICIENCY, ideal_efficiency=1),
+    return dict(version=5, profile_seed=20260904, scale=512 ** -0.55,
+                metric='paired_throughput_ratio', roofline_model=MODEL,
+                reward_normalization=dict(formula='candidate_rate / baseline_rate',
+                                          baseline='remeasured frozen incumbent on the same GPU'),
                 warmup_calls=WARMUP_CALLS, timed_calls=TIMED_CALLS,
                 repetitions=REPETITIONS, warmup_seconds=30, workload_seconds=120,
                 output_tolerance=[1e-3, 2.01 / 128, 5e-6],

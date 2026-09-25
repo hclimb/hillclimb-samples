@@ -9,4 +9,6 @@ RUN apt-get update && \
 RUN python -m pip install --no-cache-dir pytest torch==2.11.0 numpy==2.2.6 packaging==25.0 setuptools==81.0.0 wheel==0.45.1 ninja==1.13.0 filelock==3.32.5 typing-extensions==4.16.0 sympy==1.14.0 networkx==3.6.1 jinja2==3.1.6 fsspec==2026.7.0 mpmath==1.3.0 markupsafe==3.0.3
 COPY checkpoint.sh /usr/local/bin/checkpoint.sh
 RUN chmod 0555 /usr/local/bin/checkpoint.sh
+COPY stop_agent_processes.sh /usr/local/libexec/stop_agent_processes.sh
+RUN chmod 0555 /usr/local/libexec/stop_agent_processes.sh
 COPY starter/ /environment/starter/

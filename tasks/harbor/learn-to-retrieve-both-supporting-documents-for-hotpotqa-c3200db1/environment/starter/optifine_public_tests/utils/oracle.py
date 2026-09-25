@@ -1,10 +1,17 @@
 import math
 
 
-def reward(candidate):
+TARGET_NDCG = 0.715285038072705
+SCORE_MARGIN = 0.01
+
+
+def reward(candidate, baseline):
     if not math.isfinite(candidate) or not 0 <= candidate <= 1:
         raise ValueError('Invalid candidate nDCG')
-    return (candidate - 0.446) / (1 - 0.446)
+    if not math.isfinite(baseline) or not 0 <= baseline < TARGET_NDCG:
+        raise ValueError('Starter nDCG must be finite and below the target')
+    progress = (candidate - baseline) / (TARGET_NDCG - baseline)
+    return min(1.0, max(0.0, (progress - SCORE_MARGIN) / (1 - 2 * SCORE_MARGIN)))
 
 
 def score(results, queries, gold, slices, corpus_count):

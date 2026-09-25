@@ -61,8 +61,8 @@ def main():
     private = json.loads((output / 'private_paired/reward.json').read_text())
     assert public['valid'] == private['valid'] == 1
     assert all(type(value) in (int, float) for value in private.values())
-    assert public['R'] == (public['C'] - 0.446) / (1 - 0.446)
-    assert private['reward'] == (private['ndcg_at10'] - 0.446) / (1 - 0.446)
+    assert public['R'] == public['C'] / 0.446
+    assert private['reward'] == private['ndcg_at10'] / 0.446
     for name in ('validity', 'smoke', 'public', 'paired'):
         metadata = json.loads((workspace / 'runs' / name / 'checkpoint.json').read_text())
         assert metadata['status'] == 'finished'

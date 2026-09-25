@@ -1,0 +1,68 @@
+{
+  "previous_calibration": {},
+  "linear_best_score": {
+    "formula": "Progress = (candidate_rate / baseline_rate - 1) / (1.3515515495176977 - 1). Reward = clip((progress - 0.01) / 0.98, 0, 1). The 1% margin is a fraction of the starter-to-best gap at each end: progress up to 0.01 scores 0 and progress from 0.99 scores 1. The frozen starter is remeasured on the same GPU with matching workloads and seeds. Invalid submissions score 0; baseline or infrastructure failures remain evaluator errors.",
+    "source_record": "/data/pranav-work/experiments/astra-attention-6h-no-resume-20260923/extra-four/jobs/attention-astra-6h-no-resume-extra4-20260923T025411Z/native-model1-paged-sparse-atten__KeRjELa/result.json",
+    "recorded_best": {
+      "valid": 1,
+      "reward": 1.3515515495176977,
+      "baseline_rate": 2183803.9428135855,
+      "candidate_rate": 2951523.6027525594
+    },
+    "validation_status": "fresh margin controls passed",
+    "margin": {
+      "fraction": 0.01,
+      "units": "starter-to-best gap",
+      "formula": "clip((linear_progress - 0.01) / 0.98, 0, 1)",
+      "validation_status": "fresh controls passed"
+    },
+    "previous_controls_without_margin": {
+      "solution": {
+        "rewards": {
+          "valid": 1,
+          "reward": 1.0,
+          "throughput_ratio": 1.3590804787597208,
+          "baseline_rate": 2161659.992327412,
+          "candidate_rate": 2937869.897288074
+        },
+        "result": "/data/pranav-work/experiments/linear-best-score-20260924/jobs/starter-and-best-controls/native-model1-paged-sparse-atten__53mKL4P/result.json",
+        "task_checksum": "0cc28854f86211cd8e3755170df9a441a2377fd58fe1d9db2ab6e8a903c8bac7"
+      },
+      "baseline": {
+        "rewards": {
+          "valid": 1,
+          "reward": 0.0,
+          "throughput_ratio": 0.9992785274053892,
+          "baseline_rate": 2179014.132648189,
+          "candidate_rate": 2177442.033668214
+        },
+        "result": "/data/pranav-work/experiments/linear-best-score-20260924/jobs/starter-and-best-controls/native-model1-paged-sparse-atten__MCguCkA/result.json",
+        "task_checksum": "0cc28854f86211cd8e3755170df9a441a2377fd58fe1d9db2ab6e8a903c8bac7"
+      }
+    },
+    "controls": {
+      "nop": {
+        "rewards": {
+          "valid": 1,
+          "reward": 0.0,
+          "throughput_ratio": 1.0007342240224681,
+          "baseline_rate": 2213892.8986052233,
+          "candidate_rate": 2215518.391954551
+        },
+        "result": "/data/pranav-work/experiments/linear-best-score-20260924/jobs/starter-and-best-margin-controls/native-model1-paged-sparse-atten__3JQe8Pu/result.json",
+        "task_checksum": "f396cf0f72c6583fd155caf26d97174198446be88226eb991de758ae64525f69"
+      },
+      "oracle": {
+        "rewards": {
+          "valid": 1,
+          "reward": 1.0,
+          "throughput_ratio": 1.3498032134514668,
+          "baseline_rate": 2185802.069999421,
+          "candidate_rate": 2950402.6580540864
+        },
+        "result": "/data/pranav-work/experiments/linear-best-score-20260924/jobs/starter-and-best-margin-controls/native-model1-paged-sparse-atten__LUho5EU/result.json",
+        "task_checksum": "f396cf0f72c6583fd155caf26d97174198446be88226eb991de758ae64525f69"
+      }
+    }
+  }
+}

@@ -14,6 +14,8 @@ data/Bios/bios-qa/
 uv.lock
 outputs/
 *.json
+# Keep the public evaluator's required configuration and asset manifests.
+!/optifine_public_tests/**/*.json
 wandb/
 .env
 temp_qa_upload/.claude/

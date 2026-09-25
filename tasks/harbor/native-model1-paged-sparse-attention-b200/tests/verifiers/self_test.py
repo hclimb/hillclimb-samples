@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from utils.profiles import make_manifest
 from utils.protocol import PUBLIC_SEEDS, REPETITIONS, TIMED_CALLS, WARMUP_CALLS
 from verifiers.test_benchmark import BenchmarkTests
-from verifiers.test_metrics import MetricTests
+from verifiers.test_metrics import MetricTests, passing_reports
 from verifiers.test_worker import WorkerTests
 from verifiers.test_public_checkpoint import PublicCheckpointTests
 
@@ -115,7 +115,10 @@ class NumericalTests(unittest.TestCase):
                            f'{[manifest["output_tolerance"], manifest["lse_tolerance"]]!r})']
 
                 def repetitions(implementation, seeds, case, collected):
-                    execute(command, ROOT, 30)
+                    if implementation == ROOT / 'utils/incumbent/site':
+                        collected.extend(passing_reports(manifest['cases'])[:1])
+                    else:
+                        execute(command, ROOT, 30)
 
                 with patch('verifiers.benchmark.repetitions', side_effect=repetitions), \
                         contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):

@@ -1,9 +1,9 @@
 import copy
 import unittest
 
-from utils.metrics import aggregate
+from utils.metrics import measure
 from utils.profiles import make_manifest
-from utils.protocol import REPETITIONS, STARTER_EFFICIENCY, TIMED_CALLS, WARMUP_CALLS
+from utils.protocol import REPETITIONS, TIMED_CALLS, WARMUP_CALLS
 from utils.roofline import estimate
 
 
@@ -47,46 +47,33 @@ class MetricTests(unittest.TestCase):
         self.assertEqual(model['ideal_seconds'], model['compute_seconds'])
         self.assertAlmostEqual(model['query_tokens_per_second'], 384 / model['ideal_seconds'])
 
-    def test_absolute_reward_needs_no_baseline_and_uses_median(self):
-        reward, metrics = aggregate(self.runs, self.cases)
-        ideal = estimate(self.cases[-1])['ideal_seconds']
-        self.assertAlmostEqual(reward['reward'], (ideal / 0.001 - STARTER_EFFICIENCY) / (1 - STARTER_EFFICIENCY))
-        self.assertAlmostEqual(reward['candidate_rate'], 384000)
-        self.assertNotIn('baseline_rate', reward)
+    def test_rate_uses_median_and_has_no_fixed_baseline(self):
+        metrics = measure(self.runs, self.cases)
+        self.assertAlmostEqual(metrics['rate'], 384000)
+        self.assertNotIn('starter_efficiency_anchor', metrics)
         self.runs[0]['cases'][self.name].update(seconds=999, block_seconds=999 * TIMED_CALLS)
-        self.assertEqual(aggregate(self.runs, self.cases)[1]['median_seconds'], 0.001)
+        self.assertEqual(measure(self.runs, self.cases)['median_seconds'], 0.001)
         self.assertTrue(metrics['correctness_passed'])
 
-    def test_estimate_is_not_clipped(self):
+    def test_roofline_is_only_an_unclipped_diagnostic(self):
         ideal = estimate(self.cases[-1])['ideal_seconds']
-        reward, metrics = aggregate(passing_reports(self.cases, ideal / 2), self.cases)
-        self.assertAlmostEqual(reward['reward'], (2 - STARTER_EFFICIENCY) / (1 - STARTER_EFFICIENCY))
+        metrics = measure(passing_reports(self.cases, ideal / 2), self.cases)
+        self.assertAlmostEqual(metrics['estimated_roofline_efficiency'], 2)
         self.assertTrue(metrics['exceeds_estimated_roofline'])
-
-    def test_fixed_anchor_endpoints_and_negative_rewards(self):
-        ideal = estimate(self.cases[-1])['ideal_seconds']
-        rewards = []
-        for efficiency in [STARTER_EFFICIENCY / 2, STARTER_EFFICIENCY, 1]:
-            value, metrics = aggregate(passing_reports(self.cases, ideal / efficiency), self.cases)
-            self.assertEqual(value['valid'], 1)
-            self.assertEqual(metrics['starter_efficiency_anchor'], STARTER_EFFICIENCY)
-            rewards.append(value['reward'])
-        self.assertLess(rewards[0], 0)
-        self.assertAlmostEqual(rewards[1], 0)
-        self.assertAlmostEqual(rewards[2], 1)
+        self.assertNotIn('reward', metrics)
 
     def test_missing_runs_or_cases_fail(self):
         for runs in [[], self.runs[:3], self.runs + self.runs[:1]]:
             with self.assertRaises(ValueError):
-                aggregate(runs, self.cases)
+                measure(runs, self.cases)
         for index in [0, 14, 22]:
             broken = copy.deepcopy(self.runs)
             del broken[0]['cases'][self.cases[index]['name']]
             with self.assertRaisesRegex(ValueError, 'every requested correctness case'):
-                aggregate(broken, self.cases)
+                measure(broken, self.cases)
         for cases in [[], self.cases * 2, self.cases[:-1]]:
             with self.assertRaises(ValueError):
-                aggregate(self.runs, cases)
+                measure(self.runs, cases)
 
     def test_invalid_timing_or_protocol_fails(self):
         changes = [dict(seconds=value) for value in [0, -1, float('nan'), float('inf')]]
@@ -96,7 +83,7 @@ class MetricTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 runs = copy.deepcopy(self.runs)
                 runs[0]['cases'][self.name].update(change)
-                aggregate(runs, self.cases)
+                measure(runs, self.cases)
 
     def test_all_correctness_gates_are_required(self):
         for case_index in [0, 14, 22]:
@@ -104,16 +91,16 @@ class MetricTests(unittest.TestCase):
                 with self.subTest(case=case_index, gate=gate), self.assertRaises(ValueError):
                     runs = copy.deepcopy(self.runs)
                     runs[0]['cases'][self.cases[case_index]['name']][gate]['output']['passed'] = False
-                    aggregate(runs, self.cases)
+                    measure(runs, self.cases)
         runs = copy.deepcopy(self.runs)
         runs[0]['cases'][self.name]['timed_output_checks']['127']['lse']['passed'] = False
         with self.assertRaises(ValueError):
-            aggregate(runs, self.cases)
+            measure(runs, self.cases)
 
     def test_subset_is_never_official_reward(self):
         for case in [self.cases[0], self.cases[-1]]:
-            reward, metrics = aggregate(passing_reports([case]), [case], diagnostic_only=True)
-            self.assertEqual((reward['valid'], reward['reward']), (0, 0))
+            metrics = measure(passing_reports([case]), [case], diagnostic_only=True)
+            self.assertNotIn('reward', metrics)
             self.assertTrue(metrics['correctness_passed'])
             self.assertTrue(metrics['diagnostic_only'])
 
