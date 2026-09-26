@@ -3,5 +3,5 @@
 briefings/
 .env
 *.pyc
-/jobs/
+jobs/
 /tasks/werm/

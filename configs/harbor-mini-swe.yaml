@@ -1,11 +1,8 @@
 # Run from the root of this directory:
 # harbor run --config configs/harbor-mini-swe.yaml --env-file .env
-# Set OPENROUTER_API_KEY in the shell, or add --env-file /path/to/.env.
-# Each agent lane allows 900 seconds per shell command (mini-swe-agent's default is 30).
 
-job_name: harbor-mini-swe
+job_name: harbor-pi-grok-4-7
 tasks:
-  - path: tasks/harbor/oracle-assisted-maze-sft-plan-20260902
   - path: tasks/harbor/learn-to-retrieve-both-supporting-documents-for-hotpotqa-c3200db1
   - path: tasks/harbor/native-model1-paged-sparse-attention-b200
 
@@ -13,24 +10,13 @@ environment:
   type: modal
 
 agents:
-  - name: mini-swe-agent
-    model_name: openrouter/anthropic/claude-fable-5.1
+  - name: pi
+    model_name: openrouter/x-ai/grok-4.7
     extra_allowed_hosts:
       - openrouter.ai
     kwargs:
-      reasoning_effort: max
-      config:
-        environment:
-          timeout: 900
-  - name: mini-swe-agent
-    model_name: openrouter/openai/gpt-6-astra
-    extra_allowed_hosts:
-      - openrouter.ai
-    kwargs:
-      reasoning_effort: max
-      config:
-        environment:
-          timeout: 900
+      version: 0.87.1
+      thinking: xhigh
 
 n_attempts: 3
-n_concurrent_trials: 18
+n_concurrent_trials: 6
